@@ -1,5 +1,5 @@
 # -*- encoding: utf-8 -*-
-require File.join("lib/moron/version"
+require File.join("lib/moron/version")
 
 Gem::Specification.new do |s|
   s.name        = "moron"
@@ -12,8 +12,17 @@ Gem::Specification.new do |s|
 
   s.rubyforge_project = "moron"
 
-  s.add_dependency "eventmachine", "*"
-  s.add_dependency "thin", "*"
+  s.add_dependency "eventmachine", "~>0.12"
+  s.add_dependency "thin", "~>1.4"
+  s.add_dependency "sinatra", "~>1.3"
+  s.add_dependency "async_sinatra", "~>1.0"
+  s.add_dependency "tilt", "~>1.3"
+  s.add_dependency "pygments.rb", "~>0.2"
+
+  s.add_development_dependency "minitest", "~> 2.0"
+  s.add_development_dependency "em-minitest-spec", "~> 1.1"
+  s.add_development_dependency "rake", "~> 0.9"
+  s.add_development_dependency "mocha"
 
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test}/*`.split("\n")

@@ -16,8 +16,8 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #++
 require "test_helper"
-require "moron/blob"
-require "moron/repository"
+require "moron/git/blob"
+require "moron/git/repository"
 require "moron/template_renderer"
 require "moron/view"
 

@@ -3,7 +3,7 @@ how_to_run = "env REPO_ROOT=/some/git/repos rackup -Ilib"
 begin
   require "moron/server/sinatra_server"
   require "moron/server"
-  require "moron/file_system_repository_resolver"
+  require "moron/git/file_system_repository_resolver"
   require "moron/template_renderer"
   require "moron/view"
 rescue LoadError => err

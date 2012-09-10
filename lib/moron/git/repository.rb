@@ -16,7 +16,7 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #++
 require "moron/async/when"
-require "moron/blob"
+require "moron/git/blob"
 
 module Moron
   class Repository

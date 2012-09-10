@@ -16,7 +16,7 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #++
 require "test_helper"
-require "moron/repository"
+require "moron/git/repository"
 require "moron/async/when"
 
 class FakeGit

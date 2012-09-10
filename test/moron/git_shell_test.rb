@@ -18,7 +18,7 @@
 require "test_helper"
 require "mocha"
 require "eventmachine"
-require "moron/git_shell"
+require "moron/git/git_shell"
 
 describe Moron::GitShell do
   include EM::MiniTest::Spec

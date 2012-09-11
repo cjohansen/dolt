@@ -29,6 +29,10 @@ module Dolt
         git("show", "#{ref}:#{path}")
       end
 
+      def ls_tree(path, ref)
+        git("ls-tree", ref, path.sub(/(^\.?\/)?/, "./").sub(/\/?$/, "/"))
+      end
+
       def git(command, *args)
         base = "git --git-dir #{@git_dir} --work-tree #{@work_tree}"
         cmd = "#{base} #{command} #{args.join(' ')}".strip

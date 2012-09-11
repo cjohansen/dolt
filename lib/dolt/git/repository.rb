@@ -17,6 +17,7 @@
 #++
 require "dolt/async/when"
 require "dolt/git/blob"
+require "dolt/git/tree"
 
 module Dolt
   module Git
@@ -29,19 +30,30 @@ module Dolt
       end
 
       def blob(path, ref = "HEAD")
-        gitop = git.show(path, ref)
+        async_git(git.show(path, ref)) do |data, status|
+          Dolt::Git::Blob.new(path, data)
+        end
+      end
+
+      def tree(path, ref = "HEAD")
+        async_git(git.ls_tree(path, ref)) do |data, status|
+          Dolt::Git::Tree.parse(path, data)
+        end
+      end
+
+      private
+      def git; @git; end
+
+      def async_git(gitop, &block)
         deferred = When::Deferred.new
 
         gitop.callback do |data, status|
-          deferred.resolve(Dolt::Blob.new(path, data))
+          deferred.resolve(block.call(data, status))
         end
 
         gitop.errback { |err| deferred.reject(err) }
         deferred.promise
       end
-
-      private
-      def git; @git; end
     end
   end
 end

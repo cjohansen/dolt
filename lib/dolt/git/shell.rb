@@ -15,29 +15,25 @@
 #   You should have received a copy of the GNU Affero General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #++
-require "bundler/setup"
-require "minitest/autorun"
-require "em/minitest/spec"
-require "eventmachine"
-
-Bundler.require(:default, :test)
+require "dolt/async/deferrable_child_process"
 
 module Dolt
-  module StdioStub
-    def silence_stderr
-      new_stderr = $stderr.dup
-      rd, wr = IO::pipe
-      $stderr.reopen(wr)
-      yield
-      $stderr.reopen(new_stderr)
-    end
+  module Git
+    class Shell
+      def initialize(work_tree, git_dir = nil)
+        @work_tree = work_tree
+        @git_dir = git_dir || File.join(work_tree, ".git")
+      end
 
-    def silence_stdout
-      new_stdout = $stdout.dup
-      rd, wr = IO::pipe
-      $stdout.reopen(wr)
-      yield
-      $stdout.reopen(new_stdout)
+      def show(path, ref)
+        git("show", "#{ref}:#{path}")
+      end
+
+      def git(command, *args)
+        base = "git --git-dir #{@git_dir} --work-tree #{@work_tree}"
+        cmd = "#{base} #{command} #{args.join(' ')}".strip
+        Dolt::DeferrableChildProcess.open(cmd)
+      end
     end
   end
 end

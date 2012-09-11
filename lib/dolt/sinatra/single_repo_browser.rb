@@ -15,29 +15,30 @@
 #   You should have received a copy of the GNU Affero General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #++
-require "bundler/setup"
-require "minitest/autorun"
-require "em/minitest/spec"
-require "eventmachine"
-
-Bundler.require(:default, :test)
+require "dolt/sinatra/base"
 
 module Dolt
-  module StdioStub
-    def silence_stderr
-      new_stderr = $stderr.dup
-      rd, wr = IO::pipe
-      $stderr.reopen(wr)
-      yield
-      $stderr.reopen(new_stderr)
-    end
+  module Sinatra
+    class SingleRepoBrowser < Dolt::Sinatra::Base
+      attr_reader :repo
 
-    def silence_stdout
-      new_stdout = $stdout.dup
-      rd, wr = IO::pipe
-      $stdout.reopen(wr)
-      yield
-      $stdout.reopen(new_stdout)
+      def initialize(repo, actions, renderer)
+        @repo = repo
+        super(actions, renderer)
+      end
+
+      aget "/" do
+        redirect("/blob/master:Readme.md")
+      end
+
+      aget "/blob/*:*" do
+        ref, path = params[:splat]
+        blob(repo, ref, path)
+      end
+
+      aget "/blob/*" do
+        redirect("/blob/master:" + params[:splat].join)
+      end
     end
   end
 end

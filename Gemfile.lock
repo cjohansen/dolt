@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    addlepate (0.1.0)
+    dolt (0.1.1)
       async_sinatra (~> 1.0)
       eventmachine (~> 0.12)
       pygments.rb (~> 0.2)
@@ -46,7 +46,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  addlepate!
+  dolt!
   em-minitest-spec (~> 1.1)
   minitest (~> 2.0)
   mocha

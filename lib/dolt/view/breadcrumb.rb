@@ -15,29 +15,31 @@
 #   You should have received a copy of the GNU Affero General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #++
-require "bundler/setup"
-require "minitest/autorun"
-require "em/minitest/spec"
-require "eventmachine"
-
-Bundler.require(:default, :test)
-
 module Dolt
-  module StdioStub
-    def silence_stderr
-      new_stderr = $stderr.dup
-      rd, wr = IO::pipe
-      $stderr.reopen(wr)
-      yield
-      $stderr.reopen(new_stderr)
-    end
+  module View
+    class Breadcrumb
+      def render(repository, ref, path)
+        dirs = path.split("/")
+        filename = dirs.pop
+        dir_html = accumulate_dirs(dirs, repository.name, ref)
+        <<-HTML
+          <ul class="breadcrumb">
+            <li><a href="/files"><i class="icon icon-file"></i></a></li>
+            #{dir_html}<li class="active">#{filename}</li>
+          </ul>
+        HTML
+      end
 
-    def silence_stdout
-      new_stdout = $stdout.dup
-      rd, wr = IO::pipe
-      $stdout.reopen(wr)
-      yield
-      $stdout.reopen(new_stdout)
+      private
+      def accumulate_dirs(dirs, repo, ref)
+        accumulated = []
+        dir_html = dirs.inject("") do |html, dir|
+          accumulated << dir
+          "#{html}<li><a href=\"/#{repo}/tree/#{ref}:#{accumulated.join('/')}\">" +
+            "#{dir}<span class=\"divider\">/</span></a></li>"
+        end
+
+      end
     end
   end
 end

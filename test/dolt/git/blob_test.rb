@@ -15,29 +15,35 @@
 #   You should have received a copy of the GNU Affero General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #++
-require "bundler/setup"
-require "minitest/autorun"
-require "em/minitest/spec"
-require "eventmachine"
+require "test_helper"
+require "dolt/git/blob"
 
-Bundler.require(:default, :test)
+describe Dolt::Blob do
+  describe "#raw" do
+    it "returns full raw blob" do
+      blob = Dolt::Blob.new("file.txt", "Something something")
 
-module Dolt
-  module StdioStub
-    def silence_stderr
-      new_stderr = $stderr.dup
-      rd, wr = IO::pipe
-      $stderr.reopen(wr)
-      yield
-      $stderr.reopen(new_stderr)
+      assert_equal "Something something", blob.raw
+    end
+  end
+
+  describe "#lines" do
+    it "returns empty array for empty blob" do
+      blob = Dolt::Blob.new("file.txt", "")
+
+      assert_equal [], blob.lines
     end
 
-    def silence_stdout
-      new_stdout = $stdout.dup
-      rd, wr = IO::pipe
-      $stdout.reopen(wr)
-      yield
-      $stdout.reopen(new_stdout)
+    it "returns array of one line" do
+      blob = Dolt::Blob.new("file.txt", "Something something")
+
+      assert_equal ["Something something"], blob.lines
+    end
+
+    it "returns array of lines" do
+      blob = Dolt::Blob.new("file.txt", "Something\nsomething\nYup")
+
+      assert_equal ["Something", "something", "Yup"], blob.lines
     end
   end
 end

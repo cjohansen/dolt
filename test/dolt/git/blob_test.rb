@@ -18,10 +18,10 @@
 require "test_helper"
 require "dolt/git/blob"
 
-describe Dolt::Blob do
+describe Dolt::Git::Blob do
   describe "#raw" do
     it "returns full raw blob" do
-      blob = Dolt::Blob.new("file.txt", "Something something")
+      blob = Dolt::Git::Blob.new("file.txt", "Something something")
 
       assert_equal "Something something", blob.raw
     end
@@ -29,19 +29,19 @@ describe Dolt::Blob do
 
   describe "#lines" do
     it "returns empty array for empty blob" do
-      blob = Dolt::Blob.new("file.txt", "")
+      blob = Dolt::Git::Blob.new("file.txt", "")
 
       assert_equal [], blob.lines
     end
 
     it "returns array of one line" do
-      blob = Dolt::Blob.new("file.txt", "Something something")
+      blob = Dolt::Git::Blob.new("file.txt", "Something something")
 
       assert_equal ["Something something"], blob.lines
     end
 
     it "returns array of lines" do
-      blob = Dolt::Blob.new("file.txt", "Something\nsomething\nYup")
+      blob = Dolt::Git::Blob.new("file.txt", "Something\nsomething\nYup")
 
       assert_equal ["Something", "something", "Yup"], blob.lines
     end

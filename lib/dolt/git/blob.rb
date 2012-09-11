@@ -16,16 +16,18 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #++
 module Dolt
-  class Blob
-    attr_reader :path, :raw, :repo
+  module Git
+    class Blob
+      attr_reader :path, :raw, :repo
 
-    def initialize(path, raw)
-      @path = path
-      @raw = raw
-    end
+      def initialize(path, raw)
+        @path = path
+        @raw = raw
+      end
 
-    def lines
-      raw.split("\n")
+      def lines
+        raw.split("\n")
+      end
     end
   end
 end

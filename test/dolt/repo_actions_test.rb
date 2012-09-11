@@ -28,7 +28,12 @@ class Repository
     @deferred.promise
   end
 
-  def yield_blob(blob)
+  def tree(path, ref)
+    @deferred = When::Deferred.new
+    @deferred.promise
+  end
+
+  def resolve_promise(blob)
     @deferred.resolve(blob)
   end
 end
@@ -64,10 +69,31 @@ describe Dolt::RepoActions do
       end
 
       repo = @resolver.resolved.last
-      repo.yield_blob "Blob"
+      repo.resolve_promise "Blob"
 
       expected = { :blob => "Blob", :repository => repo, :ref =>  "babd120" }
       assert_equal expected, data
     end
   end
+
+  describe "#tree" do
+    it "resolves repository" do
+      @actions.tree("gitorious", "app", "master")
+
+      assert_equal ["gitorious"], @resolver.resolved.map(&:name)
+    end
+
+    it "yields tree, repo and ref to block" do
+      data = nil
+      @actions.tree("gitorious", "app", "babd120") do |status, d|
+        data = d
+      end
+
+      repo = @resolver.resolved.last
+      repo.resolve_promise "Tree"
+
+      expected = { :tree => "Tree", :repository => repo, :ref =>  "babd120" }
+      assert_equal expected, data
+    end
+ end
 end

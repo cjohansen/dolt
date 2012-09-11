@@ -35,6 +35,18 @@ module Dolt
       d.errback { |err| block.call(err, nil) }
     end
 
+    def tree(repo, path, ref, &block)
+      repository = repo_resolver.resolve(repo)
+      d = repository.tree(path, ref)
+      d.callback do |tree, status|
+        block.call(nil, {
+                     :tree => tree,
+                     :repository => repository,
+                     :ref => ref })
+      end
+      d.errback { |err| block.call(err, nil) }
+    end
+
     private
     def repo_resolver; @repo_resolver; end
   end

@@ -15,29 +15,23 @@
 #   You should have received a copy of the GNU Affero General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #++
-require "bundler/setup"
-require "minitest/autorun"
-require "em/minitest/spec"
-require "eventmachine"
-
-Bundler.require(:default, :test)
+require "addlepate/sinatra/base"
 
 module Addlepate
-  module StdioStub
-    def silence_stderr
-      new_stderr = $stderr.dup
-      rd, wr = IO::pipe
-      $stderr.reopen(wr)
-      yield
-      $stderr.reopen(new_stderr)
-    end
+  module Sinatra
+    class MultiRepoBrowser < Addlepate::Sinatra::Base
+      aget "/" do
+        response["Content-Type"] = "text/html"
+        body("<h1>Welcome to Addlepate</h1>")
+      end
 
-    def silence_stdout
-      new_stdout = $stdout.dup
-      rd, wr = IO::pipe
-      $stdout.reopen(wr)
-      yield
-      $stdout.reopen(new_stdout)
+      aget "/*/blob/*:*" do
+        blob(*params[:splat])
+      end
+
+      aget "/*/blob/*" do
+        redirect(params[:splat].shift + "/blob/master:" + params[:splat].join)
+      end
     end
   end
 end

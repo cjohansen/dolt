@@ -15,29 +15,35 @@
 #   You should have received a copy of the GNU Affero General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #++
-require "bundler/setup"
-require "minitest/autorun"
-require "em/minitest/spec"
-require "eventmachine"
-
-Bundler.require(:default, :test)
+require "pygments"
 
 module Addlepate
-  module StdioStub
-    def silence_stderr
-      new_stderr = $stderr.dup
-      rd, wr = IO::pipe
-      $stderr.reopen(wr)
-      yield
-      $stderr.reopen(new_stderr)
-    end
+  module View
+    class Highlighter
+      def initialize(options = {})
+        @options = options
+        options[:options] ||= {}
+        options[:options][:nowrap] = true
+        options[:options][:encoding] = options[:options][:encoding]|| "utf-8"
+      end
 
-    def silence_stdout
-      new_stdout = $stdout.dup
-      rd, wr = IO::pipe
-      $stdout.reopen(wr)
-      yield
-      $stdout.reopen(new_stdout)
+      def highlight(code, lexer)
+        Pygments.highlight(code, options.merge(:lexer => lexer))
+      end
+
+      def self.lexer(suffix)
+        @@lexer_aliases[suffix] || suffix
+      end
+
+      def self.add_lexer_alias(extension, lexer)
+        @@lexer_aliases ||= {}
+        @@lexer_aliases[extension] = lexer
+      end
+
+      private
+      def options; @options; end
     end
   end
 end
+
+Addlepate::View::Highlighter.add_lexer_alias("yml", "yaml")

@@ -15,29 +15,27 @@
 #   You should have received a copy of the GNU Affero General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #++
-require "bundler/setup"
-require "minitest/autorun"
-require "em/minitest/spec"
-require "eventmachine"
-
-Bundler.require(:default, :test)
+require "addlepate/git/shell"
+require "addlepate/git/repository"
 
 module Addlepate
-  module StdioStub
-    def silence_stderr
-      new_stderr = $stderr.dup
-      rd, wr = IO::pipe
-      $stderr.reopen(wr)
-      yield
-      $stderr.reopen(new_stderr)
+  class FileSystemRepositoryResolver
+    def initialize(root)
+      @root = root
     end
 
-    def silence_stdout
-      new_stdout = $stdout.dup
-      rd, wr = IO::pipe
-      $stdout.reopen(wr)
-      yield
-      $stdout.reopen(new_stdout)
+    def resolve(repo)
+      git = Addlepate::Git::Shell.new(File.join(root, repo))
+      Addlepate::Git::Repository.new(repo, git)
     end
+
+    def all
+      Dir.entries(root).reject do |e|
+        e =~ /^\.+$/ || File.file?(File.join(root, e))
+      end
+    end
+
+    private
+    def root; @root; end
   end
 end

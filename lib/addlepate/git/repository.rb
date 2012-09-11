@@ -15,29 +15,33 @@
 #   You should have received a copy of the GNU Affero General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #++
-require "bundler/setup"
-require "minitest/autorun"
-require "em/minitest/spec"
-require "eventmachine"
-
-Bundler.require(:default, :test)
+require "addlepate/async/when"
+require "addlepate/git/blob"
 
 module Addlepate
-  module StdioStub
-    def silence_stderr
-      new_stderr = $stderr.dup
-      rd, wr = IO::pipe
-      $stderr.reopen(wr)
-      yield
-      $stderr.reopen(new_stderr)
-    end
+  module Git
+    class Repository
+      attr_reader :name
 
-    def silence_stdout
-      new_stdout = $stdout.dup
-      rd, wr = IO::pipe
-      $stdout.reopen(wr)
-      yield
-      $stdout.reopen(new_stdout)
+      def initialize(name, git = nil)
+        @name = name
+        @git = git
+      end
+
+      def blob(path, ref = "HEAD")
+        gitop = git.show(path, ref)
+        deferred = When::Deferred.new
+
+        gitop.callback do |data, status|
+          deferred.resolve(Addlepate::Blob.new(path, data))
+        end
+
+        gitop.errback { |err| deferred.reject(err) }
+        deferred.promise
+      end
+
+      private
+      def git; @git; end
     end
   end
 end

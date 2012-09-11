@@ -15,29 +15,22 @@
 #   You should have received a copy of the GNU Affero General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #++
-require "bundler/setup"
-require "minitest/autorun"
-require "em/minitest/spec"
-require "eventmachine"
-
-Bundler.require(:default, :test)
+require "sinatra/base"
+require "sinatra/async"
+require "addlepate/sinatra/actions"
 
 module Addlepate
-  module StdioStub
-    def silence_stderr
-      new_stderr = $stderr.dup
-      rd, wr = IO::pipe
-      $stderr.reopen(wr)
-      yield
-      $stderr.reopen(new_stderr)
-    end
+  module Sinatra
+    class Base < ::Sinatra::Base
+      attr_reader :actions, :renderer
+      include Addlepate::Sinatra::Actions
+      register ::Sinatra::Async
 
-    def silence_stdout
-      new_stdout = $stdout.dup
-      rd, wr = IO::pipe
-      $stdout.reopen(wr)
-      yield
-      $stdout.reopen(new_stdout)
+      def initialize(actions, renderer)
+        @actions = actions
+        @renderer = renderer
+        super()
+      end
     end
   end
 end

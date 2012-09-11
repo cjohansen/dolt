@@ -1,0 +1,46 @@
+#!/usr/bin/env ruby
+require "thin"
+require "sinatra/base"
+require "addlepate/repo_actions"
+require "addlepate/template_renderer"
+require "addlepate/view"
+require "addlepate/git/file_system_repository_resolver"
+
+if ARGV.length == 0
+  puts("Addlepate should be run with a directory as its sole argument")
+  puts("The directory should either be a Git repository or a directory")
+  puts("that holds Git repositories.")
+  exit(1)
+end
+
+### TODO: Extract this into a testable API
+
+def is_git_repo?(dir)
+  File.exists?(File.join(dir, ".git"))
+end
+
+def create_app(dir, view)
+  if is_git_repo?(dir)
+    require "addlepate/sinatra/single_repo_browser"
+    dir = File.expand_path(dir)
+    resolver = Addlepate::FileSystemRepositoryResolver.new(File.dirname(dir))
+    actions = Addlepate::RepoActions.new(resolver)
+    Addlepate::Sinatra::SingleRepoBrowser.new(File.basename(dir), actions, view)
+  else
+    resolver = Addlepate::FileSystemRepositoryResolver.new(dir)
+    actions = Addlepate::RepoActions.new(resolver)
+    require "addlepate/sinatra/multi_repo_browser"
+    Addlepate::Sinatra::MultiRepoBrowser.new(actions, view)
+  end
+end
+
+base = File.join(File.dirname(__FILE__), "..")
+
+template_root = File.join(base, "views")
+options = { :cache => false, :layout => "layout" }
+view = Addlepate::TemplateRenderer.new(template_root, options)
+view.helper(Addlepate::View)
+
+Sinatra::Base.set(:public_folder, File.join(base, "vendor/ui"))
+server = create_app(ARGV[0], view)
+Thin::Server.start("0.0.0.0", 3000, server)

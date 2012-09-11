@@ -15,29 +15,35 @@
 #   You should have received a copy of the GNU Affero General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #++
-require "bundler/setup"
-require "minitest/autorun"
-require "em/minitest/spec"
 require "eventmachine"
 
-Bundler.require(:default, :test)
-
 module Addlepate
-  module StdioStub
-    def silence_stderr
-      new_stderr = $stderr.dup
-      rd, wr = IO::pipe
-      $stderr.reopen(wr)
-      yield
-      $stderr.reopen(new_stderr)
+  # A deferrable child process implementation that actually considers
+  # the not uncommon situation where the command fails.
+  #
+  class DeferrableChildProcess < EventMachine::Connection
+    include EventMachine::Deferrable
+
+    def initialize
+      super
+      @data = []
     end
 
-    def silence_stdout
-      new_stdout = $stdout.dup
-      rd, wr = IO::pipe
-      $stdout.reopen(wr)
-      yield
-      $stdout.reopen(new_stdout)
+    def self.open cmd
+      EventMachine.popen(cmd, DeferrableChildProcess)
+    end
+
+    def receive_data data
+      @data << data
+    end
+
+    def unbind
+      status = get_status
+      if status.exitstatus != 0
+        fail(status)
+      else
+        succeed(@data.join, status)
+      end
     end
   end
 end

@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    moron (0.1.0)
+    addlepate (0.1.0)
       async_sinatra (~> 1.0)
       eventmachine (~> 0.12)
       pygments.rb (~> 0.2)
@@ -46,8 +46,8 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  addlepate!
   em-minitest-spec (~> 1.1)
   minitest (~> 2.0)
   mocha
-  moron!
   rake (~> 0.9)

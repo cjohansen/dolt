@@ -1,17 +1,17 @@
-# Moron - The Git project browser
+# Addlepate - The Git project browser
 
-Moron is a stand-alone server that allows you to browse git repositories in your
+Addlepate is a stand-alone server that allows you to browse git repositories in your
 browser. It uses Pygments to syntax highlight code, and displays blame as well
 as git history for individual files.
 
-Moron can also be used as a library to serve git trees from e.g. a Rails app. It
+Addlepate can also be used as a library to serve git trees from e.g. a Rails app. It
 is the blob viewer implementation that will be used in the Gitorious application
 (gitorious.org) when it is ready.
 
 ## Blobs
 
-Moron currenly only serves blobs. The sample Rack application that comes with
-Moron allows you to surf repos locally on your disk:
+Addlepate currenly only serves blobs. The sample Rack application that comes with
+Addlepate allows you to surf repos locally on your disk:
 
     env REPO_ROOT=/where/git/repos/reside rackup -Ilib
 

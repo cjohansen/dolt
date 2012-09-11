@@ -15,29 +15,27 @@
 #   You should have received a copy of the GNU Affero General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #++
-require "bundler/setup"
-require "minitest/autorun"
-require "em/minitest/spec"
 require "eventmachine"
 
-Bundler.require(:default, :test)
-
 module Addlepate
-  module StdioStub
-    def silence_stderr
-      new_stderr = $stderr.dup
-      rd, wr = IO::pipe
-      $stderr.reopen(wr)
-      yield
-      $stderr.reopen(new_stderr)
+  class RepoActions
+    def initialize(repo_resolver)
+      @repo_resolver = repo_resolver
     end
 
-    def silence_stdout
-      new_stdout = $stdout.dup
-      rd, wr = IO::pipe
-      $stdout.reopen(wr)
-      yield
-      $stdout.reopen(new_stdout)
+    def blob(repo, ref, path, &block)
+      repository = repo_resolver.resolve(repo)
+      d = repository.blob(path, ref)
+      d.callback do |blob, status|
+        block.call(nil, {
+                     :blob => blob,
+                     :repository => repository,
+                     :ref => ref })
+      end
+      d.errback { |err| block.call(err, nil) }
     end
+
+    private
+    def repo_resolver; @repo_resolver; end
   end
 end

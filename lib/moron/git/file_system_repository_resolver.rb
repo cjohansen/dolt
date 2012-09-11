@@ -15,7 +15,7 @@
 #   You should have received a copy of the GNU Affero General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #++
-require "moron/git/git_shell"
+require "moron/git/shell"
 require "moron/git/repository"
 
 module Moron
@@ -25,7 +25,7 @@ module Moron
     end
 
     def resolve(repo)
-      git = Moron::GitShell.new(File.join(root, repo))
+      git = Moron::Git::Shell.new(File.join(root, repo))
       Moron::Git::Repository.new(repo, git)
     end
 

@@ -18,16 +18,18 @@
 require "moron/async/deferrable_child_process"
 
 module Moron
-  class GitShell
-    def initialize(work_tree, git_dir = nil)
-      @work_tree = work_tree
-      @git_dir = git_dir || File.join(work_tree, ".git")
-    end
+  module Git
+    class Shell
+      def initialize(work_tree, git_dir = nil)
+        @work_tree = work_tree
+        @git_dir = git_dir || File.join(work_tree, ".git")
+      end
 
-    def git(command, *args)
-      base = "git --git-dir #{@git_dir} --work-tree #{@work_tree}"
-      cmd = "#{base} #{command} #{args.join(' ')}".strip
-      Moron::DeferrableChildProcess.open(cmd)
+      def git(command, *args)
+        base = "git --git-dir #{@git_dir} --work-tree #{@work_tree}"
+        cmd = "#{base} #{command} #{args.join(' ')}".strip
+        Moron::DeferrableChildProcess.open(cmd)
+      end
     end
   end
 end

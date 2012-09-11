@@ -18,9 +18,9 @@
 require "test_helper"
 require "mocha"
 require "eventmachine"
-require "moron/git/git_shell"
+require "moron/git/shell"
 
-describe Moron::GitShell do
+describe Moron::Git::Shell do
   include EM::MiniTest::Spec
   include Moron::StdioStub
 
@@ -28,7 +28,7 @@ describe Moron::GitShell do
     expected_cmd = ["git --git-dir /somewhere/.git ",
                     "--work-tree /somewhere log"].join
     Moron::DeferrableChildProcess.expects(:open).with(expected_cmd)
-    git = Moron::GitShell.new("/somewhere")
+    git = Moron::Git::Shell.new("/somewhere")
     git.git("log")
   end
 
@@ -36,13 +36,13 @@ describe Moron::GitShell do
     expected_cmd = ["git --git-dir /somewhere/.git ",
                     "--work-tree /elsewhere log"].join
     Moron::DeferrableChildProcess.expects(:open).with(expected_cmd)
-    git = Moron::GitShell.new("/elsewhere", "/somewhere/.git")
+    git = Moron::Git::Shell.new("/elsewhere", "/somewhere/.git")
     git.git("log")
   end
 
   it "returns deferrable" do
     silence_stderr do
-      git = Moron::GitShell.new("/somwhere")
+      git = Moron::Git::Shell.new("/somwhere")
       result = git.git("log")
 
       assert result.respond_to?(:callback)
@@ -54,13 +54,13 @@ describe Moron::GitShell do
     expected_cmd = ["git --git-dir /somewhere/.git ",
                     "--work-tree /somewhere push origin master"].join
     Moron::DeferrableChildProcess.expects(:open).with(expected_cmd)
-    git = Moron::GitShell.new("/somewhere")
+    git = Moron::Git::Shell.new("/somewhere")
     git.git("push", "origin", "master")
   end
 
   it "calls errback when git operation fails" do
     silence_stderr do
-      git = Moron::GitShell.new("/somewhere")
+      git = Moron::Git::Shell.new("/somewhere")
       result = git.git("push", "origin", "master")
       result.errback do |status|
         refute status.nil?

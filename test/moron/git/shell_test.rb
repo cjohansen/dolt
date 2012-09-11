@@ -69,4 +69,10 @@ describe Moron::Git::Shell do
       wait!
     end
   end
+
+  it "shows a file" do
+    git = Moron::Git::Shell.new("/somewhere")
+    git.expects(:git).with("show", "master:app/models/repository.rb")
+    result = git.show("app/models/repository.rb", "master")
+  end
 end

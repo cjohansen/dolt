@@ -27,8 +27,8 @@ class FakeGit
     @deferreds = []
   end
 
-  def git(cmd, *args)
-    cmds << [cmd].concat(args).join(" ")
+  def show(path, ref)
+    cmds << ["show", path, ref]
     deferred = When::Deferred.new
     deferreds << deferred.resolver
     deferred.promise
@@ -46,14 +46,14 @@ describe Moron::Git::Repository do
       repo = Moron::Git::Repository.new("gitorious", @git)
       repo.blob("models/repository.rb", "master")
 
-      assert_equal "show master:models/repository.rb", @git.last_command
+      assert_equal ["show", "models/repository.rb", "master"], @git.last_command
     end
 
     it "defaults to showing the file at HEAD" do
       repo = Moron::Git::Repository.new("gitorious", @git)
       repo.blob("models/repository.rb")
 
-      assert_equal "show HEAD:models/repository.rb", @git.last_command
+      assert_equal ["show", "models/repository.rb", "HEAD"], @git.last_command
     end
 
     it "invokes callback with blob object" do

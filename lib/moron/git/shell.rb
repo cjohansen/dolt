@@ -25,6 +25,10 @@ module Moron
         @git_dir = git_dir || File.join(work_tree, ".git")
       end
 
+      def show(path, ref)
+        git("show", "#{ref}:#{path}")
+      end
+
       def git(command, *args)
         base = "git --git-dir #{@git_dir} --work-tree #{@work_tree}"
         cmd = "#{base} #{command} #{args.join(' ')}".strip

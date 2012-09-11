@@ -29,7 +29,7 @@ module Moron
       end
 
       def blob(path, ref = "HEAD")
-        gitop = git.git("show", "#{ref}:#{path}")
+        gitop = git.show(path, ref)
         deferred = When::Deferred.new
 
         gitop.callback do |data, status|

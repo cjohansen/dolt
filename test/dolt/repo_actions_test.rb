@@ -57,14 +57,14 @@ describe Dolt::RepoActions do
 
   describe "#blob" do
     it "resolves repository" do
-      @actions.blob("gitorious", "master", "app")
+      @actions.blob("gitorious", "app", "master")
 
       assert_equal ["gitorious"], @resolver.resolved.map(&:name)
     end
 
     it "yields blob, repo and ref to block" do
       data = nil
-      @actions.blob("gitorious", "babd120", "app") do |status, d|
+      @actions.blob("gitorious", "app", "babd120") do |status, d|
         data = d
       end
 

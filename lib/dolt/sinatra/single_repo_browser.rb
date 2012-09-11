@@ -33,7 +33,7 @@ module Dolt
 
       aget "/blob/*:*" do
         ref, path = params[:splat]
-        blob(repo, ref, path)
+        blob(repo, path, ref)
       end
 
       aget "/blob/*" do

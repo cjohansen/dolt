@@ -26,7 +26,7 @@ module Dolt
       end
 
       aget "/*/blob/*:*" do
-        blob(*params[:splat])
+        blob(params[:splat][0], params[:splat][2], params[:splat][1])
       end
 
       aget "/*/blob/*" do

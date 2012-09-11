@@ -23,7 +23,7 @@ module Dolt
       @repo_resolver = repo_resolver
     end
 
-    def blob(repo, ref, path, &block)
+    def blob(repo, path, ref, &block)
       repository = repo_resolver.resolve(repo)
       d = repository.blob(path, ref)
       d.callback do |blob, status|

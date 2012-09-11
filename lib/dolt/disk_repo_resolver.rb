@@ -19,7 +19,7 @@ require "dolt/git/shell"
 require "dolt/git/repository"
 
 module Dolt
-  class FileSystemRepositoryResolver
+  class DiskRepoResolver
     def initialize(root)
       @root = root
     end

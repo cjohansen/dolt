@@ -23,11 +23,11 @@ def create_app(dir, view)
   if is_git_repo?(dir)
     require "dolt/sinatra/single_repo_browser"
     dir = File.expand_path(dir)
-    resolver = Dolt::FileSystemRepositoryResolver.new(File.dirname(dir))
+    resolver = Dolt::DiskRepoResolver.new(File.dirname(dir))
     actions = Dolt::RepoActions.new(resolver)
     Dolt::Sinatra::SingleRepoBrowser.new(File.basename(dir), actions, view)
   else
-    resolver = Dolt::FileSystemRepositoryResolver.new(dir)
+    resolver = Dolt::DiskRepoResolver.new(dir)
     actions = Dolt::RepoActions.new(resolver)
     require "dolt/sinatra/multi_repo_browser"
     Dolt::Sinatra::MultiRepoBrowser.new(actions, view)

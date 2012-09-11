@@ -38,14 +38,14 @@ describe "blob template" do
   end
 
   it "renders blob without errors" do
-    blob = Dolt::Blob.new("file.txt", "Something something")
+    blob = Dolt::Git::Blob.new("file.txt", "Something something")
     markup = render(blob)
 
     assert_match /Something something/, markup
   end
 
   it "renders blob with line numbers" do
-    blob = Dolt::Blob.new("file.txt", "One\nTwo\nThree")
+    blob = Dolt::Git::Blob.new("file.txt", "One\nTwo\nThree")
     markup = render(blob)
 
     assert_match /<li.*One.*<\/li>/, markup
@@ -54,21 +54,21 @@ describe "blob template" do
   end
 
   it "renders blob with layout" do
-    blob = Dolt::Blob.new("file.txt", "Something something")
+    blob = Dolt::Git::Blob.new("file.txt", "Something something")
     markup = render(blob, :layout => "layout")
 
     assert_match /Something something/, markup
   end
 
   it "renders repo title in page" do
-    blob = Dolt::Blob.new("file.txt", "Something something")
+    blob = Dolt::Git::Blob.new("file.txt", "Something something")
     markup = render(blob, :layout => "layout")
 
     assert_match @repo.name, markup
   end
 
   it "renders links to other views" do
-    blob = Dolt::Blob.new("file.txt", "Something something")
+    blob = Dolt::Git::Blob.new("file.txt", "Something something")
     markup = render(blob)
 
     assert_match "/the-dolt/blame/master:file.txt", markup
@@ -77,7 +77,7 @@ describe "blob template" do
   end
 
   it "renders links to other views for correct ref" do
-    blob = Dolt::Blob.new("file.txt", "Something something")
+    blob = Dolt::Git::Blob.new("file.txt", "Something something")
     markup = render(blob, :ref => "123bc21")
 
     assert_match "/the-dolt/blame/123bc21:file.txt", markup
@@ -86,7 +86,7 @@ describe "blob template" do
   end
 
   it "renders the path clickable" do
-    blob = Dolt::Blob.new("some/deeply/nested/file.txt", "Something something")
+    blob = Dolt::Git::Blob.new("some/deeply/nested/file.txt", "Something something")
     markup = render(blob)
 
     assert_match 'href="/the-dolt/tree/master:some"', markup

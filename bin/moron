@@ -13,18 +13,22 @@ if ARGV.length == 0
   exit(1)
 end
 
+### TODO: Extract this into a testable API
+
 def is_git_repo?(dir)
   File.exists?(File.join(dir, ".git"))
 end
 
-def create_server(dir, view)
-  resolver = Moron::FileSystemRepositoryResolver.new(dir)
-  actions = Moron::RepoActions.new(resolver)
-
+def create_app(dir, view)
   if is_git_repo?(dir)
     require "moron/sinatra/single_repo_browser"
-    Moron::Sinatra::SingleRepoBrowser.new(dir, actions, view)
+    dir = File.expand_path(dir)
+    resolver = Moron::FileSystemRepositoryResolver.new(File.dirname(dir))
+    actions = Moron::RepoActions.new(resolver)
+    Moron::Sinatra::SingleRepoBrowser.new(File.basename(dir), actions, view)
   else
+    resolver = Moron::FileSystemRepositoryResolver.new(dir)
+    actions = Moron::RepoActions.new(resolver)
     require "moron/sinatra/multi_repo_browser"
     Moron::Sinatra::MultiRepoBrowser.new(actions, view)
   end
@@ -38,5 +42,5 @@ view = Moron::TemplateRenderer.new(template_root, options)
 view.helper(Moron::View)
 
 Sinatra::Base.set(:public_folder, File.join(base, "vendor/ui"))
-server = create_server(ARGV[0], view)
+server = create_app(ARGV[0], view)
 Thin::Server.start("0.0.0.0", 3000, server)

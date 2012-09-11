@@ -19,7 +19,7 @@ require "test_helper"
 require "dolt/git/tree"
 
 describe Dolt::Git::Tree do
-  describe "parse" do
+  describe "parsing root tree" do
     before do
       lines = <<-GIT
 100644 blob e90021f89616ddf86855d05337c188408d3b417e    .gitmodules
@@ -35,7 +35,7 @@ describe Dolt::Git::Tree do
 040000 tree be8fb09b735ac23265db2bec7c23e022a99ee730    views
       GIT
 
-      @tree = Dolt::Git::Tree.parse("./", lines)
+      @tree = Dolt::Git::Tree.parse("", lines)
     end
 
     it "has path" do
@@ -47,23 +47,74 @@ describe Dolt::Git::Tree do
     end
 
     it "extracts file entry objects" do
-      gemfile = @tree.entries[1]
+      gemfile = @tree.entries[6]
 
       assert gemfile.file?
       assert !gemfile.dir?
       assert_equal "Gemfile", gemfile.path
+      assert_equal "Gemfile", gemfile.full_path
       assert_equal "100644", gemfile.mode
       assert_equal "c80ee3697054566d1a4247d80be78ec3ddfde295", gemfile.sha
     end
 
     it "extracts directory entry objects" do
-      bin = @tree.entries[5]
+      bin = @tree.entries[0]
 
       assert !bin.file?
       assert bin.dir?
       assert_equal "bin", bin.path
       assert_equal "040000", bin.mode
       assert_equal "18052467e73a1b7fb2613dc7b36baa554fab024b", bin.sha
+    end
+  end
+
+  describe "parsing nested tree" do
+    before do
+      lines = <<-GIT
+040000 tree c1d92125977841b672a10c96c6800e1b360a4e62    lib/dolt/async
+100644 blob 6da3991090ba2df53eabe05bf4330aadf370a43a    lib/dolt/disk_repo_resolver.rb
+040000 tree 0142bdb42936094cdd92aa188d3193be85f7a6c1    lib/dolt/git
+100644 blob 2b8674702e62aaa5607317ed83085e74a62b9781    lib/dolt/repo_actions.rb
+040000 tree d93b4afc62ad460387cf5d91d98d1ad306219419    lib/dolt/sinatra
+100644 blob 2a7e89f4b940e23a3d921199d9000e93da299872    lib/dolt/template_renderer.rb
+100644 blob dfe78a965009e27d9cce7c9733787acb564b6630    lib/dolt/version.rb
+100644 blob 685369dd2a66f0313b232ee898f8bbdafec6862d    lib/dolt/view.rb
+040000 tree 78347f337aaa613eb0a1c27ae7f89e39a22dcd6f    lib/dolt/view
+      GIT
+
+      @tree = Dolt::Git::Tree.parse("lib/dolt", lines)
+    end
+
+    it "does not include ./ in path" do
+      assert_equal "lib/dolt", @tree.path
+    end
+
+    it "strips root path from entries" do
+      assert_equal "disk_repo_resolver.rb", @tree.entries[4].path
+    end
+
+    it "groups tree by type, dirs first" do
+      assert @tree.entries[0].dir?
+      assert @tree.entries[1].dir?
+      assert @tree.entries[2].dir?
+      assert @tree.entries[3].dir?
+      assert @tree.entries[4].file?
+      assert @tree.entries[5].file?
+      assert @tree.entries[6].file?
+      assert @tree.entries[7].file?
+      assert @tree.entries[8].file?
+    end
+
+    it "sorts tree entries alphabetically" do
+      assert_equal "async", @tree.entries[0].path
+      assert_equal "git", @tree.entries[1].path
+      assert_equal "sinatra", @tree.entries[2].path
+      assert_equal "view", @tree.entries[3].path
+      assert_equal "disk_repo_resolver.rb", @tree.entries[4].path
+      assert_equal "repo_actions.rb", @tree.entries[5].path
+      assert_equal "template_renderer.rb", @tree.entries[6].path
+      assert_equal "version.rb", @tree.entries[7].path
+      assert_equal "view.rb", @tree.entries[8].path
     end
   end
 end

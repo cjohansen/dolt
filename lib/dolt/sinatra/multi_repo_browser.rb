@@ -25,12 +25,25 @@ module Dolt
         body("<h1>Welcome to Dolt</h1>")
       end
 
+      aget "/*/tree/*:*" do
+        tree(params[:splat][0], params[:splat][2], params[:splat][1])
+      end
+
+      aget "/*/tree/*" do
+        force_ref(params[:splat], "tree", "master")
+      end
+
       aget "/*/blob/*:*" do
         blob(params[:splat][0], params[:splat][2], params[:splat][1])
       end
 
       aget "/*/blob/*" do
-        redirect(params[:splat].shift + "/blob/master:" + params[:splat].join)
+        force_ref(params[:splat], "blob", "master")
+      end
+
+      private
+      def force_ref(args, action, ref)
+        redirect(args.shift + "/#{action}/#{ref}:" + args.join)
       end
     end
   end

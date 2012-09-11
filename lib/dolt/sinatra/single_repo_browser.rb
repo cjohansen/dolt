@@ -28,7 +28,15 @@ module Dolt
       end
 
       aget "/" do
-        redirect("/blob/master:Readme.md")
+        redirect("/tree/master:")
+      end
+
+      aget "/tree/*:*" do
+        tree(repo, params[:splat][1], params[:splat][0])
+      end
+
+      aget "/tree/*" do
+        force_ref(params[:splat], "tree", "master")
       end
 
       aget "/blob/*:*" do
@@ -37,7 +45,12 @@ module Dolt
       end
 
       aget "/blob/*" do
-        redirect("/blob/master:" + params[:splat].join)
+        force_ref(params[:splat], "blob", "master")
+      end
+
+      private
+      def force_ref(args, action, ref)
+        redirect("/#{action}/#{ref}:" + args.join)
       end
     end
   end

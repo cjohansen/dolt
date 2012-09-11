@@ -26,20 +26,25 @@ module Dolt
       end
 
       def self.parse(path, ls_tree_payload)
-        paths = ls_tree_payload.split("\n").collect do |line|
+        path = path == "" ? "./" : path
+
+        entries = ls_tree_payload.split("\n").collect do |line|
           pieces = line.split(/\s+/)
           klass = pieces[1] == "blob" ? File : Dir
           klass.new(pieces[3], pieces[2], pieces[0])
         end
 
-        new(path, paths)
+        dirs = entries.reject { |e| e.file? }.sort_by(&:path)
+        files = entries.reject { |e| e.dir? }.sort_by(&:path)
+        new(path, dirs + files)
       end
 
       class Entry
-        attr_reader :path, :sha, :mode
+        attr_reader :full_path, :path, :sha, :mode
 
         def initialize(path, sha, mode)
-          @path = path
+          @full_path = path
+          @path = ::File.basename(path)
           @sha = sha
           @mode = mode
         end

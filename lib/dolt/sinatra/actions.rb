@@ -23,11 +23,22 @@ module Dolt
         body("Process failed with exit code \n#{status.exitstatus}")
       end
 
-      def blob(repo, ref, path)
-        actions.blob(repo, ref, path) do |status, data|
+      def blob(repo, path, ref)
+        actions.blob(repo, path, ref) do |status, data|
           if status.nil?
             response["Content-Type"] = "text/html"
             body(renderer.render(:blob, data))
+          else
+            error(status)
+          end
+        end
+      end
+
+      def tree(repo, path, ref)
+        actions.tree(repo, path, ref) do |status, data|
+          if status.nil?
+            response["Content-Type"] = "text/html"
+            body(renderer.render(:tree, data))
           else
             error(status)
           end

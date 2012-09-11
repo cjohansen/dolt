@@ -18,13 +18,19 @@
 module Dolt
   module View
     class Breadcrumb
+      attr_reader :multi_repo_mode
+
+      def initialize(options = {})
+        @multi_repo_mode = options[:multi_repo_mode]
+      end
+
       def render(repository, ref, path)
         dirs = path.split("/")
         filename = dirs.pop
         dir_html = accumulate_dirs(dirs, repository.name, ref)
         <<-HTML
           <ul class="breadcrumb">
-            <li><a href="/files"><i class="icon icon-file"></i></a></li>
+            <li><a href="#{prefix(repository)}/tree/#{ref}:"><i class="icon icon-file"></i></a></li>
             #{dir_html}<li class="active">#{filename}</li>
           </ul>
         HTML
@@ -35,10 +41,13 @@ module Dolt
         accumulated = []
         dir_html = dirs.inject("") do |html, dir|
           accumulated << dir
-          "#{html}<li><a href=\"/#{repo}/tree/#{ref}:#{accumulated.join('/')}\">" +
+          "#{html}<li><a href=\"#{prefix(repo)}/tree/#{ref}:#{accumulated.join('/')}\">" +
             "#{dir}<span class=\"divider\">/</span></a></li>"
         end
+      end
 
+      def prefix(repo)
+        multi_repo_mode ? "/#{repo}" : ""
       end
     end
   end

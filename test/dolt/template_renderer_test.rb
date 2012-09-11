@@ -77,4 +77,12 @@ describe Dolt::TemplateRenderer do
 
     assert_equal "Say it: YES", renderer.render(:file)
   end
+
+  it "configures the renderer" do
+    renderer = Dolt::TemplateRenderer.new("/", { :attributes => { :stuff => "THING" } })
+    renderer.helper(ViewHelper)
+    File.stubs(:read).with("/file.erb").returns("<%= stuff %>")
+
+    assert_equal "THING", renderer.render(:file)
+  end
 end

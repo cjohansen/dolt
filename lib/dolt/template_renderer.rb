@@ -25,6 +25,7 @@ module Dolt
       @layout = opt[:layout]
       @type = opt[:type] || "erb"
       @context_class = Class.new
+      @attributes = opt[:attributes] || {}
     end
 
     def helper(helper_module)
@@ -32,6 +33,7 @@ module Dolt
     end
 
     def render(template, locals = {})
+      locals = locals.merge(attributes)
       context = context_class.new
       content = load(template).render(context, locals)
 
@@ -56,5 +58,6 @@ module Dolt
     def layout; @layout; end
     def type; @type; end
     def context_class; @context_class; end
+    def attributes; @attributes; end
   end
 end

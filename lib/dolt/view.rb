@@ -20,8 +20,9 @@ require "dolt/view/highlighter"
 
 module Dolt
   module View
-    def breadcrumb(repository, ref, path)
-      Dolt::View::Breadcrumb.new.render(repository, ref, path)
+    def breadcrumb(repository, path, ref, options = {})
+      bc = Dolt::View::Breadcrumb.new(:multi_repo_mode => options[:multi_repo_mode])
+      bc.render(repository, ref, path)
     end
 
     def multiline(blob, options = {})
@@ -53,6 +54,28 @@ module Dolt
     def lexer_for_file(path)
       suffix = path.split(".").pop
       Dolt::View::Highlighter.lexer(suffix)
+    end
+
+    def tree_url(repository, entry, ref, multi_repo_mode)
+      action = entry.file? ? "blob" : "tree"
+      repo_url(repository, "/#{action}/#{ref}:#{entry.full_path}", multi_repo_mode)
+    end
+
+    def blame_url(repository, blob, ref, multi_repo_mode)
+      repo_url(repository, "/blame/#{ref}:#{blob.path}", multi_repo_mode)
+    end
+
+    def history_url(repository, blob, ref, multi_repo_mode)
+      repo_url(repository, "/history/#{ref}:#{blob.path}", multi_repo_mode)
+    end
+
+    def raw_url(repository, blob, ref, multi_repo_mode)
+      repo_url(repository, "/raw/#{ref}:#{blob.path}", multi_repo_mode)
+    end
+
+    def repo_url(repository, url, multi_repo_mode)
+      prefix = multi_repo_mode ? "/#{repository.name}" : ""
+      "#{prefix}#{url}"
     end
   end
 end

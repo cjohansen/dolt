@@ -62,7 +62,7 @@ describe Dolt::RepoActions do
       assert_equal ["gitorious"], @resolver.resolved.map(&:name)
     end
 
-    it "yields blob, repo and ref to block" do
+    it "yields blob, repo, ref and base_tree_url to block" do
       data = nil
       @actions.blob("gitorious", "app", "babd120") do |status, d|
         data = d
@@ -71,8 +71,11 @@ describe Dolt::RepoActions do
       repo = @resolver.resolved.last
       repo.resolve_promise "Blob"
 
-      expected = { :blob => "Blob", :repository => repo, :ref =>  "babd120" }
-      assert_equal expected, data
+      assert_equal({
+        :blob => "Blob",
+        :repository => repo,
+        :ref =>  "babd120"
+      }, data)
     end
   end
 

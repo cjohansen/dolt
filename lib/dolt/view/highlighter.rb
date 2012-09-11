@@ -47,3 +47,6 @@ module Dolt
 end
 
 Dolt::View::Highlighter.add_lexer_alias("yml", "yaml")
+Dolt::View::Highlighter.add_lexer_alias("Rakefile", "rb")
+Dolt::View::Highlighter.add_lexer_alias("Gemfile", "rb")
+Dolt::View::Highlighter.add_lexer_alias("gemspec", "rb")

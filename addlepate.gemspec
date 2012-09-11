@@ -1,6 +1,14 @@
 # -*- encoding: utf-8 -*-
 require File.join("lib/addlepate/version")
 
+module GemSpecHelper
+  def self.files(path)
+    `cd #{path} && git ls-files`.split("\n").map do |p|
+      File.join(path, p)
+    end
+  end
+end
+
 Gem::Specification.new do |s|
   s.name        = "addlepate"
   s.version     = Addlepate::VERSION
@@ -24,7 +32,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency "rake", "~> 0.9"
   s.add_development_dependency "mocha"
 
-  s.files         = `git ls-files`.split("\n")
+  s.files         = GemSpecHelper.files(".") + GemSpecHelper.files("vendor/ui")
   s.test_files    = `git ls-files -- {test}/*`.split("\n")
   s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   s.require_paths = ["lib"]

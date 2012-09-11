@@ -15,27 +15,30 @@
 #   You should have received a copy of the GNU Affero General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #++
-require "eventmachine"
+require "moron/sinatra/base"
 
 module Moron
-  class Server
-    def initialize(repo_resolver)
-      @repo_resolver = repo_resolver
-    end
+  module Sinatra
+    class SingleRepoBrowser < Moron::Sinatra::Base
+      attr_reader :repo
 
-    def blob(repo, ref, path, &block)
-      repository = repo_resolver.resolve(repo)
-      d = repository.blob(path, ref)
-      d.callback do |blob, status|
-        block.call(nil, {
-                     :blob => blob,
-                     :repository => repository,
-                     :ref => ref })
+      def initialize(repo, actions, renderer)
+        @repo = repo
+        super(actions, renderer)
       end
-      d.errback { |err| block.call(err, nil) }
-    end
 
-    private
-    def repo_resolver; @repo_resolver; end
+      aget "/" do
+        redirect("/blob/master:Readme.md")
+      end
+
+      aget "/blob/*:*" do
+        ref, path = params[:splat]
+        blob(repo, ref, path)
+      end
+
+      aget "/blob/*" do
+        redirect("/blob/master:" + params[:splat].join)
+      end
+    end
   end
 end

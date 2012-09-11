@@ -15,27 +15,22 @@
 #   You should have received a copy of the GNU Affero General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #++
-require "moron/git/git_shell"
-require "moron/git/repository"
+require "sinatra/base"
+require "sinatra/async"
+require "moron/sinatra/actions"
 
 module Moron
-  class FileSystemRepositoryResolver
-    def initialize(root)
-      @root = root
-    end
+  module Sinatra
+    class Base < ::Sinatra::Base
+      attr_reader :actions, :renderer
+      include Moron::Sinatra::Actions
+      register ::Sinatra::Async
 
-    def resolve(repo)
-      git = Moron::GitShell.new(File.join(root, repo))
-      Moron::Git::Repository.new(repo, git)
-    end
-
-    def all
-      Dir.entries(root).reject do |e|
-        e =~ /^\.+$/ || File.file?(File.join(root, e))
+      def initialize(actions, renderer)
+        @actions = actions
+        @renderer = renderer
+        super()
       end
     end
-
-    private
-    def root; @root; end
   end
 end

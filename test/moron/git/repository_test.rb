@@ -38,26 +38,26 @@ class FakeGit
   def last_resolver; deferreds.last; end
 end
 
-describe Moron::Repository do
+describe Moron::Git::Repository do
   before { @git = FakeGit.new }
 
   describe "#blob" do
     it "uses git-show to cat file at ref" do
-      repo = Moron::Repository.new("gitorious", @git)
+      repo = Moron::Git::Repository.new("gitorious", @git)
       repo.blob("models/repository.rb", "master")
 
       assert_equal "show master:models/repository.rb", @git.last_command
     end
 
     it "defaults to showing the file at HEAD" do
-      repo = Moron::Repository.new("gitorious", @git)
+      repo = Moron::Git::Repository.new("gitorious", @git)
       repo.blob("models/repository.rb")
 
       assert_equal "show HEAD:models/repository.rb", @git.last_command
     end
 
     it "invokes callback with blob object" do
-      repo = Moron::Repository.new("gitorious", @git)
+      repo = Moron::Git::Repository.new("gitorious", @git)
       d = repo.blob("models/repository.rb")
 
       d.callback do |blob|

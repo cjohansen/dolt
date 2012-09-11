@@ -15,39 +15,24 @@
 #   You should have received a copy of the GNU Affero General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #++
-require "sinatra"
-require "sinatra/async"
-require "eventmachine"
-
 module Moron
-  class SinatraServer < Sinatra::Base
-    register Sinatra::Async
+  module Sinatra
+    module Actions
+      def error(status)
+        response["Content-Type"] = "text/plain"
+        body("Process failed with exit code \n#{status.exitstatus}")
+      end
 
-    def initialize(server, renderer)
-      @server = server
-      @renderer = renderer
-      super()
-    end
-
-    def error(status)
-      response["Content-Type"] = "text/plain"
-      body("Process failed with exit code \n#{status.exitstatus}")
-    end
-
-    aget "/*/blob/*:*" do
-      repo, ref, path = params[:splat]
-      tree = server.blob(repo, ref, path) do |status, data|
-        if status.nil?
-          response["Content-Type"] = "text/html"
-          body(renderer.render(:blob, data))
-        else
-          error(status)
+      def blob(repo, ref, path)
+        actions.blob(repo, ref, path) do |status, data|
+          if status.nil?
+            response["Content-Type"] = "text/html"
+            body(renderer.render(:blob, data))
+          else
+            error(status)
+          end
         end
       end
     end
-
-    private
-    def renderer; @renderer; end
-    def server; @server; end
   end
 end

@@ -6,7 +6,7 @@ Gem::Specification.new do |s|
   s.version     = Moron::VERSION
   s.authors     = ["Christian Johansen"]
   s.email       = ["christian@gitorious.org"]
-  s.homepage    = "http://gitorious.org/moron"
+  s.homepage    = "http://gitorious.org/gitorious/moron"
   s.summary     = %q{Moron serves git trees and syntax highlighted blobs}
   s.description = %q{Moron serves git trees and syntax highlighted blobs}
 

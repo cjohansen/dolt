@@ -19,27 +19,29 @@ require "moron/async/when"
 require "moron/git/blob"
 
 module Moron
-  class Repository
-    attr_reader :name
+  module Git
+    class Repository
+      attr_reader :name
 
-    def initialize(name, git = nil)
-      @name = name
-      @git = git
-    end
-
-    def blob(path, ref = "HEAD")
-      gitop = git.git("show", "#{ref}:#{path}")
-      deferred = When::Deferred.new
-
-      gitop.callback do |data, status|
-        deferred.resolve(Moron::Blob.new(path, data))
+      def initialize(name, git = nil)
+        @name = name
+        @git = git
       end
 
-      gitop.errback { |err| deferred.reject(err) }
-      deferred.promise
-    end
+      def blob(path, ref = "HEAD")
+        gitop = git.git("show", "#{ref}:#{path}")
+        deferred = When::Deferred.new
 
-    private
-    def git; @git; end
+        gitop.callback do |data, status|
+          deferred.resolve(Moron::Blob.new(path, data))
+        end
+
+        gitop.errback { |err| deferred.reject(err) }
+        deferred.promise
+      end
+
+      private
+      def git; @git; end
+    end
   end
 end

@@ -1,0 +1,42 @@
+#!/usr/bin/env ruby
+require "thin"
+require "sinatra/base"
+require "moron/repo_actions"
+require "moron/template_renderer"
+require "moron/view"
+require "moron/git/file_system_repository_resolver"
+
+if ARGV.length == 0
+  puts("Moron should be run with a directory as its sole argument")
+  puts("The directory should either be a Git repository or a directory")
+  puts("that holds Git repositories.")
+  exit(1)
+end
+
+def is_git_repo?(dir)
+  File.exists?(File.join(dir, ".git"))
+end
+
+def create_server(dir, view)
+  resolver = Moron::FileSystemRepositoryResolver.new(dir)
+  actions = Moron::RepoActions.new(resolver)
+
+  if is_git_repo?(dir)
+    require "moron/sinatra/single_repo_browser"
+    Moron::Sinatra::SingleRepoBrowser.new(dir, actions, view)
+  else
+    require "moron/sinatra/multi_repo_browser"
+    Moron::Sinatra::MultiRepoBrowser.new(actions, view)
+  end
+end
+
+base = File.join(File.dirname(__FILE__), "..")
+
+template_root = File.join(base, "views")
+options = { :cache => false, :layout => "layout" }
+view = Moron::TemplateRenderer.new(template_root, options)
+view.helper(Moron::View)
+
+Sinatra::Base.set(:public_folder, File.join(base, "vendor/ui"))
+server = create_server(ARGV[0], view)
+Thin::Server.start("0.0.0.0", 3000, server)

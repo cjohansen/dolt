@@ -15,27 +15,27 @@
 #   You should have received a copy of the GNU Affero General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #++
-require "moron/git/git_shell"
-require "moron/git/repository"
+require "eventmachine"
 
 module Moron
-  class FileSystemRepositoryResolver
-    def initialize(root)
-      @root = root
+  class RepoActions
+    def initialize(repo_resolver)
+      @repo_resolver = repo_resolver
     end
 
-    def resolve(repo)
-      git = Moron::GitShell.new(File.join(root, repo))
-      Moron::Git::Repository.new(repo, git)
-    end
-
-    def all
-      Dir.entries(root).reject do |e|
-        e =~ /^\.+$/ || File.file?(File.join(root, e))
+    def blob(repo, ref, path, &block)
+      repository = repo_resolver.resolve(repo)
+      d = repository.blob(path, ref)
+      d.callback do |blob, status|
+        block.call(nil, {
+                     :blob => blob,
+                     :repository => repository,
+                     :ref => ref })
       end
+      d.errback { |err| block.call(err, nil) }
     end
 
     private
-    def root; @root; end
+    def repo_resolver; @repo_resolver; end
   end
 end

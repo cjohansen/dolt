@@ -23,7 +23,7 @@ require "moron/view"
 
 describe "blob template" do
   before do
-    @repo = Moron::Repository.new("the-moron")
+    @repo = Moron::Git::Repository.new("the-moron")
     @template_root = File.join(File.dirname(__FILE__), "..", "..", "..", "views")
   end
 

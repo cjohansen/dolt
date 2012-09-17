@@ -3,6 +3,7 @@ PATH
   specs:
     dolt (0.1.1)
       async_sinatra (~> 1.0)
+      em_pessimistic (~> 0.1)
       eventmachine (~> 0.12)
       pygments.rb (~> 0.2)
       sinatra (~> 1.3)
@@ -19,6 +20,8 @@ GEM
     daemons (1.1.9)
     em-minitest-spec (1.1.1)
       eventmachine
+    em_pessimistic (0.1.1)
+      eventmachine (= 0.12.10)
     eventmachine (0.12.10)
     ffi (1.0.11)
     minitest (2.1.0)

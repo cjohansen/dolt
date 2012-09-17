@@ -15,7 +15,7 @@
 #   You should have received a copy of the GNU Affero General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #++
-require "dolt/async/deferrable_child_process"
+require "em_pessimistic"
 
 module Dolt
   module Git
@@ -36,7 +36,7 @@ module Dolt
       def git(command, *args)
         base = "git --git-dir #{@git_dir} --work-tree #{@work_tree}"
         cmd = "#{base} #{command} #{args.join(' ')}".strip
-        Dolt::DeferrableChildProcess.open(cmd)
+        EMPessimistic::DeferrableChildProcess.open(cmd)
       end
     end
   end

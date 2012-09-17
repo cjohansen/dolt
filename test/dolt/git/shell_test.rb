@@ -18,6 +18,7 @@
 require "test_helper"
 require "mocha"
 require "eventmachine"
+require "em_pessimistic"
 require "dolt/git/shell"
 
 describe Dolt::Git::Shell do
@@ -28,7 +29,7 @@ describe Dolt::Git::Shell do
     it "assumes git dir in work tree" do
       expected_cmd = ["git --git-dir /somewhere/.git ",
                       "--work-tree /somewhere log"].join
-      Dolt::DeferrableChildProcess.expects(:open).with(expected_cmd)
+      EMPessimistic::DeferrableChildProcess.expects(:open).with(expected_cmd)
       git = Dolt::Git::Shell.new("/somewhere")
       git.git("log")
     end
@@ -36,7 +37,7 @@ describe Dolt::Git::Shell do
     it "uses provided git dir" do
       expected_cmd = ["git --git-dir /somewhere/.git ",
                       "--work-tree /elsewhere log"].join
-      Dolt::DeferrableChildProcess.expects(:open).with(expected_cmd)
+      EMPessimistic::DeferrableChildProcess.expects(:open).with(expected_cmd)
       git = Dolt::Git::Shell.new("/elsewhere", "/somewhere/.git")
       git.git("log")
     end
@@ -54,7 +55,7 @@ describe Dolt::Git::Shell do
     it "joins arguments with spaces" do
       expected_cmd = ["git --git-dir /somewhere/.git ",
                       "--work-tree /somewhere push origin master"].join
-      Dolt::DeferrableChildProcess.expects(:open).with(expected_cmd)
+      EMPessimistic::DeferrableChildProcess.expects(:open).with(expected_cmd)
       git = Dolt::Git::Shell.new("/somewhere")
       git.git("push", "origin", "master")
     end
@@ -63,7 +64,7 @@ describe Dolt::Git::Shell do
       silence_stderr do
         git = Dolt::Git::Shell.new("/somewhere")
         result = git.git("push", "origin", "master")
-        result.errback do |status|
+        result.errback do |data, status|
           refute status.nil?
           done!
         end

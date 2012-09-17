@@ -20,6 +20,14 @@ require "dolt/sinatra/base"
 module Dolt
   module Sinatra
     class MultiRepoBrowser < Dolt::Sinatra::Base
+      def blob_url(repo, path, ref)
+        "/#{repo}/blob/#{ref}:#{path}"
+      end
+
+      def tree_url(repo, path, ref)
+        "/#{repo}/tree/#{ref}:#{path}"
+      end
+
       aget "/" do
         response["Content-Type"] = "text/html"
         body("<h1>Welcome to Dolt</h1>")

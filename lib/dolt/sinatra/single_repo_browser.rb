@@ -27,6 +27,14 @@ module Dolt
         super(actions, renderer)
       end
 
+      def blob_url(repo, path, ref)
+        "/blob/#{ref}:#{path}"
+      end
+
+      def tree_url(repo, path, ref)
+        "/tree/#{ref}:#{path}"
+      end
+
       aget "/" do
         redirect("/tree/master:")
       end

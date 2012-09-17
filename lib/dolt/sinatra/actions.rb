@@ -15,32 +15,46 @@
 #   You should have received a copy of the GNU Affero General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #++
+require "dolt/git/error"
+
 module Dolt
   module Sinatra
     module Actions
-      def error(status)
+      # Built-in redirect seems to not work with Sinatra::Async, it throws
+      # an error.
+      def redirect(url)
+        response.status = 302
+        response["Location"] = url
+        body ""
+      end
+
+      def error(error)
         response["Content-Type"] = "text/plain"
-        body("Process failed with exit code \n#{status.exitstatus}")
+        body("Process failed with exit code #{error.exit_code}:\n#{error.message}")
       end
 
       def blob(repo, path, ref)
-        actions.blob(repo, path, ref) do |status, data|
-          if status.nil?
+        actions.blob(repo, path, ref) do |err, data|
+          if err.nil?
             response["Content-Type"] = "text/html"
             body(renderer.render(:blob, data))
+          elsif Dolt::Git::WrongObjectTypeError === err
+            redirect(tree_url(repo, path, ref))
           else
-            error(status)
+            error(err)
           end
         end
       end
 
       def tree(repo, path, ref)
-        actions.tree(repo, path, ref) do |status, data|
-          if status.nil?
+        actions.tree(repo, path, ref) do |err, data|
+          if err.nil?
             response["Content-Type"] = "text/html"
             body(renderer.render(:tree, data))
+          elsif Dolt::Git::InvalidObjectNameError === err
+            redirect(blob_url(repo, path, ref))
           else
-            error(status)
+            error(err)
           end
         end
       end

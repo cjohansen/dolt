@@ -1,5 +1,6 @@
 # -*- encoding: utf-8 -*-
-require File.join("lib/dolt/version")
+dir = File.expand_path(File.dirname(__FILE__))
+require File.join(dir, "lib/dolt/version")
 
 module GemSpecHelper
   def self.files(path)

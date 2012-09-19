@@ -21,8 +21,7 @@ require "dolt/view/highlighter"
 module Dolt
   module View
     def breadcrumb(repository, path, ref, options = {})
-      bc = Dolt::View::Breadcrumb.new(:multi_repo_mode => options[:multi_repo_mode])
-      bc.render(repository, ref, path)
+      Dolt::View::Breadcrumb.new.render(repository, ref, path)
     end
 
     def multiline(blob, options = {})
@@ -56,26 +55,32 @@ module Dolt
       Dolt::View::Highlighter.lexer(suffix)
     end
 
-    def tree_url(repository, entry, ref, multi_repo_mode)
-      action = entry.file? ? "blob" : "tree"
-      repo_url(repository, "/#{action}/#{ref}:#{entry.full_path}", multi_repo_mode)
+    def tree_entries(tree)
+      tree.entries
     end
 
-    def blame_url(repository, blob, ref, multi_repo_mode)
-      repo_url(repository, "/blame/#{ref}:#{blob.path}", multi_repo_mode)
+    def object_url(repository, ref, path, object)
+      "/#{object[:type]}/#{ref}:#{object_path(path, object)}"
     end
 
-    def history_url(repository, blob, ref, multi_repo_mode)
-      repo_url(repository, "/history/#{ref}:#{blob.path}", multi_repo_mode)
+    def object_path(root, object)
+      File.join(root, object[:name]).sub(/^\//, "")
     end
 
-    def raw_url(repository, blob, ref, multi_repo_mode)
-      repo_url(repository, "/raw/#{ref}:#{blob.path}", multi_repo_mode)
+    def object_icon_class(entry)
+      entry[:type] == :blob ? "icon-file" : "icon-folder-close"
     end
 
-    def repo_url(repository, url, multi_repo_mode)
-      prefix = multi_repo_mode ? "/#{repository.name}" : ""
-      "#{prefix}#{url}"
+    def blame_url(repository, ref, path)
+      "/#{repository}/blame/#{ref}:#{path}"
+    end
+
+    def history_url(repository, ref, path)
+      "/#{repository}/history/#{ref}:#{path}"
+    end
+
+    def raw_url(repository, ref, path)
+      "/#{repository}/raw/#{ref}:#{path}"
     end
   end
 end

@@ -18,16 +18,10 @@
 module Dolt
   module View
     class Breadcrumb
-      attr_reader :multi_repo_mode
-
-      def initialize(options = {})
-        @multi_repo_mode = options[:multi_repo_mode]
-      end
-
       def render(repository, ref, path)
         dirs = path.split("/")
         filename = dirs.pop
-        dir_html = accumulate_dirs(dirs, repository.name, ref)
+        dir_html = accumulate_dirs(dirs, repository, ref)
         <<-HTML
           <ul class="breadcrumb">
             <li><a href="#{prefix(repository)}/tree/#{ref}:"><i class="icon icon-file"></i></a></li>
@@ -47,7 +41,8 @@ module Dolt
       end
 
       def prefix(repo)
-        multi_repo_mode ? "/#{repo}" : ""
+        "/#{repo}"
+        ""
       end
     end
   end

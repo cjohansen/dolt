@@ -17,7 +17,7 @@
    #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
    #++
    %>
-<% @title = "#{tree.path} in #{repository.name}:#{ref}" %>
+<% @title = "#{path} in #{ref}" %>
 <table class="table table-striped gts-tree-explorer">
   <thead>
     <tr>
@@ -27,12 +27,12 @@
     </tr>
   </thead>
   <tbody>
-    <% tree.entries.each do |entry| %>
+    <% tree_entries(tree).each do |object| %>
       <tr>
         <td class="gts-name">
-          <a href="<%= tree_url(repository, entry, ref, defined?(multi_repo_mode) && multi_repo_mode) %>">
-            <i class="icon <%= entry.file? ? "icon-file" : "icon-folder-close" %>"></i>
-            <%= entry.path %>
+          <a href="<%= object_url(repository, ref, path, object) %>">
+            <i class="icon <%= object_icon_class(object) %>"></i>
+            <%= object[:name] %>
           </a>
         </td>
         <td></td>

@@ -15,8 +15,6 @@
 #   You should have received a copy of the GNU Affero General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #++
-require "dolt/git/error"
-
 module Dolt
   module Sinatra
     module Actions
@@ -35,27 +33,21 @@ module Dolt
 
       def blob(repo, path, ref)
         actions.blob(repo, path, ref) do |err, data|
-          if err.nil?
-            response["Content-Type"] = "text/html"
-            body(renderer.render(:blob, data))
-          elsif Dolt::Git::WrongObjectTypeError === err
-            redirect(tree_url(repo, path, ref))
-          else
-            error(err)
-          end
+          return error(err) if !err.nil?
+          blob = data[:blob]
+          return redirect(tree_url(repo, path, ref)) if !blob.is_a?(Rugged::Blob)
+          response["Content-Type"] = "text/html"
+          body(renderer.render(:blob, data))
         end
       end
 
       def tree(repo, path, ref)
         actions.tree(repo, path, ref) do |err, data|
-          if err.nil?
-            response["Content-Type"] = "text/html"
-            body(renderer.render(:tree, data))
-          elsif Dolt::Git::InvalidObjectNameError === err
-            redirect(blob_url(repo, path, ref))
-          else
-            error(err)
-          end
+          return error(err) if !err.nil?
+          tree = data[:tree]
+          return redirect(blob_url(repo, path, ref)) if !tree.is_a?(Rugged::Tree)
+          response["Content-Type"] = "text/html"
+          body(renderer.render(:tree, data))
         end
       end
     end

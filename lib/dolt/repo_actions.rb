@@ -25,29 +25,31 @@ module Dolt
 
     def blob(repo, path, ref, &block)
       repository = repo_resolver.resolve(repo)
-      d = repository.blob(path, ref)
+      d = repository.rev_parse("#{ref}:#{path}")
       d.callback do |blob, status|
-        block.call(nil, {
-                     :blob => blob,
-                     :repository => repository,
-                     :ref => ref })
+        block.call(nil, tpl_data(repo, path, ref, { :blob => blob }))
       end
       d.errback { |err| block.call(err, nil) }
     end
 
     def tree(repo, path, ref, &block)
       repository = repo_resolver.resolve(repo)
-      d = repository.tree(path, ref)
+      d = repository.rev_parse("#{ref}:#{path}")
       d.callback do |tree, status|
-        block.call(nil, {
-                     :tree => tree,
-                     :repository => repository,
-                     :ref => ref })
+        block.call(nil, tpl_data(repo, path, ref, { :tree => tree }))
       end
       d.errback { |err| block.call(err, nil) }
     end
 
     private
     def repo_resolver; @repo_resolver; end
+
+    def tpl_data(repo, path, ref, locals = {})
+      {
+        :repository => repo,
+        :path => path,
+        :ref => ref
+      }.merge(locals)
+    end
   end
 end

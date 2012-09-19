@@ -15,8 +15,7 @@
 #   You should have received a copy of the GNU Affero General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #++
-require "dolt/git/shell"
-require "dolt/git/repository"
+require "em_rugged/repository"
 
 module Dolt
   class DiskRepoResolver
@@ -25,8 +24,7 @@ module Dolt
     end
 
     def resolve(repo)
-      git = Dolt::Git::Shell.new(File.join(root, repo))
-      Dolt::Git::Repository.new(repo, git)
+      EMRugged::Repository.new(File.join(root, repo))
     end
 
     def all

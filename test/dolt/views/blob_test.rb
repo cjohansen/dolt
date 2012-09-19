@@ -16,18 +16,21 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #++
 require "test_helper"
-require "dolt/git/blob"
-require "dolt/git/repository"
 require "dolt/template_renderer"
 require "dolt/view"
 
+class Blob
+  attr_reader :content
+  def initialize(content); @content = content; end
+end
+
 describe "blob template" do
   before do
-    @repo = Dolt::Git::Repository.new("the-dolt")
+    @repo = "the-dolt"
     @template_root = File.join(File.dirname(__FILE__), "..", "..", "..", "views")
   end
 
-  def render(blob, options = {})
+  def render(path, blob, options = {})
     options[:attributes] = options[:attributes] || {}
     attrs = options[:attributes]
     if !attrs.key?(:multi_repo_mode); attrs[:multi_repo_mode] = true; end
@@ -36,20 +39,19 @@ describe "blob template" do
     renderer.render(:blob, {
                       :blob => blob,
                       :repository => @repo,
-                      :ref => options[:ref] || "master"
+                      :ref => options[:ref] || "master",
+                      :path => path
                     })
   end
 
   it "renders blob without errors" do
-    blob = Dolt::Git::Blob.new("file.txt", "Something something")
-    markup = render(blob)
+    markup = render("file.txt", Blob.new("Something something"))
 
     assert_match /Something something/, markup
   end
 
   it "renders blob with line numbers" do
-    blob = Dolt::Git::Blob.new("file.txt", "One\nTwo\nThree")
-    markup = render(blob)
+    markup = render("file.txt", Blob.new("One\nTwo\nThree"))
 
     assert_match /<li.*One.*<\/li>/, markup
     assert_match /<li.*Two.*<\/li>/, markup
@@ -57,22 +59,20 @@ describe "blob template" do
   end
 
   it "renders blob with layout" do
-    blob = Dolt::Git::Blob.new("file.txt", "Something something")
-    markup = render(blob, :layout => "layout")
+    markup = render("file.txt", Blob.new("Something something"), :layout => "layout")
 
     assert_match /Something something/, markup
   end
 
   it "renders repo title in page" do
-    blob = Dolt::Git::Blob.new("file.txt", "Something something")
-    markup = render(blob, :layout => "layout")
+    @repo = "my-magic-repo"
+    markup = render("file.txt", Blob.new("Something something"), :layout => "layout")
 
-    assert_match @repo.name, markup
+    assert_match "my-magic-repo", markup
   end
 
   it "renders links to other views" do
-    blob = Dolt::Git::Blob.new("file.txt", "Something something")
-    markup = render(blob)
+    markup = render("file.txt", Blob.new("Something something"))
 
     assert_match "/the-dolt/blame/master:file.txt", markup
     assert_match "/the-dolt/history/master:file.txt", markup
@@ -80,8 +80,7 @@ describe "blob template" do
   end
 
   it "renders links to other views in single repo mode" do
-    blob = Dolt::Git::Blob.new("file.txt", "Something something")
-    markup = render(blob, { :attributes => { :multi_repo_mode => false } })
+    markup = render("file.txt", Blob.new("Something something"), { :attributes => { :multi_repo_mode => false } })
 
     assert_match "\"/blame/master:file.txt", markup
     assert_match "\"/history/master:file.txt", markup
@@ -89,8 +88,7 @@ describe "blob template" do
   end
 
   it "renders links to other views for correct ref" do
-    blob = Dolt::Git::Blob.new("file.txt", "Something something")
-    markup = render(blob, :ref => "123bc21")
+    markup = render("file.txt", Blob.new("Something something"), :ref => "123bc21")
 
     assert_match "/the-dolt/blame/123bc21:file.txt", markup
     assert_match "/the-dolt/history/123bc21:file.txt", markup
@@ -98,8 +96,7 @@ describe "blob template" do
   end
 
   it "renders the path clickable" do
-    blob = Dolt::Git::Blob.new("some/deeply/nested/file.txt", "Something something")
-    markup = render(blob)
+    markup = render("some/deeply/nested/file.txt", Blob.new("Something something"))
 
     assert_match 'href="/the-dolt/tree/master:some"', markup
     assert_match 'href="/the-dolt/tree/master:some/deeply"', markup

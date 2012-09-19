@@ -15,18 +15,29 @@
 #   You should have received a copy of the GNU Affero General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #++
-require "test_helper"
-require "dolt/view"
-require "dolt/merger"
+module Dolt
+  class Merger
+    def initialize(objects)
+      @objects = objects
+    end
 
-describe Dolt::View do
-  describe "#load_all" do
-    it "loads all helpers" do
-      helpers = Dolt::Merger.new(Dolt::View.load_all)
+    def <<(object)
+      @objects << object
+    end
 
-      assert helpers.respond_to?(:object_url)
-      assert helpers.respond_to?(:blame_url)
-      assert helpers.respond_to?(:breadcrumb)
+    def method_missing(method, *args, &block)
+      object = provider(method)
+      return super if object.nil?
+      object.send(method, *args, &block)
+    end
+
+    def respond_to?(method)
+      !provider(method).nil?
+    end
+
+    private
+    def provider(method)
+      @objects.find { |h| h.respond_to?(method) }
     end
   end
 end

@@ -21,13 +21,15 @@ Gem::Specification.new do |s|
 
   s.rubyforge_project = "dolt"
 
-  s.add_dependency "eventmachine", "~>0.12"
+  s.add_dependency "eventmachine", "~>1.0"
   s.add_dependency "thin", "~>1.4"
   s.add_dependency "sinatra", "~>1.3"
   s.add_dependency "async_sinatra", "~>1.0"
   s.add_dependency "tilt", "~>1.3"
   s.add_dependency "pygments.rb", "~>0.2"
   s.add_dependency "em_pessimistic", "~>0.1"
+  s.add_dependency "builder", "~> 3.1"
+  s.add_dependency "em_rugged", "~> 0.1.0"
 
   s.add_development_dependency "minitest", "~> 2.0"
   s.add_development_dependency "em-minitest-spec", "~> 1.1"

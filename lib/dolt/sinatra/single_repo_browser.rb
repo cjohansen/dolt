@@ -27,11 +27,11 @@ module Dolt
         super(actions, renderer)
       end
 
-      def blob_url(repo, path, ref)
+      def blob_url(repo, ref, path)
         "/blob/#{ref}:#{path}"
       end
 
-      def tree_url(repo, path, ref)
+      def tree_url(repo, ref, path)
         "/tree/#{ref}:#{path}"
       end
 
@@ -40,7 +40,8 @@ module Dolt
       end
 
       aget "/tree/*:*" do
-        tree(repo, params[:splat][1], params[:splat][0])
+        ref, path = params[:splat]
+        tree(repo, ref, path)
       end
 
       aget "/tree/*" do
@@ -49,7 +50,7 @@ module Dolt
 
       aget "/blob/*:*" do
         ref, path = params[:splat]
-        blob(repo, path, ref)
+        blob(repo, ref, path)
       end
 
       aget "/blob/*" do

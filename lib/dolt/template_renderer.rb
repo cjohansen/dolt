@@ -16,6 +16,7 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #++
 require "tilt"
+require "dolt/merger"
 
 module Dolt
   class TemplateRenderer
@@ -24,17 +25,16 @@ module Dolt
       @cache = {} if !opt.key?(:cache) || opt[:cache]
       @layout = opt[:layout]
       @type = opt[:type] || "erb"
-      @context_class = Class.new
-      @attributes = opt[:attributes] || {}
+      @helpers = Dolt::Merger.new([])
     end
 
-    def helper(helper_module)
-      @context_class.send(:include, helper_module)
+    def helper(helper)
+      helper = [helper] unless Array === helper
+      helper.each { |h| helpers << h }
     end
 
     def render(template, locals = {})
-      locals = locals.merge(attributes)
-      context = context_class.new
+      context = Helper.new(helpers)
       content = load(template).render(context, locals)
 
       if !layout.nil?
@@ -57,7 +57,16 @@ module Dolt
     def cache; @cache; end
     def layout; @layout; end
     def type; @type; end
-    def context_class; @context_class; end
-    def attributes; @attributes; end
+    def helpers; @helpers; end
+
+    class Helper
+      def initialize(helpers)
+        @helpers = helpers
+      end
+
+      def method_missing(method, *args, &block)
+        @helpers.send(method, *args, &block)
+      end
+    end
   end
 end

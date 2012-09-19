@@ -15,18 +15,19 @@
 #   You should have received a copy of the GNU Affero General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #++
-module Dolt
-  module Git
-    class Blob
-      attr_reader :path, :raw, :repo
 
-      def initialize(path, raw)
-        @path = path
-        @raw = raw
+module Dolt
+  module View
+    class Base
+      attr_reader :options
+
+      def initialize(options = {})
+        @options = options
       end
 
-      def lines
-        raw.split("\n")
+      def repo_url(repository, url)
+        return url if !options[:multi_repo_mode]
+        "/#{repository}#{url}"
       end
     end
   end

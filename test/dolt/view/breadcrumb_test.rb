@@ -16,34 +16,30 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #++
 require "test_helper"
-require "dolt/git/blob"
+require "dolt/view/breadcrumb"
 
-describe Dolt::Git::Blob do
-  describe "#raw" do
-    it "returns full raw blob" do
-      blob = Dolt::Git::Blob.new("file.txt", "Something something")
+describe Dolt::View::Breadcrumb do
+  include Dolt::Html
+  before { @view = Dolt::View::Breadcrumb.new }
 
-      assert_equal "Something something", blob.raw
-    end
+  it "renders li element for root" do
+    html = @view.breadcrumb("myrepo", "master", "path.txt")
+
+    assert_equal 1, select(html, "a").length
+    assert_match /icon-file/, select(html, "li").first
   end
 
-  describe "#lines" do
-    it "returns empty array for empty blob" do
-      blob = Dolt::Git::Blob.new("file.txt", "")
+  it "renders li element for file" do
+    html = @view.breadcrumb("myrepo", "master", "path.txt")
 
-      assert_equal [], blob.lines
-    end
+    assert_match /path.txt/, select(html, "li").last
+  end
 
-    it "returns array of one line" do
-      blob = Dolt::Git::Blob.new("file.txt", "Something something")
+  it "renders links to accumulated paths" do
+    html = @view.breadcrumb("myrepo", "master", "some/nested/path.txt")
 
-      assert_equal ["Something something"], blob.lines
-    end
-
-    it "returns array of lines" do
-      blob = Dolt::Git::Blob.new("file.txt", "Something\nsomething\nYup")
-
-      assert_equal ["Something", "something", "Yup"], blob.lines
-    end
+    links = select(html, "a")
+    assert_match /\"\/tree\/master:some"/, links[1]
+    assert_match /\"\/tree\/master:some\/nested"/, links[2]
   end
 end

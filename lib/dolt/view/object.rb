@@ -15,18 +15,23 @@
 #   You should have received a copy of the GNU Affero General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #++
-require "test_helper"
-require "dolt/view"
-require "dolt/merger"
+require "dolt/view/base"
 
-describe Dolt::View do
-  describe "#load_all" do
-    it "loads all helpers" do
-      helpers = Dolt::Merger.new(Dolt::View.load_all)
+module Dolt
+  module View
+    class Object < Dolt::View::Base
+      def object_url(repository, ref, path, object)
+        url = "/#{object[:type]}/#{ref}:#{object_path(path, object)}"
+        repo_url(repository, url)
+      end
 
-      assert helpers.respond_to?(:object_url)
-      assert helpers.respond_to?(:blame_url)
-      assert helpers.respond_to?(:breadcrumb)
+      def object_path(root, object)
+        File.join(root, object[:name]).sub(/^\//, "")
+      end
+
+      def object_icon_class(entry)
+        entry[:type] == :blob ? "icon-file" : "icon-folder-close"
+      end
     end
   end
 end

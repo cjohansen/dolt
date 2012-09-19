@@ -19,11 +19,15 @@ require "test_helper"
 require "mocha"
 require "dolt/template_renderer"
 
-module ViewHelper
-  def say_it; "YES"; end
+class ViewHelper
+  attr_accessor :response
+  def initialize; @response = "YES"; end
+  def say_it; response; end
 end
 
 describe Dolt::TemplateRenderer do
+  before { @root = "/dolt/views" }
+
   it "reads template from file" do
     File.expects(:read).with("/dolt/views/file.erb").returns("")
     renderer = Dolt::TemplateRenderer.new("/dolt/views")
@@ -32,13 +36,13 @@ describe Dolt::TemplateRenderer do
 
   it "renders template with locals" do
     File.stubs(:read).returns("<%= name %>!")
-    renderer = Dolt::TemplateRenderer.new("/dolt/views")
+    renderer = Dolt::TemplateRenderer.new(@root)
 
     assert_equal "Chris!", renderer.render(:file, { :name => "Chris"})
   end
 
   it "caches template in memory" do
-    renderer = Dolt::TemplateRenderer.new("/dolt/views")
+    renderer = Dolt::TemplateRenderer.new(@root)
     File.stubs(:read).returns("Original")
     renderer.render(:file)
     File.stubs(:read).returns("Updated")
@@ -47,7 +51,7 @@ describe Dolt::TemplateRenderer do
   end
 
   it "does not cache template in memory when configured not to" do
-    renderer = Dolt::TemplateRenderer.new("/dolt/views", :cache => false)
+    renderer = Dolt::TemplateRenderer.new(@root, :cache => false)
     File.stubs(:read).returns("Original")
     renderer.render(:file)
     File.stubs(:read).returns("Updated")
@@ -63,26 +67,41 @@ describe Dolt::TemplateRenderer do
     assert_equal "I give you: Template", renderer.render(:file)
   end
 
-  it "renders str templates" do
+  it "renders templates of specific type" do
     renderer = Dolt::TemplateRenderer.new("/", :type => :str)
     File.stubs(:read).with("/file.str").returns("Hey!")
 
     assert_equal "Hey!", renderer.render(:file)
   end
 
-  it "renders with helper module" do
+  it "renders with helper object" do
     renderer = Dolt::TemplateRenderer.new("/")
-    renderer.helper(ViewHelper)
+    renderer.helper(ViewHelper.new)
     File.stubs(:read).with("/file.erb").returns("Say it: <%= say_it %>")
 
     assert_equal "Say it: YES", renderer.render(:file)
   end
 
-  it "configures the renderer" do
-    renderer = Dolt::TemplateRenderer.new("/", { :attributes => { :stuff => "THING" } })
-    renderer.helper(ViewHelper)
-    File.stubs(:read).with("/file.erb").returns("<%= stuff %>")
+  it "does not leak state across render calls" do
+    renderer = Dolt::TemplateRenderer.new("/")
+    renderer.helper(ViewHelper.new)
+    File.stubs(:read).with("/file.erb").returns(<<-TEMPLATE)
+<%= @response %><% @response = "NO" %><%= @response %>
+    TEMPLATE
 
-    assert_equal "THING", renderer.render(:file)
+    assert_equal "NO", renderer.render(:file)
+    assert_equal "NO", renderer.render(:file)
+  end
+
+  it "shares state between template and layout" do
+    renderer = Dolt::TemplateRenderer.new("/", :layout => "layout")
+    renderer.helper(ViewHelper.new)
+    File.stubs(:read).with("/file.erb").returns(<<-TEMPLATE)
+<% self.response = "NO" %><h1><%= response %></h1>
+    TEMPLATE
+    tpl = "<title><%= response %></title><%= yield %>"
+    File.stubs(:read).with("/layout.erb").returns(tpl)
+
+    assert_equal "<title>NO</title><h1>NO</h1>\n", renderer.render(:file)
   end
 end

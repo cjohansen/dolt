@@ -15,39 +15,33 @@
 #   You should have received a copy of the GNU Affero General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #++
+require "dolt/view/base"
+
 module Dolt
   module View
-    class Breadcrumb
-      attr_reader :multi_repo_mode
-
-      def initialize(options = {})
-        @multi_repo_mode = options[:multi_repo_mode]
-      end
-
-      def render(repository, ref, path)
+    class Breadcrumb < Dolt::View::Base
+      def breadcrumb(repository, ref, path)
         dirs = path.split("/")
         filename = dirs.pop
-        dir_html = accumulate_dirs(dirs, repository.name, ref)
+        dir_html = accumulate_dirs(dirs, repository, ref)
+        url = repo_url(repository, "/tree/#{ref}")
         <<-HTML
           <ul class="breadcrumb">
-            <li><a href="#{prefix(repository)}/tree/#{ref}:"><i class="icon icon-file"></i></a></li>
+            <li><a href="#{url}:"><i class="icon icon-file"></i></a></li>
             #{dir_html}<li class="active">#{filename}</li>
           </ul>
         HTML
       end
 
       private
-      def accumulate_dirs(dirs, repo, ref)
+      def accumulate_dirs(dirs, repository, ref)
         accumulated = []
+        divider = "<span class=\"divider\">/</span>"
         dir_html = dirs.inject("") do |html, dir|
           accumulated << dir
-          "#{html}<li><a href=\"#{prefix(repo)}/tree/#{ref}:#{accumulated.join('/')}\">" +
-            "#{dir}<span class=\"divider\">/</span></a></li>"
+          url = repo_url(repository, "/tree/#{ref}:#{accumulated.join('/')}")
+          "#{html}<li><a href=\"#{url}\">#{dir}#{divider}</a></li>"
         end
-      end
-
-      def prefix(repo)
-        multi_repo_mode ? "/#{repo}" : ""
       end
     end
   end

@@ -23,21 +23,9 @@ require "eventmachine"
 Bundler.require(:default, :test)
 
 module Dolt
-  module StdioStub
-    def silence_stderr
-      new_stderr = $stderr.dup
-      rd, wr = IO::pipe
-      $stderr.reopen(wr)
-      yield
-      $stderr.reopen(new_stderr)
-    end
-
-    def silence_stdout
-      new_stdout = $stdout.dup
-      rd, wr = IO::pipe
-      $stdout.reopen(wr)
-      yield
-      $stdout.reopen(new_stdout)
+  module Html
+    def select(html, tag_name)
+      html.scan(/<#{tag_name}[^>]*>.*?<\/#{tag_name}>/)
     end
   end
 end

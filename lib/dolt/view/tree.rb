@@ -15,31 +15,14 @@
 #   You should have received a copy of the GNU Affero General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #++
+require "dolt/view/base"
 
 module Dolt
-  module Git
-    class AsyncShellError < StandardError
-      attr_reader :exit_code
-
-      def initialize(message, exit_code)
-        @exit_code = exit_code
-        super(message)
-      end
-
-      def self.from_process(stderr, status)
-        exit_code = status.exitstatus
-        if stderr =~ /not a tree object/
-          return WrongObjectTypeError.new(stderr, exit_code)
-        end
-        if stderr =~ /Not a valid object name/
-          return InvalidObjectNameError.new(stderr, exit_code)
-        end
-        NoRepositoryError.new(stderr, exit_code)
+  module View
+    class Tree < Dolt::View::Base
+      def tree_entries(tree)
+        tree.entries
       end
     end
-
-    class NoRepositoryError < AsyncShellError; end
-    class WrongObjectTypeError < AsyncShellError; end
-    class InvalidObjectNameError < AsyncShellError; end
   end
 end

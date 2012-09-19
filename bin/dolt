@@ -39,11 +39,10 @@ base = File.join(File.dirname(__FILE__), "..")
 template_root = File.join(base, "views")
 view = Dolt::TemplateRenderer.new(template_root, {
   :cache => false,
-  :layout => "layout",
-  :attributes => { :multi_repo_mode => !is_git_repo?(ARGV[0]) }
+  :layout => "layout"
 })
 
-view.helper(Dolt::View)
+view.helper(Dolt::View.load_all({ :multi_repo_mode => !is_git_repo?(ARGV[0]) }))
 
 Sinatra::Base.set(:public_folder, File.join(base, "vendor/ui"))
 server = create_app(ARGV[0], view)

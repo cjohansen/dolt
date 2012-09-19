@@ -33,9 +33,10 @@ describe "blob template" do
   def render(path, blob, options = {})
     options[:attributes] = options[:attributes] || {}
     attrs = options[:attributes]
-    if !attrs.key?(:multi_repo_mode); attrs[:multi_repo_mode] = true; end
+    options.delete(:attributes)
     renderer = Dolt::TemplateRenderer.new(@template_root, options)
-    renderer.helper(Dolt::View)
+    if !attrs.key?(:multi_repo_mode); attrs[:multi_repo_mode] = true; end
+    renderer.helper(Dolt::View.load_all(attrs))
     renderer.render(:blob, {
                       :blob => blob,
                       :repository => @repo,

@@ -23,12 +23,7 @@ class Repository
   attr_reader :name
   def initialize(name); @name = name; end
 
-  def blob(path, ref)
-    @deferred = When::Deferred.new
-    @deferred.promise
-  end
-
-  def tree(path, ref)
+  def rev_parse(rev)
     @deferred = When::Deferred.new
     @deferred.promise
   end
@@ -57,46 +52,51 @@ describe Dolt::RepoActions do
 
   describe "#blob" do
     it "resolves repository" do
-      @actions.blob("gitorious", "app", "master")
+      @actions.blob("gitorious", "master", "app")
 
       assert_equal ["gitorious"], @resolver.resolved.map(&:name)
     end
 
-    it "yields blob, repo, ref and base_tree_url to block" do
+    it "yields path, blob, repo, ref and base_tree_url to block" do
       data = nil
-      @actions.blob("gitorious", "app", "babd120") do |status, d|
+      @actions.blob("gitorious", "babd120", "app") do |status, d|
         data = d
       end
 
-      repo = @resolver.resolved.last
-      repo.resolve_promise "Blob"
+      @resolver.resolved.last.resolve_promise("Blob")
 
       assert_equal({
-        :blob => "Blob",
-        :repository => repo,
-        :ref =>  "babd120"
-      }, data)
+                     :blob => "Blob",
+                     :repository => "gitorious",
+                     :ref =>  "babd120",
+                     :path => "app"
+                   }, data)
     end
   end
 
   describe "#tree" do
     it "resolves repository" do
-      @actions.tree("gitorious", "app", "master")
+      @actions.tree("gitorious", "master", "app")
 
       assert_equal ["gitorious"], @resolver.resolved.map(&:name)
     end
 
     it "yields tree, repo and ref to block" do
       data = nil
-      @actions.tree("gitorious", "app", "babd120") do |status, d|
+      @actions.tree("gitorious", "babd120", "app") do |status, d|
         data = d
       end
 
       repo = @resolver.resolved.last
       repo.resolve_promise "Tree"
 
-      expected = { :tree => "Tree", :repository => repo, :ref =>  "babd120" }
+      expected = {
+        :tree => "Tree",
+        :repository => "gitorious",
+        :ref =>  "babd120",
+        :path => "app"
+      }
       assert_equal expected, data
     end
- end
+  end
 end

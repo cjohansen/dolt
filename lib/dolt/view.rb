@@ -15,72 +15,21 @@
 #   You should have received a copy of the GNU Affero General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #++
-require "dolt/view/breadcrumb"
-require "dolt/view/highlighter"
 
 module Dolt
   module View
-    def breadcrumb(repository, path, ref, options = {})
-      Dolt::View::Breadcrumb.new.render(repository, ref, path)
-    end
+    def self.load_all(options = {})
+      dir = File.join(File.dirname(__FILE__), "view")
 
-    def multiline(blob, options = {})
-      class_names = options[:class_names] || []
-      class_names << "prettyprint" << "linenums"
-
-      num = 0
-      lines = blob.split("\n").inject("") do |html, line|
-        num += 1
-        "#{html}<li class=\"L#{num}\"><span class=\"line\">#{line}</span></li>"
+      Dir.entries(dir).select { |f| f =~ /\.rb$/ }.map do |file|
+        require(File.join(dir, file))
+        Dolt::View.const_get(classify(file)).new(options)
       end
-
-      "<pre class=\"#{class_names.join(' ')}\">" +
-        "<ol class=\"linenums\">#{lines}</ol></pre>"
     end
 
-    def highlight(path, code, options = {})
-      lexer = lexer_for_file(path)
-      Dolt::View::Highlighter.new(options).highlight(code, lexer)
-    rescue RubyPython::PythonError
-      code
-    end
-
-    def highlight_lines(path, code, options = {})
-      lexer = lexer_for_file(path)
-      multiline(highlight(path, code, options), :class_names => [lexer])
-    end
-
-    def lexer_for_file(path)
-      suffix = path.split(".").pop
-      Dolt::View::Highlighter.lexer(suffix)
-    end
-
-    def tree_entries(tree)
-      tree.entries
-    end
-
-    def object_url(repository, ref, path, object)
-      "/#{object[:type]}/#{ref}:#{object_path(path, object)}"
-    end
-
-    def object_path(root, object)
-      File.join(root, object[:name]).sub(/^\//, "")
-    end
-
-    def object_icon_class(entry)
-      entry[:type] == :blob ? "icon-file" : "icon-folder-close"
-    end
-
-    def blame_url(repository, ref, path)
-      "/#{repository}/blame/#{ref}:#{path}"
-    end
-
-    def history_url(repository, ref, path)
-      "/#{repository}/history/#{ref}:#{path}"
-    end
-
-    def raw_url(repository, ref, path)
-      "/#{repository}/raw/#{ref}:#{path}"
+    private
+    def self.classify(file)
+      file.sub(/\.rb$/, "").split("_").map { |p| p.capitalize }.join
     end
   end
 end

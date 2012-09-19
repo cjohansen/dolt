@@ -15,18 +15,20 @@
 #   You should have received a copy of the GNU Affero General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #++
-require "test_helper"
-require "dolt/view"
-require "dolt/merger"
 
-describe Dolt::View do
-  describe "#load_all" do
-    it "loads all helpers" do
-      helpers = Dolt::Merger.new(Dolt::View.load_all)
+module Dolt
+  module View
+    class Base
+      attr_reader :options
 
-      assert helpers.respond_to?(:object_url)
-      assert helpers.respond_to?(:blame_url)
-      assert helpers.respond_to?(:breadcrumb)
+      def initialize(options = {})
+        @options = options
+      end
+
+      def repo_url(repository, url)
+        return url if !options[:multi_repo_mode]
+        "/#{repository}#{url}"
+      end
     end
   end
 end

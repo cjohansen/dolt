@@ -15,18 +15,14 @@
 #   You should have received a copy of the GNU Affero General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #++
-require "test_helper"
-require "dolt/view"
-require "dolt/merger"
+require "dolt/view/base"
 
-describe Dolt::View do
-  describe "#load_all" do
-    it "loads all helpers" do
-      helpers = Dolt::Merger.new(Dolt::View.load_all)
-
-      assert helpers.respond_to?(:object_url)
-      assert helpers.respond_to?(:blame_url)
-      assert helpers.respond_to?(:breadcrumb)
+module Dolt
+  module View
+    class Tree < Dolt::View::Base
+      def tree_entries(tree)
+        tree.entries
+      end
     end
   end
 end

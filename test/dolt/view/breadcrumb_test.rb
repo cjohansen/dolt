@@ -16,17 +16,30 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #++
 require "test_helper"
-require "dolt/view"
-require "dolt/merger"
+require "dolt/view/breadcrumb"
 
-describe Dolt::View do
-  describe "#load_all" do
-    it "loads all helpers" do
-      helpers = Dolt::Merger.new(Dolt::View.load_all)
+describe Dolt::View::Breadcrumb do
+  include Dolt::Html
+  before { @view = Dolt::View::Breadcrumb.new }
 
-      assert helpers.respond_to?(:object_url)
-      assert helpers.respond_to?(:blame_url)
-      assert helpers.respond_to?(:breadcrumb)
-    end
+  it "renders li element for root" do
+    html = @view.breadcrumb("myrepo", "master", "path.txt")
+
+    assert_equal 1, select(html, "a").length
+    assert_match /icon-file/, select(html, "li").first
+  end
+
+  it "renders li element for file" do
+    html = @view.breadcrumb("myrepo", "master", "path.txt")
+
+    assert_match /path.txt/, select(html, "li").last
+  end
+
+  it "renders links to accumulated paths" do
+    html = @view.breadcrumb("myrepo", "master", "some/nested/path.txt")
+
+    links = select(html, "a")
+    assert_match /\"\/tree\/master:some"/, links[1]
+    assert_match /\"\/tree\/master:some\/nested"/, links[2]
   end
 end

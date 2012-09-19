@@ -20,11 +20,11 @@ require "dolt/sinatra/base"
 module Dolt
   module Sinatra
     class MultiRepoBrowser < Dolt::Sinatra::Base
-      def blob_url(repo, path, ref)
+      def blob_url(repo, ref, path)
         "/#{repo}/blob/#{ref}:#{path}"
       end
 
-      def tree_url(repo, path, ref)
+      def tree_url(repo, ref, path)
         "/#{repo}/tree/#{ref}:#{path}"
       end
 
@@ -34,7 +34,8 @@ module Dolt
       end
 
       aget "/*/tree/*:*" do
-        tree(params[:splat][0], params[:splat][2], params[:splat][1])
+        repo, ref, path = params[:splat]
+        tree(repo, ref, path)
       end
 
       aget "/*/tree/*" do
@@ -42,7 +43,8 @@ module Dolt
       end
 
       aget "/*/blob/*:*" do
-        blob(params[:splat][0], params[:splat][2], params[:splat][1])
+        repo, ref, path = params[:splat]
+        blob(repo, ref, path)
       end
 
       aget "/*/blob/*" do

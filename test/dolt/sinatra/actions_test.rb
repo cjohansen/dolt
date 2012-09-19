@@ -33,7 +33,20 @@ class DummySinatraApp
   end
 
   def response
-    @response ||= {}
+    if !@response
+      @response = {}
+      def @response.status; @status; end
+      def @response.status=(status); @status = status; end
+    end
+    @response
+  end
+
+  def tree_url(repo, ref, path)
+    "/#{repo}/tree/#{ref}:#{path}"
+  end
+
+  def blob_url(repo, ref, path)
+    "/#{repo}/blob/#{ref}:#{path}"
   end
 end
 
@@ -47,14 +60,35 @@ class Renderer
   end
 end
 
+class BlobStub
+  def is_a?(type)
+    type == Rugged::Blob
+  end
+end
+
+class TreeStub
+  def is_a?(type)
+    type == Rugged::Tree
+  end
+end
+
 class Actions
   attr_reader :repo, :ref, :path
+
+  def initialize(blob = BlobStub.new)
+    @blob = blob
+  end
 
   def blob(repo, ref, path)
     @repo = repo
     @ref = ref
     @path = path
-    yield nil, { :ref => ref, :repository => repo, :blob => "Blob" }
+
+    yield nil, {
+      :ref => ref,
+      :repository => repo,
+      :blob => @blob
+    }
   end
 end
 
@@ -76,6 +110,15 @@ describe Dolt::Sinatra::Actions do
 
       assert_equal "text/html", app.response["Content-Type"]
       assert_equal "Blob", app.body
+    end
+
+    it "redirects tree views to tree action" do
+      app = DummySinatraApp.new(Actions.new(TreeStub.new), Renderer.new("Blob"))
+      app.blob("gitorious", "master", "app/models")
+
+      assert_equal 302, app.response.status
+      assert_equal "/gitorious/tree/master:app/models", app.response["Location"]
+      assert_equal "", app.body
     end
   end
 end

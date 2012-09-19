@@ -21,7 +21,13 @@ module Dolt
   module View
     class Tree < Dolt::View::Base
       def tree_entries(tree)
-        tree.entries
+        sort(tree.entries.select { |e| e[:type] == :tree }) +
+          sort(tree.entries.select { |e| e[:type] == :blob })
+      end
+
+      private
+      def sort(entries)
+        entries.sort_by { |e| e[:name] }
       end
     end
   end

@@ -25,22 +25,15 @@ class Blob
 end
 
 describe "blob template" do
+  include Dolt::ViewTest
+
   before do
     @repo = "the-dolt"
     @template_root = File.join(File.dirname(__FILE__), "..", "..", "..", "views")
   end
 
   def render(path, blob, options = {})
-    options[:attributes] = options[:attributes] || {}
-    attrs = options[:attributes]
-    options.delete(:attributes)
-    renderer = Dolt::TemplateRenderer.new(@template_root, options)
-
-    renderer.helper([Dolt::View::MultiRepository,
-                     Dolt::View::Object,
-                     Dolt::View::Blob,
-                     Dolt::View::Breadcrumb])
-
+    renderer = prepare_renderer(@template_root, options)
     renderer.render(:blob, {
                       :blob => blob,
                       :repository => @repo,

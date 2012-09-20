@@ -15,31 +15,27 @@
 #   You should have received a copy of the GNU Affero General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #++
-require "bundler/setup"
-require "minitest/autorun"
-require "em/minitest/spec"
-require "eventmachine"
+require "test_helper"
+require "dolt/template_renderer"
 require "dolt/view"
 
-Bundler.require(:default, :test)
+class Blob
+  attr_reader :content
+  def initialize(content); @content = content; end
+end
 
-module Dolt
-  module Html
-    def select(html, tag_name)
-      html.scan(/<#{tag_name}[^>]*>.*?<\/#{tag_name}>/m)
-    end
+describe "raw template" do
+  include Dolt::ViewTest
+
+  before do
+    @repo = "the-dolt"
+    @template_root = File.join(File.dirname(__FILE__), "..", "..", "..", "views")
   end
 
-  module ViewTest
-    def prepare_renderer(root, options = {}, helpers = nil)
-      renderer = Dolt::TemplateRenderer.new(root, options)
-      renderer.helper(helpers || [Dolt::View::MultiRepository,
-                                  Dolt::View::Object,
-                                  Dolt::View::Blob,
-                                  Dolt::View::Tree,
-                                  Dolt::View::Blame,
-                                  Dolt::View::Breadcrumb])
-      renderer
-    end
+  it "renders raw contents" do
+    renderer = prepare_renderer(@template_root)
+    html = renderer.render(:raw, { :blob => Blob.new("Something something") })
+
+    assert_equal "Something something\n", html
   end
 end

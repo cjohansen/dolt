@@ -65,6 +65,25 @@ describe Dolt::TemplateRenderer do
     assert_equal "I give you: Template", renderer.render(:file)
   end
 
+  it "renders template once without layout" do
+    renderer = Dolt::TemplateRenderer.new("/", :layout => "layout")
+    File.stubs(:read).with("/file.erb").returns("Template")
+    File.stubs(:read).with("/layout.erb").returns("I give you: <%= yield %>")
+
+    assert_equal "Template", renderer.render(:file, {}, :layout => nil)
+  end
+
+  it "renders template once with different layout" do
+    renderer = Dolt::TemplateRenderer.new("/", :layout => "layout")
+    File.stubs(:read).with("/file.erb").returns("Template")
+    File.stubs(:read).with("/layout.erb").returns("I give you: <%= yield %>")
+    File.stubs(:read).with("/layout2.erb").returns("I present you: <%= yield %>")
+
+    html = renderer.render(:file, {}, :layout => "layout2")
+
+    assert_equal "I present you: Template", html
+  end
+
   it "renders templates of specific type" do
     renderer = Dolt::TemplateRenderer.new("/", :type => :str)
     File.stubs(:read).with("/file.str").returns("Hey!")

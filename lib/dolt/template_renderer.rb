@@ -32,12 +32,13 @@ module Dolt
       helper.each { |h| @context_class.send(:include, h) }
     end
 
-    def render(template, locals = {})
+    def render(template, locals = {}, options = {})
       context = context_class.new
       content = load(template).render(context, locals)
+      layout_tpl = options.key?(:layout) ? options[:layout] : layout
 
-      if !layout.nil?
-        content = load(layout).render(context, locals) { content }
+      if !layout_tpl.nil?
+        content = load(layout_tpl).render(context, locals) { content }
       end
 
       content

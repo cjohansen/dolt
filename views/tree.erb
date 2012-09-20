@@ -22,12 +22,12 @@
   <thead>
     <tr>
       <th colspan="<%= tree_table_padding_width("/#{path}") %>">File</th>
-      <th>Changed</th>
-      <th colspan="2">Last commit</th>
+      <th class="gts-col-changed">Changed</th>
+      <th class="gts-col-commit" colspan="2">Last commit</th>
     </tr>
   </thead>
   <tbody>
-    <%= tree_context(path) %>
+    <%= tree_context(repository, ref, path) %>
     <% tree_entries(tree).each do |object| %>
       <tr>
         <%= tree_table_padding_td(path) %>

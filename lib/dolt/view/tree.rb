@@ -24,23 +24,23 @@ module Dolt
           sort(tree.entries.select { |e| e[:type] == :blob })
       end
 
-      def tree_context(path)
-        acc_path = ""
+      def tree_context(repo, ref, path)
+        acc = ""
         pieces = path.sub(/^\.?\//, "").split("/")
         total = 5 + pieces.length
         colspan = total
         pieces.inject("") do |html, dir|
-          padding_td = tree_table_padding_td(acc_path.sub(/^\.?\//, ""))
-          acc_path << "/#{dir}"
+          padding_td = tree_table_padding_td(acc.sub(/^\.?\//, ""))
+          url = object_url(repo, ref, acc, { :type => :tree, :name => dir })
+          acc << "/#{dir}"
           colspan -= 1
           <<-HTML
             #{html}
             <tr>
               #{padding_td}
               <td colspan="#{colspan}">
-                <a href=\"#{acc_path}\">
-                  <i class="icon icon-folder-open"></i>
-                  #{dir}
+                <a href=\"#{url}\">
+                  <i class="icon icon-folder-open"></i> #{dir}
                 </a>
               </td>
             </tr>

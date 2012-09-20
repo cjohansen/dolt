@@ -16,11 +16,15 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #++
 require "test_helper"
+require "dolt/view/single_repository"
+require "dolt/view/object"
 require "dolt/view/tree"
 require "ostruct"
 
 describe Dolt::View::Tree do
   include Dolt::Html
+  include Dolt::View::SingleRepository
+  include Dolt::View::Object
   include Dolt::View::Tree
 
   describe "#tree_entries" do
@@ -69,38 +73,42 @@ describe Dolt::View::Tree do
   end
 
   describe "#tree_context" do
+    def context(path)
+      tree_context("gitorious", "master", path)
+    end
+
     it "renders root as empty string" do
-      assert_equal "", tree_context("")
-      assert_equal "", tree_context("/")
-      assert_equal "", tree_context("./")
+      assert_equal "", context("")
+      assert_equal "", context("/")
+      assert_equal "", context("./")
     end
 
     it "renders single path item as table row" do
-      assert_equal 1, select(tree_context("lib"), "tr").length
-      assert_equal 1, select(tree_context("./lib"), "tr").length
+      assert_equal 1, select(context("lib"), "tr").length
+      assert_equal 1, select(context("./lib"), "tr").length
     end
 
     it "renders single path item in cell" do
-      assert_equal 1, select(tree_context("lib"), "td").length
+      assert_equal 1, select(context("lib"), "td").length
     end
 
     it "renders single path item as link" do
-      assert_equal 1, select(tree_context("lib"), "a").length
-      assert_match /lib/, select(tree_context("lib"), "a").first
+      assert_equal 1, select(context("lib"), "a").length
+      assert_match /lib/, select(context("lib"), "a").first
     end
 
     it "renders single path item with open folder icon" do
-      assert_match /icon-folder-open/, select(tree_context("lib"), "i").first
+      assert_match /icon-folder-open/, select(context("lib"), "i").first
     end
 
     it "renders two path items as two table rows" do
-      assert_equal 2, select(tree_context("lib/dolt"), "tr").length
+      assert_equal 2, select(context("lib/dolt"), "tr").length
     end
 
     it "renders two path items with colspan in first row" do
-      assert_match /colspan="6"/, select(tree_context("lib/dolt"), "tr").first
-      assert_match /colspan="5"/, select(tree_context("lib/dolt"), "tr")[1]
-      tr = select(tree_context("lib/dolt"), "tr")[1]
+      assert_match /colspan="6"/, select(context("lib/dolt"), "tr").first
+      assert_match /colspan="5"/, select(context("lib/dolt"), "tr")[1]
+      tr = select(context("lib/dolt"), "tr")[1]
       assert_equal 2, select(tr, "td").length
     end
   end

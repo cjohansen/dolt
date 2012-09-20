@@ -29,7 +29,7 @@
   <%= breadcrumb(repository, ref, path) %>
   <table class="gts-code-listing">
     <% annotations = blame_annotations(blame) %>
-    <% lines = blame_lines(blame) %>
+    <% lines = blame_lines(path, blame) %>
     <% annotations.length.times do |i| %>
       <tr>
         <%= blame_annotation_cell(annotations[i]) %>

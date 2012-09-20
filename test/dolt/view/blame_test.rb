@@ -54,7 +54,25 @@ describe Dolt::View::Blame do
 
   describe "#blame_lines" do
     it "returns array of lines" do
-      assert_equal 5, blame_lines(@blame).length
+      assert_equal 5, blame_lines("file.rb", @blame).length
+    end
+
+    it "does not modify lines" do
+      assert_equal "1", blame_lines("file.rb", @blame).first
+    end
+  end
+
+  describe "#blame_lines with #highlight" do
+    def highlight(path, code)
+      "{" + code.split("\n").map { |l| "#{path}:#{l}" }.join("\n") + "}"
+    end
+
+    it "highlights code before splitting" do
+      lines = blame_lines("file.rb", @blame)
+
+      assert_equal "{file.rb:1", lines.first
+      assert_equal "file.rb:2", lines[1]
+      assert_equal "file.rb:5}", lines.last
     end
   end
 

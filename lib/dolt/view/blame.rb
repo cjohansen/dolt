@@ -27,10 +27,13 @@ module Dolt
         end
       end
 
-      def blame_lines(blame)
-        blame.chunks.inject([]) do |lines, chunk|
+      def blame_lines(path, blame)
+        lines = blame.chunks.inject([]) do |lines, chunk|
           lines.concat(chunk[:lines])
         end
+
+        return lines unless respond_to?(:highlight)
+        highlight(path, lines.join("\n")).split("\n")
       end
 
       def blame_annotation_cell(annotation)

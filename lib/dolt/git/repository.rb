@@ -15,25 +15,34 @@
 #   You should have received a copy of the GNU Affero General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #++
-require "dolt/git/repository"
+require "em_rugged/repository"
+require "em_pessimistic/deferrable_child_process"
+require "em/deferrable"
+require "dolt/git/blame"
 
 module Dolt
-  class DiskRepoResolver
-    def initialize(root)
-      @root = root
-    end
+  module Git
+    class Repository < EMRugged::Repository
+      def blame(ref, path)
+        d = EventMachine::DefaultDeferrable.new
+        cmd = git("blame -l -t -p #{ref} #{path}")
+        p = EMPessimistic::DeferrableChildProcess.open(cmd)
 
-    def resolve(repo)
-      Dolt::Git::Repository.new(File.join(root, repo))
-    end
+        p.callback do |output, status|
+          d.succeed(Dolt::Git::Blame.parse_porcelain(output))
+        end
 
-    def all
-      Dir.entries(root).reject do |e|
-        e =~ /^\.+$/ || File.file?(File.join(root, e))
+        p.errback do |err|
+          d.fail(err)
+        end
+
+        d
+      end
+
+      private
+      def git(cmd)
+        "git --git-dir #{subject.path} #{cmd}"
       end
     end
-
-    private
-    def root; @root; end
   end
 end

@@ -91,6 +91,10 @@ class Actions
     respond(:raw, repo, ref, path, &block)
   end
 
+  def blame(repo, ref, path, &block)
+    respond(:blame, repo, ref, path, &block)
+  end
+
   def respond(type, repo, ref, path, &block)
     @repo = repo
     @ref = ref
@@ -188,6 +192,26 @@ describe Dolt::Sinatra::Actions do
       assert_equal 302, app.response.status
       assert_equal "/gitorious/tree/master:app/models", location
       assert_equal "", app.body
+    end
+  end
+
+  describe "#blame" do
+    it "delegates to actions" do
+      actions = Actions.new(BlobStub.new)
+      app = DummySinatraApp.new(actions, Renderer.new)
+      app.blame("gitorious", "master", "app/models/repository.rb")
+
+      assert_equal "gitorious", actions.repo
+      assert_equal "master", actions.ref
+      assert_equal "app/models/repository.rb", actions.path
+    end
+
+    it "renders the blame template as text" do
+      app = DummySinatraApp.new(Actions.new(BlobStub.new), Renderer.new("Text"))
+      app.blame("gitorious", "master", "app/models/repository.rb")
+
+      assert_equal "text/html", app.response["Content-Type"]
+      assert_equal "blame:Text", app.body
     end
   end
 end

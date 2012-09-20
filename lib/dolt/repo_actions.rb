@@ -41,6 +41,15 @@ module Dolt
       d.errback { |err| block.call(err, nil) }
     end
 
+    def blame(repo, ref, path, &block)
+      repository = repo_resolver.resolve(repo)
+      d = repository.blame(ref, path)
+      d.callback do |blame|
+        block.call(nil, tpl_data(repo, ref, path, { :blame => blame }))
+      end
+      d.errback { |err| block.call(err, nil) }
+    end
+
     private
     def repo_resolver; @repo_resolver; end
 

@@ -28,6 +28,11 @@ class Repository
     @deferred.promise
   end
 
+  def blame(ref, path)
+    @deferred = When::Deferred.new
+    @deferred.promise
+  end
+
   def resolve_promise(blob)
     @deferred.resolve(blob)
   end
@@ -92,6 +97,32 @@ describe Dolt::RepoActions do
 
       expected = {
         :tree => "Tree",
+        :repository => "gitorious",
+        :ref =>  "babd120",
+        :path => "app"
+      }
+      assert_equal expected, data
+    end
+  end
+
+  describe "#blame" do
+    it "resolves repository" do
+      @actions.blame("gitorious", "master", "app")
+
+      assert_equal ["gitorious"], @resolver.resolved.map(&:name)
+    end
+
+    it "yields blame, repo and ref to block" do
+      data = nil
+      @actions.blame("gitorious", "babd120", "app") do |status, d|
+        data = d
+      end
+
+      repo = @resolver.resolved.last
+      repo.resolve_promise "Blame"
+
+      expected = {
+        :blame => "Blame",
         :repository => "gitorious",
         :ref =>  "babd120",
         :path => "app"

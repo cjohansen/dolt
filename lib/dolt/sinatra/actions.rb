@@ -61,6 +61,14 @@ module Dolt
           body(renderer.render(:tree, data))
         end
       end
+
+      def blame(repo, ref, path)
+        actions.blame(repo, ref, path) do |err, data|
+          return error(err) if !err.nil?
+          response["Content-Type"] = "text/html"
+          body(renderer.render(:blame, data))
+        end
+      end
     end
   end
 end

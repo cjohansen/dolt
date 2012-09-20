@@ -64,6 +64,15 @@ module Dolt
         force_ref(params[:splat], "raw", "master")
       end
 
+      aget "/blame/*:*" do
+        ref, path = params[:splat]
+        blame(repo, ref, path)
+      end
+
+      aget "/blame/*" do
+        force_ref(params[:splat], "blame", "master")
+      end
+
       private
       def force_ref(args, action, ref)
         redirect("/#{action}/#{ref}:" + args.join)

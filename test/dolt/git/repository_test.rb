@@ -15,25 +15,26 @@
 #   You should have received a copy of the GNU Affero General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #++
+require "test_helper"
 require "dolt/git/repository"
 
-module Dolt
-  class DiskRepoResolver
-    def initialize(root)
-      @root = root
+describe Dolt::Git::Repository do
+  include EM::MiniTest::Spec
+
+  describe "#blame" do
+    before { @repository = Dolt::Git::Repository.new(".") }
+    it "returns deferrable" do
+      deferrable = @repository.blame("master", "Gemfile")
+      assert deferrable.respond_to?(:callback)
+      assert deferrable.respond_to?(:errback)
     end
 
-    def resolve(repo)
-      Dolt::Git::Repository.new(File.join(root, repo))
-    end
-
-    def all
-      Dir.entries(root).reject do |e|
-        e =~ /^\.+$/ || File.file?(File.join(root, e))
+    it "yields blame" do
+      @repository.blame("master", "Gemfile").callback do |blame|
+        assert Dolt::Git::Blame === blame
+        done!
       end
+      wait!
     end
-
-    private
-    def root; @root; end
   end
 end

@@ -33,13 +33,22 @@ module Dolt
         body("Process failed with exit code #{error.exit_code}:\n#{error.message}")
       end
 
-      def blob(repo, ref, path)
+      def raw(repo, ref, path)
+        blob(repo, ref, path, {
+               :template => :raw,
+               :content_type => "text/plain",
+               :template_options => { :layout => nil }
+             })
+      end
+
+      def blob(repo, ref, path, options = { :template => :blob, :content_type => "text/html" })
         actions.blob(repo, ref, path) do |err, data|
           return error(err) if !err.nil?
           blob = data[:blob]
           return redirect(tree_url(repo, ref, path)) if !blob.is_a?(Rugged::Blob)
-          response["Content-Type"] = "text/html"
-          body(renderer.render(:blob, data))
+          response["Content-Type"] = options[:content_type]
+          tpl_options = options[:template_options] || {}
+          body(renderer.render(options[:template], data, tpl_options))
         end
       end
 

@@ -26,7 +26,7 @@ module Dolt
     def blob(repo, ref, path, &block)
       repository = repo_resolver.resolve(repo)
       d = repository.rev_parse("#{ref}:#{path}")
-      d.callback do |blob, status|
+      d.callback do |blob|
         block.call(nil, tpl_data(repo, ref, path, { :blob => blob }))
       end
       d.errback { |err| block.call(err, nil) }
@@ -35,7 +35,7 @@ module Dolt
     def tree(repo, ref, path, &block)
       repository = repo_resolver.resolve(repo)
       d = repository.rev_parse("#{ref}:#{path}")
-      d.callback do |tree, status|
+      d.callback do |tree|
         block.call(nil, tpl_data(repo, ref, path, { :tree => tree }))
       end
       d.errback { |err| block.call(err, nil) }

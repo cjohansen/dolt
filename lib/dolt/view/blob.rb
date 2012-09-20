@@ -49,23 +49,6 @@ module Dolt
         "<pre class=\"#{class_names.join(' ')}\">" +
           "<ol class=\"linenums\">#{lines}</ol></pre>"
       end
-
-      def highlight(path, code, options = {})
-        lexer = lexer_for_file(path)
-        Dolt::View::Highlighter.new(options).highlight(code, lexer)
-      rescue RubyPython::PythonError
-        code
-      end
-
-      def highlight_lines(path, code, options = {})
-        lexer = lexer_for_file(path)
-        multiline(highlight(path, code, options), :class_names => [lexer])
-      end
-
-      def lexer_for_file(path)
-        suffix = path.split(".").pop
-        Dolt::View::Highlighter.lexer(suffix)
-      end
     end
   end
 end

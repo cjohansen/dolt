@@ -80,49 +80,4 @@ describe Dolt::View::Blob do
       assert_match "ruby", html
     end
   end
-
-  describe "#highlight" do
-    it "highlights a Ruby file" do
-      html = highlight("file.rb", "class File\n  attr_reader :path\nend")
-
-      assert_match "<span class=\"k\">class</span>", html
-      assert_match "<span class=\"nc\">File</span>", html
-    end
-
-    it "highlights a YAML file" do
-      html = highlight("file.yml", "something:\n  is: true")
-
-      assert_match "<span class=\"l-Scalar-Plain\">something</span>", html
-      assert_match "<span class=\"p-Indicator\">:", html
-    end
-
-    it "highlights file with custom suffix" do
-      Dolt::View::Highlighter.add_lexer_alias("derp", "rb")
-      html = highlight("file.derp", "class File")
-
-      assert_match "<span class=\"k\">class</span>", html
-      assert_match "<span class=\"nc\">File</span>", html
-    end
-
-    it "skips highlighting if lexer is missing" do
-      html = highlight("file.txt", "Yeah yeah yeah")
-
-      assert_equal "Yeah yeah yeah", html
-    end
-  end
-
-  describe "#highlight_lines" do
-    it "highlights a Ruby file with line nums" do
-      html = highlight_lines("file.rb", "class File\n  attr_reader :path\nend")
-
-      assert_match "<li class=\"L1\">", html
-      assert_match "<span class=\"k\">class</span>", html
-    end
-
-    it "includes lexer as class name" do
-      html = highlight_lines("file.rb", "class File\n  attr_reader :path\nend")
-
-      assert_match "rb", html
-    end
-  end
 end

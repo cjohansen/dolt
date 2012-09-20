@@ -53,6 +53,7 @@ view.helper(Dolt::View::Blob)
 view.helper(Dolt::View::Blame)
 view.helper(Dolt::View::Breadcrumb)
 view.helper(Dolt::View::Tree)
+view.helper(Dolt::View::SyntaxHighlight)
 
 Sinatra::Base.set(:public_folder, File.join(base, "vendor/ui"))
 server = create_app(ARGV[0], view)

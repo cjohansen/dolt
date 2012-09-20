@@ -38,6 +38,7 @@ module Dolt
                                   Dolt::View::Blob,
                                   Dolt::View::Tree,
                                   Dolt::View::Blame,
+                                  Dolt::View::SyntaxHighlight,
                                   Dolt::View::Breadcrumb])
       renderer
     end

@@ -37,5 +37,5 @@
     <li><a href="<%= raw_url(repository, ref, path) %>">Raw blob</a></li>
   </ul>
   <%= breadcrumb(repository, ref, path) %>
-  <%= highlight_lines(path, blob.content) %>
+  <%= format_blob(path, blob.content) %>
 </div>

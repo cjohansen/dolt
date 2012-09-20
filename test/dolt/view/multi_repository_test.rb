@@ -15,29 +15,21 @@
 #   You should have received a copy of the GNU Affero General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #++
-module Dolt
-  class Merger
-    def initialize(objects)
-      @objects = objects
+require "test_helper"
+require "dolt/view/multi_repository"
+
+describe Dolt::View::MultiRepository do
+  include Dolt::Html
+  include Dolt::View::MultiRepository
+
+  describe "#repo_url" do
+    it "returns url prefixed with repository" do
+      assert_equal "/gitorious/some/url", repo_url("gitorious", "/some/url")
     end
 
-    def <<(object)
-      @objects << object
-    end
-
-    def method_missing(method, *args, &block)
-      object = provider(method)
-      return super if object.nil?
-      object.send(method, *args, &block)
-    end
-
-    def respond_to?(method)
-      !provider(method).nil?
-    end
-
-    private
-    def provider(method)
-      @objects.find { |h| h.respond_to?(method) }
+    it "returns url prefixed with repository name containing slashes" do
+      url = repo_url("gitorious/mainline", "/some/url")
+      assert_equal "/gitorious/mainline/some/url", url
     end
   end
 end

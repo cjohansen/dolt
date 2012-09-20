@@ -16,52 +16,56 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #++
 require "test_helper"
+require "dolt/view/single_repository"
+require "dolt/view/multi_repository"
 require "dolt/view/object"
 
 describe Dolt::View::Object do
-  before { @view = Dolt::View::Object.new(:multi_repo_mode => false) }
+  include Dolt::View::Object
 
   describe "single repo mode" do
+    include Dolt::View::SingleRepository
+
     it "returns blob url" do
       object = { :type => "blob", :name => "Gemfile" }
-      url = @view.object_url("myrepo", "master", "", object)
+      url = object_url("myrepo", "master", "", object)
       assert_equal "/blob/master:Gemfile", url
     end
 
     it "returns tree url" do
       object = { :type => "tree", :name => "models" }
-      url = @view.object_url("myrepo", "master", "app", object)
+      url = object_url("myrepo", "master", "app", object)
       assert_equal "/tree/master:app/models", url
     end
 
     it "returns blob url in directory" do
       object = { :type => "blob", :name => "Gemfile" }
-      url = @view.object_url("myrepo", "master", "lib/mything", object)
+      url = object_url("myrepo", "master", "lib/mything", object)
       assert_equal "/blob/master:lib/mything/Gemfile", url
     end
   end
 
   describe "multi repo mode" do
-    before { @view = Dolt::View::Object.new(:multi_repo_mode => true) }
+    include Dolt::View::MultiRepository
 
     it "returns blob url" do
       object = { :type => "blob", :name => "Gemfile" }
-      url = @view.object_url("myrepo", "master", "", object)
+      url = object_url("myrepo", "master", "", object)
       assert_equal "/myrepo/blob/master:Gemfile", url
     end
 
     it "returns blob url in directory" do
       object = { :type => "blob", :name => "Gemfile" }
-      url = @view.object_url("myrepo", "master", "lib/mything", object)
+      url = object_url("myrepo", "master", "lib/mything", object)
       assert_equal "/myrepo/blob/master:lib/mything/Gemfile", url
     end
   end
 
   it "returns blob icon type" do
-    assert_equal "icon-file", @view.object_icon_class({ :type => :blob })
+    assert_equal "icon-file", object_icon_class({ :type => :blob })
   end
 
   it "returns tree icon type" do
-    assert_equal "icon-folder-close", @view.object_icon_class({ :type => :tree })
+    assert_equal "icon-folder-close", object_icon_class({ :type => :tree })
   end
 end

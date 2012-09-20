@@ -16,17 +16,15 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #++
 require "test_helper"
-require "dolt/view"
-require "dolt/merger"
+require "dolt/view/single_repository"
 
-describe Dolt::View do
-  describe "#load_all" do
-    it "loads all helpers" do
-      helpers = Dolt::Merger.new(Dolt::View.load_all)
+describe Dolt::View::SingleRepository do
+  include Dolt::Html
+  include Dolt::View::SingleRepository
 
-      assert helpers.respond_to?(:object_url)
-      assert helpers.respond_to?(:blame_url)
-      assert helpers.respond_to?(:breadcrumb)
+  describe "#repo_url" do
+    it "returns url unmodified" do
+      assert_equal "/some/url", repo_url("gitorious", "/some/url")
     end
   end
 end

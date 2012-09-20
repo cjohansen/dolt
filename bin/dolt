@@ -42,7 +42,16 @@ view = Dolt::TemplateRenderer.new(template_root, {
   :layout => "layout"
 })
 
-view.helper(Dolt::View.load_all({ :multi_repo_mode => !is_git_repo?(ARGV[0]) }))
+if is_git_repo?(ARGV[0])
+  view.helper(Dolt::View::SingleRepository)
+else
+  view.helper(Dolt::View::MultipleRepository)
+end
+
+view.helper(Dolt::View::Object)
+view.helper(Dolt::View::Blob)
+view.helper(Dolt::View::Breadcrumb)
+view.helper(Dolt::View::Tree)
 
 Sinatra::Base.set(:public_folder, File.join(base, "vendor/ui"))
 server = create_app(ARGV[0], view)

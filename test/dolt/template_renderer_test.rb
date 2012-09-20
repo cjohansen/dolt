@@ -19,10 +19,8 @@ require "test_helper"
 require "mocha"
 require "dolt/template_renderer"
 
-class ViewHelper
-  attr_accessor :response
-  def initialize; @response = "YES"; end
-  def say_it; response; end
+module ViewHelper
+  def say_it; "YES"; end
 end
 
 describe Dolt::TemplateRenderer do
@@ -76,7 +74,7 @@ describe Dolt::TemplateRenderer do
 
   it "renders with helper object" do
     renderer = Dolt::TemplateRenderer.new("/")
-    renderer.helper(ViewHelper.new)
+    renderer.helper(ViewHelper)
     File.stubs(:read).with("/file.erb").returns("Say it: <%= say_it %>")
 
     assert_equal "Say it: YES", renderer.render(:file)
@@ -84,7 +82,6 @@ describe Dolt::TemplateRenderer do
 
   it "does not leak state across render calls" do
     renderer = Dolt::TemplateRenderer.new("/")
-    renderer.helper(ViewHelper.new)
     File.stubs(:read).with("/file.erb").returns(<<-TEMPLATE)
 <%= @response %><% @response = "NO" %><%= @response %>
     TEMPLATE
@@ -95,11 +92,10 @@ describe Dolt::TemplateRenderer do
 
   it "shares state between template and layout" do
     renderer = Dolt::TemplateRenderer.new("/", :layout => "layout")
-    renderer.helper(ViewHelper.new)
     File.stubs(:read).with("/file.erb").returns(<<-TEMPLATE)
-<% self.response = "NO" %><h1><%= response %></h1>
+<% @response = "NO" %><h1><%= @response %></h1>
     TEMPLATE
-    tpl = "<title><%= response %></title><%= yield %>"
+    tpl = "<title><%= @response %></title><%= yield %>"
     File.stubs(:read).with("/layout.erb").returns(tpl)
 
     assert_equal "<title>NO</title><h1>NO</h1>\n", renderer.render(:file)

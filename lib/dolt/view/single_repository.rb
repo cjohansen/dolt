@@ -18,18 +18,9 @@
 
 module Dolt
   module View
-    module Object
-      def object_url(repository, ref, path, object)
-        url = "/#{object[:type]}/#{ref}:#{object_path(path, object)}"
-        repo_url(repository, url)
-      end
-
-      def object_path(root, object)
-        File.join(root, object[:name]).sub(/^\//, "")
-      end
-
-      def object_icon_class(entry)
-        entry[:type] == :blob ? "icon-file" : "icon-folder-close"
+    module SingleRepository
+      def repo_url(repository, url)
+        url
       end
     end
   end

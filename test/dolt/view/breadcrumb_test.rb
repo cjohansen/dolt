@@ -20,23 +20,24 @@ require "dolt/view/breadcrumb"
 
 describe Dolt::View::Breadcrumb do
   include Dolt::Html
-  before { @view = Dolt::View::Breadcrumb.new }
+  include Dolt::View::SingleRepository
+  include Dolt::View::Breadcrumb
 
   it "renders li element for root" do
-    html = @view.breadcrumb("myrepo", "master", "path.txt")
+    html = breadcrumb("myrepo", "master", "path.txt")
 
     assert_equal 1, select(html, "a").length
     assert_match /icon-file/, select(html, "li").first
   end
 
   it "renders li element for file" do
-    html = @view.breadcrumb("myrepo", "master", "path.txt")
+    html = breadcrumb("myrepo", "master", "path.txt")
 
     assert_match /path.txt/, select(html, "li").last
   end
 
   it "renders links to accumulated paths" do
-    html = @view.breadcrumb("myrepo", "master", "some/nested/path.txt")
+    html = breadcrumb("myrepo", "master", "some/nested/path.txt")
 
     links = select(html, "a")
     assert_match /\"\/tree\/master:some"/, links[1]

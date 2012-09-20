@@ -20,7 +20,8 @@ require "dolt/view/tree"
 require "ostruct"
 
 describe Dolt::View::Tree do
-  before { @view = Dolt::View::Tree.new }
+  include Dolt::Html
+  include Dolt::View::Tree
 
   describe "#tree_entries" do
     before do
@@ -39,7 +40,7 @@ describe Dolt::View::Tree do
     end
 
     it "groups tree by type, dirs first" do
-      entries = @view.tree_entries(@tree)
+      entries = tree_entries(@tree)
 
       assert_equal :tree, entries[0][:type]
       assert_equal :tree, entries[1][:type]
@@ -53,7 +54,7 @@ describe Dolt::View::Tree do
     end
 
     it "sorts by name" do
-      entries = @view.tree_entries(@tree)
+      entries = tree_entries(@tree)
 
       assert_equal "async", entries[0][:name]
       assert_equal "git", entries[1][:name]
@@ -64,6 +65,43 @@ describe Dolt::View::Tree do
       assert_equal "template_renderer.rb", entries[6][:name]
       assert_equal "version.rb", entries[7][:name]
       assert_equal "view.rb", entries[8][:name]
+    end
+  end
+
+  describe "#tree_context" do
+    it "renders root as empty string" do
+      assert_equal "", tree_context("")
+      assert_equal "", tree_context("/")
+      assert_equal "", tree_context("./")
+    end
+
+    it "renders single path item as table row" do
+      assert_equal 1, select(tree_context("lib"), "tr").length
+      assert_equal 1, select(tree_context("./lib"), "tr").length
+    end
+
+    it "renders single path item in cell" do
+      assert_equal 1, select(tree_context("lib"), "td").length
+    end
+
+    it "renders single path item as link" do
+      assert_equal 1, select(tree_context("lib"), "a").length
+      assert_match /lib/, select(tree_context("lib"), "a").first
+    end
+
+    it "renders single path item with open folder icon" do
+      assert_match /icon-folder-open/, select(tree_context("lib"), "i").first
+    end
+
+    it "renders two path items as two table rows" do
+      assert_equal 2, select(tree_context("lib/dolt"), "tr").length
+    end
+
+    it "renders two path items with colspan in first row" do
+      assert_match /colspan="6"/, select(tree_context("lib/dolt"), "tr").first
+      assert_match /colspan="5"/, select(tree_context("lib/dolt"), "tr")[1]
+      tr = select(tree_context("lib/dolt"), "tr")[1]
+      assert_equal 2, select(tr, "td").length
     end
   end
 end

@@ -35,8 +35,12 @@ describe "blob template" do
     attrs = options[:attributes]
     options.delete(:attributes)
     renderer = Dolt::TemplateRenderer.new(@template_root, options)
-    if !attrs.key?(:multi_repo_mode); attrs[:multi_repo_mode] = true; end
-    renderer.helper(Dolt::View.load_all(attrs))
+
+    renderer.helper([Dolt::View::MultiRepository,
+                     Dolt::View::Object,
+                     Dolt::View::Blob,
+                     Dolt::View::Breadcrumb])
+
     renderer.render(:blob, {
                       :blob => blob,
                       :repository => @repo,
@@ -78,14 +82,6 @@ describe "blob template" do
     assert_match "/the-dolt/blame/master:file.txt", markup
     assert_match "/the-dolt/history/master:file.txt", markup
     assert_match "/the-dolt/raw/master:file.txt", markup
-  end
-
-  it "renders links to other views in single repo mode" do
-    markup = render("file.txt", Blob.new("Something something"), { :attributes => { :multi_repo_mode => false } })
-
-    assert_match "\"/blame/master:file.txt", markup
-    assert_match "\"/history/master:file.txt", markup
-    assert_match "\"/raw/master:file.txt", markup
   end
 
   it "renders links to other views for correct ref" do

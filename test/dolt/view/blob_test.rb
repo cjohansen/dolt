@@ -16,52 +16,54 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #++
 require "test_helper"
+require "dolt/view/single_repository"
+require "dolt/view/multi_repository"
 require "dolt/view/blob"
 
 describe Dolt::View::Blob do
-  before { @view = Dolt::View::Blob.new }
+  include Dolt::View::Blob
 
   describe "single repo mode" do
-    before { @view = Dolt::View::Blob.new(:multi_repo_mode => false) }
+    include Dolt::View::SingleRepository
 
     it "returns blame url" do
-      url = @view.blame_url("myrepo", "master", "some/path")
+      url = blame_url("myrepo", "master", "some/path")
       assert_equal "/blame/master:some/path", url
     end
 
     it "returns history url" do
-      url = @view.history_url("myrepo", "master", "some/path")
+      url = history_url("myrepo", "master", "some/path")
       assert_equal "/history/master:some/path", url
     end
 
     it "returns raw url" do
-      url = @view.raw_url("myrepo", "master", "some/path")
+      url = raw_url("myrepo", "master", "some/path")
       assert_equal "/raw/master:some/path", url
     end
   end
 
   describe "multi repo mode" do
-    before { @view = Dolt::View::Blob.new(:multi_repo_mode => true) }
+    include Dolt::View::MultiRepository
 
     it "returns blame url" do
-      url = @view.blame_url("myrepo", "master", "some/path")
+      url = blame_url("myrepo", "master", "some/path")
       assert_equal "/myrepo/blame/master:some/path", url
     end
 
     it "returns history url" do
-      url = @view.history_url("myrepo", "master", "some/path")
+      url = history_url("myrepo", "master", "some/path")
       assert_equal "/myrepo/history/master:some/path", url
     end
 
     it "returns raw url" do
-      url = @view.raw_url("myrepo", "master", "some/path")
+      url = raw_url("myrepo", "master", "some/path")
       assert_equal "/myrepo/raw/master:some/path", url
     end
   end
 
   describe "#multiline" do
     it "adds line number markup to code" do
-      html = @view.multiline("A few\nLines\n    Here")
+      html = multiline("A few\nLines\n    Here")
 
       assert_match "<pre", html
       assert_match "<ol class=\"linenums", html
@@ -71,7 +73,7 @@ describe Dolt::View::Blob do
     end
 
     it "adds custom class name" do
-      html = @view.multiline("A few\nLines\n    Here", :class_names => ["ruby"])
+      html = multiline("A few\nLines\n    Here", :class_names => ["ruby"])
 
       assert_match "prettyprint", html
       assert_match "linenums", html
@@ -81,14 +83,14 @@ describe Dolt::View::Blob do
 
   describe "#highlight" do
     it "highlights a Ruby file" do
-      html = @view.highlight("file.rb", "class File\n  attr_reader :path\nend")
+      html = highlight("file.rb", "class File\n  attr_reader :path\nend")
 
       assert_match "<span class=\"k\">class</span>", html
       assert_match "<span class=\"nc\">File</span>", html
     end
 
     it "highlights a YAML file" do
-      html = @view.highlight("file.yml", "something:\n  is: true")
+      html = highlight("file.yml", "something:\n  is: true")
 
       assert_match "<span class=\"l-Scalar-Plain\">something</span>", html
       assert_match "<span class=\"p-Indicator\">:", html
@@ -96,14 +98,14 @@ describe Dolt::View::Blob do
 
     it "highlights file with custom suffix" do
       Dolt::View::Highlighter.add_lexer_alias("derp", "rb")
-      html = @view.highlight("file.derp", "class File")
+      html = highlight("file.derp", "class File")
 
       assert_match "<span class=\"k\">class</span>", html
       assert_match "<span class=\"nc\">File</span>", html
     end
 
     it "skips highlighting if lexer is missing" do
-      html = @view.highlight("file.txt", "Yeah yeah yeah")
+      html = highlight("file.txt", "Yeah yeah yeah")
 
       assert_equal "Yeah yeah yeah", html
     end
@@ -111,14 +113,14 @@ describe Dolt::View::Blob do
 
   describe "#highlight_lines" do
     it "highlights a Ruby file with line nums" do
-      html = @view.highlight_lines("file.rb", "class File\n  attr_reader :path\nend")
+      html = highlight_lines("file.rb", "class File\n  attr_reader :path\nend")
 
       assert_match "<li class=\"L1\">", html
       assert_match "<span class=\"k\">class</span>", html
     end
 
     it "includes lexer as class name" do
-      html = @view.highlight_lines("file.rb", "class File\n  attr_reader :path\nend")
+      html = highlight_lines("file.rb", "class File\n  attr_reader :path\nend")
 
       assert_match "rb", html
     end

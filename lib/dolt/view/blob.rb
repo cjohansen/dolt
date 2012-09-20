@@ -20,7 +20,7 @@ require "dolt/view/highlighter"
 
 module Dolt
   module View
-    class Blob < Dolt::View::Base
+    module Blob
       def blame_url(repository, ref, path)
         repo_url(repository, "/blame/#{ref}:#{path}")
       end

@@ -16,20 +16,8 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #++
 
-module Dolt
-  module View
-    def self.load_all(options = {})
-      dir = File.join(File.dirname(__FILE__), "view")
+dir = File.join(File.dirname(__FILE__), "view")
 
-      Dir.entries(dir).select { |f| f =~ /\.rb$/ }.map do |file|
-        require(File.join(dir, file))
-        Dolt::View.const_get(classify(file)).new(options)
-      end
-    end
-
-    private
-    def self.classify(file)
-      file.sub(/\.rb$/, "").split("_").map { |p| p.capitalize }.join
-    end
-  end
+Dir.entries(dir).select { |f| f =~ /\.rb$/ }.map do |file|
+  require(File.join(dir, file))
 end

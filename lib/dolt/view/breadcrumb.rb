@@ -15,11 +15,10 @@
 #   You should have received a copy of the GNU Affero General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #++
-require "dolt/view/base"
 
 module Dolt
   module View
-    class Breadcrumb < Dolt::View::Base
+    module Breadcrumb
       def breadcrumb(repository, ref, path)
         dirs = path.split("/")
         filename = dirs.pop

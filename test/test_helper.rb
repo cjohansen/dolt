@@ -25,7 +25,7 @@ Bundler.require(:default, :test)
 module Dolt
   module Html
     def select(html, tag_name)
-      html.scan(/<#{tag_name}[^>]*>.*?<\/#{tag_name}>/)
+      html.scan(/<#{tag_name}[^>]*>.*?<\/#{tag_name}>/m)
     end
   end
 end

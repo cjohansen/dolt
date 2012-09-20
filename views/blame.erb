@@ -18,18 +18,24 @@
 #++
 %>
 <% @title = "Blame #{path} in #{repository}:master" %>
+
 <div class="gts-file">
   <ul class="pull-right gts-blob-view">
-    <li><a href="<%= blob_url(repository, ref, path) %>">Blob content</li>
+    <li><a href="<%= blob_url(repository, ref, path) %>">Blob content</a></li>
     <li class="active">Blame</li>
     <li><a href="<%= history_url(repository, ref, path) %>">History</a></li>
     <li><a href="<%= raw_url(repository, ref, path) %>">Raw blob</a></li>
   </ul>
-  <pre>
-  <% blame.chunks.each do |chunk| %>
-    <% chunk[:lines].each do |line| %>
-      <%= line %>
+  <%= breadcrumb(repository, ref, path) %>
+  <table class="gts-code-listing">
+    <% annotations = blame_annotations(blame) %>
+    <% lines = blame_lines(blame) %>
+    <% annotations.length.times do |i| %>
+      <tr>
+        <%= blame_annotation_cell(annotations[i]) %>
+        <td class="linenum L<%= i + 1 %>"><%= i + 1 %></td>
+        <%= blame_code_cell(lines[i]) %>
+      </tr>
     <% end %>
-  <% end %>
-  </pre>
+  </table>
 </div>

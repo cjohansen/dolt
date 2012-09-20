@@ -33,6 +33,7 @@ module Dolt
       class PorcelainParser
         def initialize(output)
           @output = output
+          @commits = {}
         end
 
         def parse
@@ -68,6 +69,11 @@ module Dolt
             header[:committer] = extract_hash(lines, :committer)
             header[:summary] = extract(lines, "summary")
             throwaway = lines.shift until throwaway =~ /^filename/
+            @commits[header[:oid]] = header
+          else
+            header[:author] = @commits[header[:oid]][:author]
+            header[:committer] = @commits[header[:oid]][:committer]
+            header[:summary] = @commits[header[:oid]][:summary]
           end
 
           header

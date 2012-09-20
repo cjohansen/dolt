@@ -50,6 +50,7 @@ end
 
 view.helper(Dolt::View::Object)
 view.helper(Dolt::View::Blob)
+view.helper(Dolt::View::Blame)
 view.helper(Dolt::View::Breadcrumb)
 view.helper(Dolt::View::Tree)
 

@@ -120,5 +120,9 @@ beb65bee5619c651532179b19421363ead2c2a44 22 22
       assert_equal 18, chunk[:lines].length
       assert_equal "#   Copyright (C) 2012 Gitorious AS", chunk[:lines][2]
     end
+
+    it "repeats commit meta" do
+      assert_equal @blame.chunks[2][:committer], @blame.chunks[0][:committer]
+    end
   end
 end

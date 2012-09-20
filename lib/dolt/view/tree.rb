@@ -19,6 +19,10 @@
 module Dolt
   module View
     module Tree
+      def tree_url(repository, ref, path)
+        repo_url(repository, "/tree/#{ref}:#{path}")
+      end
+
       def tree_entries(tree)
         sort(tree.entries.select { |e| e[:type] == :tree }) +
           sort(tree.entries.select { |e| e[:type] == :blob })

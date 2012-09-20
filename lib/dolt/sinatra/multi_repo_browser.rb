@@ -16,17 +16,16 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #++
 require "dolt/sinatra/base"
+require "dolt/view/single_repository"
+require "dolt/view/blob"
+require "dolt/view/tree"
 
 module Dolt
   module Sinatra
     class MultiRepoBrowser < Dolt::Sinatra::Base
-      def blob_url(repo, ref, path)
-        "/#{repo}/blob/#{ref}:#{path}"
-      end
-
-      def tree_url(repo, ref, path)
-        "/#{repo}/tree/#{ref}:#{path}"
-      end
+      include Dolt::View::SingleRepository
+      include Dolt::View::Blob
+      include Dolt::View::Tree
 
       aget "/" do
         response["Content-Type"] = "text/html"

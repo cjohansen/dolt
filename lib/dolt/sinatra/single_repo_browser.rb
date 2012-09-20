@@ -16,23 +16,21 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #++
 require "dolt/sinatra/base"
+require "dolt/view/single_repository"
+require "dolt/view/blob"
+require "dolt/view/tree"
 
 module Dolt
   module Sinatra
     class SingleRepoBrowser < Dolt::Sinatra::Base
+      include Dolt::View::SingleRepository
+      include Dolt::View::Blob
+      include Dolt::View::Tree
       attr_reader :repo
 
       def initialize(repo, actions, renderer)
         @repo = repo
         super(actions, renderer)
-      end
-
-      def blob_url(repo, ref, path)
-        "/blob/#{ref}:#{path}"
-      end
-
-      def tree_url(repo, ref, path)
-        "/tree/#{ref}:#{path}"
       end
 
       aget "/" do

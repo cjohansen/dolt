@@ -53,7 +53,7 @@ end
 class Renderer
   def initialize(body = ""); @body = body; end
 
-  def render(action, data)
+  def render(action, data, options = {})
     @action = action
     @data = data
     @body
@@ -75,27 +75,32 @@ end
 class Actions
   attr_reader :repo, :ref, :path
 
-  def initialize(blob = BlobStub.new)
-    @blob = blob
+  def initialize(response)
+    @response = response
   end
 
-  def blob(repo, ref, path)
+  def blob(repo, ref, path, &block)
+    respond(:blob, repo, ref, path, &block)
+  end
+
+  def tree(repo, ref, path, &block)
+    respond(:tree, repo, ref, path, &block)
+  end
+
+  def respond(type, repo, ref, path, &block)
     @repo = repo
     @ref = ref
     @path = path
-
-    yield nil, {
-      :ref => ref,
-      :repository => repo,
-      :blob => @blob
-    }
+    data = { :ref => ref, :repository => repo }
+    data[type] = @response
+    block.call(nil, data)
   end
 end
 
 describe Dolt::Sinatra::Actions do
   describe "#blob" do
     it "delegates to actions" do
-      actions = Actions.new
+      actions = Actions.new(BlobStub.new)
       app = DummySinatraApp.new(actions, Renderer.new)
       app.blob("gitorious", "master", "app/models/repository.rb")
 
@@ -105,7 +110,7 @@ describe Dolt::Sinatra::Actions do
     end
 
     it "renders the blob template as html" do
-      app = DummySinatraApp.new(Actions.new, Renderer.new("Blob"))
+      app = DummySinatraApp.new(Actions.new(BlobStub.new), Renderer.new("Blob"))
       app.blob("gitorious", "master", "app/models/repository.rb")
 
       assert_equal "text/html", app.response["Content-Type"]
@@ -118,6 +123,36 @@ describe Dolt::Sinatra::Actions do
 
       assert_equal 302, app.response.status
       assert_equal "/gitorious/tree/master:app/models", app.response["Location"]
+      assert_equal "", app.body
+    end
+  end
+
+  describe "#tree" do
+    it "delegates to actions" do
+      actions = Actions.new(TreeStub.new)
+      app = DummySinatraApp.new(actions, Renderer.new)
+      app.tree("gitorious", "master", "app/models")
+
+      assert_equal "gitorious", actions.repo
+      assert_equal "master", actions.ref
+      assert_equal "app/models", actions.path
+    end
+
+    it "renders the tree template as html" do
+      app = DummySinatraApp.new(Actions.new(TreeStub.new), Renderer.new("Tree"))
+      app.tree("gitorious", "master", "app/models")
+
+      assert_equal "text/html", app.response["Content-Type"]
+      assert_equal "Tree", app.body
+    end
+
+    it "redirects blob views to blob action" do
+      app = DummySinatraApp.new(Actions.new(BlobStub.new), Renderer.new("Tree"))
+      app.tree("gitorious", "master", "app/models/repository.rb")
+
+      location = app.response["Location"]
+      assert_equal 302, app.response.status
+      assert_equal "/gitorious/blob/master:app/models/repository.rb", location
       assert_equal "", app.body
     end
   end

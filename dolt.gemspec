@@ -37,6 +37,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency "em-minitest-spec", "~> 1.1"
   s.add_development_dependency "rake", "~> 0.9"
   s.add_development_dependency "mocha"
+  s.add_development_dependency "redcarpet"
 
   s.files         = GemSpecHelper.files(".") + GemSpecHelper.files("vendor/ui")
   s.test_files    = `git ls-files -- {test}/*`.split("\n")

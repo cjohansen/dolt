@@ -32,8 +32,8 @@ describe "blob template" do
     @template_root = File.join(File.dirname(__FILE__), "..", "..", "..", "views")
   end
 
-  def render(path, blob, options = {})
-    renderer = prepare_renderer(@template_root, options)
+  def render(path, blob, options = {}, helpers = nil)
+    renderer = prepare_renderer(@template_root, options, helpers)
     renderer.render(:blob, {
                       :blob => blob,
                       :repository => @repo,
@@ -91,5 +91,28 @@ describe "blob template" do
     assert_match 'href="/the-dolt/tree/master:some"', markup
     assert_match 'href="/the-dolt/tree/master:some/deeply"', markup
     assert_match 'href="/the-dolt/tree/master:some/deeply/nested"', markup
+  end
+
+  describe "with smart blob rendering" do
+    include Dolt::Html
+
+    before do
+      @helpers = [Dolt::View::SingleRepository,
+                  Dolt::View::Breadcrumb,
+                  Dolt::View::Blob,
+                  Dolt::View::SmartBlobRenderer]
+    end
+
+    it "renders markdown as html" do
+      markup = render("file.md", Blob.new("# Cool"), {}, @helpers)
+      assert_equal 1, select(markup, "h1").length
+    end
+
+    it "syntax highlights ruby" do
+      blob = Blob.new("class Person\n  attr_reader :name\nend")
+      markup = render("file.rb", blob, {}, @helpers)
+
+      assert_equal 0, select(markup, "h1").length
+    end
   end
 end

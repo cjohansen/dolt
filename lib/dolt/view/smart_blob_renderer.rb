@@ -21,8 +21,8 @@ require "dolt/view/markup"
 module Dolt
   module View
     module SmartBlobRenderer
-      include Dolt::View::SyntaxHighlight
       include Dolt::View::Markup
+      include Dolt::View::SyntaxHighlight
 
       def format_blob(path, content, options = {})
         return render_markup(path, content) if supported_markup_format?(path)

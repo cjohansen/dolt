@@ -80,4 +80,11 @@ describe Dolt::View::Blob do
       assert_match "ruby", html
     end
   end
+
+  describe "#format_blob" do
+    it "escapes brackets" do
+      html = format_blob("file.txt", "<hey>")
+      assert_match /&lt;hey&gt;/, html
+    end
+  end
 end

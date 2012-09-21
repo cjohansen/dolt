@@ -15,10 +15,16 @@
 #   You should have received a copy of the GNU Affero General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #++
+require "htmlentities"
 
 module Dolt
   module View
     module Blob
+      def format_blob(path, content)
+        @coder ||= HTMLEntities.new
+        multiline(@coder.encode(content))
+      end
+
       def blob_url(repository, ref, path)
         repo_url(repository, "/blob/#{ref}:#{path}")
       end

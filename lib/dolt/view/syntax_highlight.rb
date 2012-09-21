@@ -27,9 +27,14 @@ module Dolt
         code
       end
 
-      def format_blob(path, code, options = {})
+      def highlight_multiline(path, code, options = {})
+        return highlight(path, code, options) unless respond_to?(:multiline)
         lexer = lexer_for_file(path)
         multiline(highlight(path, code, options), :class_names => [lexer])
+      end
+
+      def format_blob(path, code, options = {})
+        highlight_multiline(path, code, options)
       end
 
       def lexer_for_file(path)

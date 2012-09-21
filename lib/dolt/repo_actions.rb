@@ -24,34 +24,28 @@ module Dolt
     end
 
     def blob(repo, ref, path, &block)
-      repository = repo_resolver.resolve(repo)
-      d = repository.rev_parse("#{ref}:#{path}")
-      d.callback do |blob|
-        block.call(nil, tpl_data(repo, ref, path, { :blob => blob }))
-      end
-      d.errback { |err| block.call(err, nil) }
+      repo_action(repo, ref, path, :blob, :rev_parse, "#{ref}:#{path}", &block)
     end
 
     def tree(repo, ref, path, &block)
-      repository = repo_resolver.resolve(repo)
-      d = repository.rev_parse("#{ref}:#{path}")
-      d.callback do |tree|
-        block.call(nil, tpl_data(repo, ref, path, { :tree => tree }))
-      end
-      d.errback { |err| block.call(err, nil) }
+      repo_action(repo, ref, path, :tree, :rev_parse, "#{ref}:#{path}", &block)
     end
 
     def blame(repo, ref, path, &block)
-      repository = repo_resolver.resolve(repo)
-      d = repository.blame(ref, path)
-      d.callback do |blame|
-        block.call(nil, tpl_data(repo, ref, path, { :blame => blame }))
-      end
-      d.errback { |err| block.call(err, nil) }
+      repo_action(repo, ref, path, :blame, :blame, ref, path, &block)
     end
 
     private
     def repo_resolver; @repo_resolver; end
+
+    def repo_action(repo, ref, path, data, method, *args, &block)
+      repository = repo_resolver.resolve(repo)
+      d = repository.send(method, *args)
+      d.callback do |result|
+        block.call(nil, tpl_data(repo, ref, path, { data => result }))
+      end
+      d.errback { |err| block.call(err, nil) }
+    end
 
     def tpl_data(repo, ref, path, locals = {})
       {

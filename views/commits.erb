@@ -1,0 +1,23 @@
+<% @title = "History of #{path}" %>
+<ul class="pull-right gts-blob-view">
+  <li><a href="<%= blob_url(repository, ref, path) %>">Blob content</a></li>
+  <li class="active">Blame</li>
+  <li><a href="<%= history_url(repository, ref, path) %>">History</a></li>
+  <li><a href="<%= raw_url(repository, ref, path) %>">Raw blob</a></li>
+</ul>
+<%= breadcrumb(repository, ref, path) %>
+<% commits.each do |commit| %>
+  <div class="gts-commit">
+    <p class="gts-log-message">
+      <a href="/commit"><%= commit_oid(commit[:oid]) %></a>:
+      <%= commit[:summary] %>
+    </p>
+    <p>
+      <a class="event-author" href="/~">
+        <img width="24" height="24" src="<%= gravatar(commit[:author][:email]) %>" alt="avatar" class="gts-avatar">
+        <%= commit[:author][:name] %>
+      </a>
+      <span class="event-time"><%= commit[:date].strftime("%H:%M") %></span>
+    </p>
+  </div>
+<% end %>

@@ -33,6 +33,11 @@ class Repository
     @deferred.promise
   end
 
+  def log(ref, path, limit)
+    @deferred = When::Deferred.new
+    @deferred.promise
+  end
+
   def resolve_promise(blob)
     @deferred.resolve(blob)
   end
@@ -64,7 +69,7 @@ describe Dolt::RepoActions do
 
     it "yields path, blob, repo, ref and base_tree_url to block" do
       data = nil
-      @actions.blob("gitorious", "babd120", "app") do |status, d|
+      @actions.blob("gitorious", "babd120", "app") do |err, d|
         data = d
       end
 
@@ -88,7 +93,7 @@ describe Dolt::RepoActions do
 
     it "yields tree, repo and ref to block" do
       data = nil
-      @actions.tree("gitorious", "babd120", "app") do |status, d|
+      @actions.tree("gitorious", "babd120", "app") do |err, d|
         data = d
       end
 
@@ -114,7 +119,7 @@ describe Dolt::RepoActions do
 
     it "yields blame, repo and ref to block" do
       data = nil
-      @actions.blame("gitorious", "babd120", "app") do |status, d|
+      @actions.blame("gitorious", "babd120", "app") do |err, d|
         data = d
       end
 
@@ -123,6 +128,32 @@ describe Dolt::RepoActions do
 
       expected = {
         :blame => "Blame",
+        :repository => "gitorious",
+        :ref =>  "babd120",
+        :path => "app"
+      }
+      assert_equal expected, data
+    end
+  end
+
+  describe "#history" do
+    it "resolves repository" do
+      @actions.history("gitorious", "master", "app", 1)
+
+      assert_equal ["gitorious"], @resolver.resolved.map(&:name)
+    end
+
+    it "yields commits, repo and ref to block" do
+      data = nil
+      @actions.history("gitorious", "babd120", "app", 2) do |err, d|
+        data = d
+      end
+
+      repo = @resolver.resolved.last
+      repo.resolve_promise "History"
+
+      expected = {
+        :commits => "History",
         :repository => "gitorious",
         :ref =>  "babd120",
         :path => "app"

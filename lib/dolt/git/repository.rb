@@ -19,6 +19,7 @@ require "em_rugged/repository"
 require "em_pessimistic/deferrable_child_process"
 require "em/deferrable"
 require "dolt/git/blame"
+require "dolt/git/commit"
 
 module Dolt
   module Git

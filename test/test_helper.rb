@@ -39,6 +39,8 @@ module Dolt
                                   Dolt::View::Tree,
                                   Dolt::View::Blame,
                                   Dolt::View::SyntaxHighlight,
+                                  Dolt::View::Commit,
+                                  Dolt::View::Gravatar,
                                   Dolt::View::Breadcrumb])
       renderer
     end

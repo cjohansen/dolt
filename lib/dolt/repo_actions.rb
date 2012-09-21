@@ -35,6 +35,10 @@ module Dolt
       repo_action(repo, ref, path, :blame, :blame, ref, path, &block)
     end
 
+    def history(repo, ref, path, count, &block)
+      repo_action(repo, ref, path, :commits, :log, ref, path, count, &block)
+    end
+
     private
     def repo_resolver; @repo_resolver; end
 

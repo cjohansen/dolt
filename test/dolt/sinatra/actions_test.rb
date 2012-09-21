@@ -95,6 +95,10 @@ class Actions
     respond(:blame, repo, ref, path, &block)
   end
 
+  def history(repo, ref, path, limit, &block)
+    respond(:history, repo, ref, path, &block)
+  end
+
   def respond(type, repo, ref, path, &block)
     @repo = repo
     @ref = ref
@@ -212,6 +216,26 @@ describe Dolt::Sinatra::Actions do
 
       assert_equal "text/html", app.response["Content-Type"]
       assert_equal "blame:Text", app.body
+    end
+  end
+
+  describe "#history" do
+    it "delegates to actions" do
+      actions = Actions.new(BlobStub.new)
+      app = DummySinatraApp.new(actions, Renderer.new)
+      app.history("gitorious", "master", "app/models/repository.rb", 10)
+
+      assert_equal "gitorious", actions.repo
+      assert_equal "master", actions.ref
+      assert_equal "app/models/repository.rb", actions.path
+    end
+
+    it "renders the commits template as text" do
+      app = DummySinatraApp.new(Actions.new(BlobStub.new), Renderer.new("Text"))
+      app.history("gitorious", "master", "app/models/repository.rb", 10)
+
+      assert_equal "text/html", app.response["Content-Type"]
+      assert_equal "commits:Text", app.body
     end
   end
 end

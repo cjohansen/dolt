@@ -73,6 +73,15 @@ module Dolt
         force_ref(params[:splat], "blame", "master")
       end
 
+      aget "/history/*:*" do
+        ref, path = params[:splat]
+        history(repo, ref, path, (params[:commit_count] || 20).to_i)
+      end
+
+      aget "/history/*" do
+        force_ref(params[:splat], "blame", "master")
+      end
+
       private
       def force_ref(args, action, ref)
         redirect("/#{action}/#{ref}:" + args.join)

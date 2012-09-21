@@ -69,6 +69,14 @@ module Dolt
           body(renderer.render(:blame, data))
         end
       end
+
+      def history(repo, ref, path, count)
+        actions.history(repo, ref, path, count) do |err, data|
+          return error(err) if !err.nil?
+          response["Content-Type"] = "text/html"
+          body(renderer.render(:commits, data))
+        end
+      end
     end
   end
 end

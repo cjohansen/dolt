@@ -49,6 +49,8 @@ view.helper(Dolt::View::Blob)
 view.helper(Dolt::View::Blame)
 view.helper(Dolt::View::Breadcrumb)
 view.helper(Dolt::View::Tree)
+view.helper(Dolt::View::Commit)
+view.helper(Dolt::View::Gravatar)
 
 # Configure blob rendering module
 

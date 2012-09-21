@@ -21,7 +21,8 @@ module Dolt
   module View
     module Markup
       def render_markup(path, content)
-        GitHub::Markup.render(path, content)
+        markup = GitHub::Markup.render(path, content)
+        "<div class=\"gts-markup\">#{markup}</div>"
       end
 
       def supported_markup_format?(path)

@@ -20,6 +20,13 @@ Dolt is the implementation of the next generation repo browser to be used in the
 To install `dolt` you need Ruby, RubyGems and Python development files. The
 Python development files are required to support Pygments syntax highlighting.
 
+Note: Dolt uses [libgit2](http://libgit2.github.com) and its Ruby bindings,
+[Rugged](http://github.com/libgit2/rugged) through
+[em-rugged](http://gitorious.org/gitorious/em-rugged) for Git access where
+feasible. Currently, ``EMRugged`` relies on a version of `Rugged` that is not
+yet released, so you have to build it yourself.
+[See em-rugged instructions](http://github.com/cjohansen/em-rugged).
+
 ### Systems using apt (Debian/Ubuntu, others)
 
     # 1) Install Ruby (skip if you already have Ruby installed)
@@ -29,7 +36,8 @@ Python development files are required to support Pygments syntax highlighting.
     sudo apt-get install python-dev
 
     # 3) Install dolt. This may or may not require the use of sudo, depending on
-    #    how you installed Ruby.
+    #    how you installed Ruby. This step assumes that you already built and
+    #    installed em-rugged as explained above.
     sudo gem install dolt
 
 ### Systems using yum (Fedora/CentOS/RedHat, others)
@@ -41,7 +49,8 @@ Python development files are required to support Pygments syntax highlighting.
     sudo yum install python-devel
 
     # 3) Install dolt. This may or may not require the use of sudo, depending on
-    #    how you installed Ruby.
+    #    how you installed Ruby. This step assumes that you already built and
+    #    installed em-rugged as explained above.
     sudo gem install dolt
 
 # The Dolt CLI
@@ -74,6 +83,14 @@ can browse all of them through the same process by doing:
 Now [http://localhost:3000/repo](http://localhost:3000/repo) will allow you to
 browse the `/path/repos/repo` repository. As `dolt` matures, there will be a
 listing of all repositories and more.
+
+## Markup rendering
+
+Dolt uses the [``GitHub::Markup``](https://github.com/github/markup/) library to
+render certain markup formats as HTML. Dolt does not have a hard dependency on
+any of the required gems to actually render markups, so see the
+[``GitHub::Markup`` docs](https://github.com/github/markup/) for information on
+what and how to install support for various languages.
 
 # License
 

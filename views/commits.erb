@@ -9,7 +9,7 @@
 <% commits.each do |commit| %>
   <div class="gts-commit">
     <p class="gts-log-message">
-      <a href="/commit"><%= commit_oid(commit[:oid]) %></a>:
+      <span class="gts-commit-oid"><%= commit_oid(commit[:oid]) %></span>:
       <%= commit[:summary] %>
     </p>
     <p>

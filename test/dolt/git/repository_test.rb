@@ -23,6 +23,7 @@ describe Dolt::Git::Repository do
 
   describe "#blame" do
     before { @repository = Dolt::Git::Repository.new(".") }
+
     it "returns deferrable" do
       deferrable = @repository.blame("master", "Gemfile")
       assert deferrable.respond_to?(:callback)
@@ -32,6 +33,25 @@ describe Dolt::Git::Repository do
     it "yields blame" do
       @repository.blame("master", "Gemfile").callback do |blame|
         assert Dolt::Git::Blame === blame
+        done!
+      end
+      wait!
+    end
+  end
+
+  describe "#log" do
+    before { @repository = Dolt::Git::Repository.new(".") }
+
+    it "returns deferrable" do
+      deferrable = @repository.log("master", "Gemfile", 1)
+      assert deferrable.respond_to?(:callback)
+      assert deferrable.respond_to?(:errback)
+    end
+
+    it "yields commits" do
+      @repository.log("master", "dolt.gemspec", 2).callback do |log|
+        assert_equal 2, log.length
+        assert Hash === log[0]
         done!
       end
       wait!

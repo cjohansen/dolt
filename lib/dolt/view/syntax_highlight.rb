@@ -15,14 +15,14 @@
 #   You should have received a copy of the GNU Affero General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #++
-require "dolt/view/highlighter"
+require "pygments"
 
 module Dolt
   module View
     module SyntaxHighlight
-      def highlight(path, code, options = {})
-        lexer = lexer_for_file(path)
-        Dolt::View::Highlighter.new(options).highlight(code, lexer)
+      def highlight(path, code, opt = {})
+        options = { :lexer => lexer_for_file(path) }.merge(opt)
+        Pygments.highlight(code, highlight_options(options))
       rescue RubyPython::PythonError
         code
       end
@@ -34,8 +34,30 @@ module Dolt
 
       def lexer_for_file(path)
         suffix = path.split(".").pop
-        Dolt::View::Highlighter.lexer(suffix)
+        Dolt::View::SyntaxHighlight.lexer(suffix)
+      end
+
+      def self.lexer(suffix)
+        @@lexer_aliases[suffix] || suffix
+      end
+
+      def self.add_lexer_alias(extension, lexer)
+        @@lexer_aliases ||= {}
+        @@lexer_aliases[extension] = lexer
+      end
+
+      private
+      def highlight_options(options = {})
+        options[:options] ||= {}
+        options[:options][:nowrap] = true
+        options[:options][:encoding] ||= "utf-8"
+        options
       end
     end
   end
 end
+
+Dolt::View::SyntaxHighlight.add_lexer_alias("yml", "yaml")
+Dolt::View::SyntaxHighlight.add_lexer_alias("Rakefile", "rb")
+Dolt::View::SyntaxHighlight.add_lexer_alias("Gemfile", "rb")
+Dolt::View::SyntaxHighlight.add_lexer_alias("gemspec", "rb")

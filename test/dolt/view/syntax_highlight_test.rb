@@ -41,7 +41,7 @@ describe Dolt::View::Blob do
     end
 
     it "highlights file with custom suffix" do
-      Dolt::View::Highlighter.add_lexer_alias("derp", "rb")
+      Dolt::View::SyntaxHighlight.add_lexer_alias("derp", "rb")
       html = highlight("file.derp", "class File")
 
       assert_match "<span class=\"k\">class</span>", html

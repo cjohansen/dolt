@@ -24,12 +24,25 @@ module Dolt
   module Git
     class Repository < EMRugged::Repository
       def blame(ref, path)
+        deferred_method("blame -l -t -p #{ref} #{path}") do |output, s|
+          Dolt::Git::Blame.parse_porcelain(output)
+        end
+      end
+
+      def log(ref, path, limit)
+        deferred_method("log -n #{limit} --follow #{ref} #{path}") do |out, s|
+          Dolt::Git::Commit.parse_log(out)
+        end
+      end
+
+      private
+      def deferred_method(cmd, &block)
         d = EventMachine::DefaultDeferrable.new
-        cmd = git("blame -l -t -p #{ref} #{path}")
+        cmd = git(cmd)
         p = EMPessimistic::DeferrableChildProcess.open(cmd)
 
         p.callback do |output, status|
-          d.succeed(Dolt::Git::Blame.parse_porcelain(output))
+          d.succeed(block.call(output, status))
         end
 
         p.errback do |err|
@@ -39,7 +52,6 @@ module Dolt
         d
       end
 
-      private
       def git(cmd)
         "git --git-dir #{subject.path} #{cmd}"
       end

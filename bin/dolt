@@ -45,7 +45,7 @@ view = Dolt::TemplateRenderer.new(template_root, {
 if is_git_repo?(ARGV[0])
   view.helper(Dolt::View::SingleRepository)
 else
-  view.helper(Dolt::View::MultipleRepository)
+  view.helper(Dolt::View::MultiRepository)
 end
 
 view.helper(Dolt::View::Object)
@@ -53,8 +53,16 @@ view.helper(Dolt::View::Blob)
 view.helper(Dolt::View::Blame)
 view.helper(Dolt::View::Breadcrumb)
 view.helper(Dolt::View::Tree)
-#view.helper(Dolt::View::SyntaxHighlight)
-#view.helper(Dolt::View::Markup)
+
+# Configure blob rendering module
+
+# Attempt to syntax highlight every blob
+# view.helper(Dolt::View::SyntaxHighlight)
+
+# Attempt to render every blob as markup
+# view.helper(Dolt::View::Markup)
+
+# Render supported formats as markup, syntax highlight the rest
 view.helper(Dolt::View::SmartBlobRenderer)
 
 Sinatra::Base.set(:public_folder, File.join(base, "vendor/ui"))

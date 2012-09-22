@@ -48,6 +48,7 @@ module Dolt
         num = 0
         lines = blob.split("\n").inject("") do |html, line|
           num += 1
+          line = line.gsub(/\t/, "    ")
           "#{html}<li class=\"L#{num}\"><span class=\"line\">#{line}</span></li>"
         end
 

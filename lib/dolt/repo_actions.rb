@@ -39,6 +39,10 @@ module Dolt
       repo_action(repo, ref, path, :commits, :log, ref, path, count, &block)
     end
 
+    def repositories
+      repo_resolver.all
+    end
+
     private
     def repo_resolver; @repo_resolver; end
 

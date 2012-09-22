@@ -29,7 +29,7 @@ module Dolt
 
       aget "/" do
         response["Content-Type"] = "text/html"
-        body("<h1>Welcome to Dolt</h1>")
+        body(renderer.render(:index, { :repositories => actions.repositories }))
       end
 
       aget "/*/tree/*:*" do

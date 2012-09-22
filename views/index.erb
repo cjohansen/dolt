@@ -1,3 +1,4 @@
+<%#
 # encoding: utf-8
 #--
 #   Copyright (C) 2012 Gitorious AS
@@ -15,25 +16,10 @@
 #   You should have received a copy of the GNU Affero General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #++
-require "dolt/git/repository"
-
-module Dolt
-  class DiskRepoResolver
-    def initialize(root)
-      @root = root
-    end
-
-    def resolve(repo)
-      Dolt::Git::Repository.new(File.join(root, repo))
-    end
-
-    def all
-      Dir.entries(root).select do |e|
-        File.exists?(File.join(root, e, ".git"))
-      end
-    end
-
-    private
-    def root; @root; end
-  end
-end
+%>
+<h1><%= @title = "All repositories" %></h1>
+<ul>
+  <% repositories.each do |repo| %>
+    <li><a href="/<%= repo %>/tree/master:"><%= repo %></a></li>
+  <% end %>
+</ul>

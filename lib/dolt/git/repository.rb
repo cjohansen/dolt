@@ -31,7 +31,7 @@ module Dolt
       end
 
       def log(ref, path, limit)
-        deferred_method("log -n #{limit} --follow #{ref} #{path}") do |out, s|
+        deferred_method("log -n #{limit} #{ref} #{path}") do |out, s|
           Dolt::Git::Commit.parse_log(out)
         end
       end

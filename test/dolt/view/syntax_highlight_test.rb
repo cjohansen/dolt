@@ -69,4 +69,33 @@ describe Dolt::View::Blob do
       assert_match "rb", html
     end
   end
+
+  describe "#lexer" do
+    it "uses known suffix" do
+      assert_equal "rb", lexer("file.rb")
+    end
+
+    it "uses registered suffix" do
+      Dolt::View::SyntaxHighlight.add_lexer_alias("blarg", "blarg")
+      assert_equal "blarg", lexer("file.blarg")
+    end
+
+    it "uses registered lexer" do
+      Dolt::View::SyntaxHighlight.add_lexer_alias("bg", "blarg")
+      assert_equal "blarg", lexer("file.bg")
+    end
+
+    it "uses known shebang" do
+      assert_equal "rb", lexer("some-binary", "#!/usr/bin/env ruby\n")
+    end
+
+    it "uses registered shebang" do
+      Dolt::View::SyntaxHighlight.add_lexer_shebang(/\bnode\b/, "js")
+      assert_equal "js", lexer("some-binary", "#!/usr/bin/env node\n")
+    end
+
+    it "uses filename for unknown lexer" do
+      assert_equal "some-binary", lexer("some-binary", "class Person\nend")
+    end
+  end
 end

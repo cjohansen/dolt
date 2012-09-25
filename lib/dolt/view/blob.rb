@@ -41,6 +41,10 @@ module Dolt
         repo_url(repository, "/raw/#{ref}:#{path}")
       end
 
+      def format_whitespace(text)
+        text
+      end
+
       def multiline(blob, options = {})
         class_names = options[:class_names] || []
         class_names << "prettyprint" << "linenums"
@@ -48,7 +52,7 @@ module Dolt
         num = 0
         lines = blob.split("\n").inject("") do |html, line|
           num += 1
-          line = line.gsub(/\t/, "    ")
+          line = format_whitespace(line)
           "#{html}<li class=\"L#{num}\"><span class=\"line\">#{line}</span></li>"
         end
 

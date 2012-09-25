@@ -51,6 +51,8 @@ view.helper(Dolt::View::Breadcrumb)
 view.helper(Dolt::View::Tree)
 view.helper(Dolt::View::Commit)
 view.helper(Dolt::View::Gravatar)
+Dolt::View::TabWidth.tab_width = 4
+view.helper(Dolt::View::TabWidth)
 
 # Configure blob rendering module
 

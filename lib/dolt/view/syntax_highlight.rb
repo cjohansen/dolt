@@ -78,6 +78,7 @@ module Dolt
 end
 
 Dolt::View::SyntaxHighlight.add_lexer_alias("yml", "yaml")
+Dolt::View::SyntaxHighlight.add_lexer_alias("ru", "rb")
 Dolt::View::SyntaxHighlight.add_lexer_alias("Rakefile", "rb")
 Dolt::View::SyntaxHighlight.add_lexer_alias("Gemfile", "rb")
 Dolt::View::SyntaxHighlight.add_lexer_alias("Gemfile.lock", "yaml")

@@ -15,7 +15,7 @@
 #   You should have received a copy of the GNU Affero General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #++
-require "parsedate"
+require "time"
 
 module Dolt
   module Git
@@ -47,7 +47,7 @@ module Dolt
           pieces = value.match(/(.*)\s<(.*)>/)
           value = { :name => pieces[1], :email => pieces[2] }
         when :date
-          value = Time.mktime(*ParseDate.parsedate(value))
+          value = Time.parse(value)
         end
 
         hash[key] = value

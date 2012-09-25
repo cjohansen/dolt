@@ -77,6 +77,14 @@ module Dolt
           body(renderer.render(:commits, data))
         end
       end
+
+      def refs(repo)
+        actions.refs(repo) do |err, data|
+          return error(err) if !err.nil?
+          response["Content-Type"] = "application/json"
+          body(renderer.render(:refs, data, :layout => nil))
+        end
+      end
     end
   end
 end

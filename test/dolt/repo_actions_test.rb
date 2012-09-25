@@ -18,28 +18,24 @@
 require "test_helper"
 require "dolt/repo_actions"
 require "dolt/async/when"
+require "ostruct"
 
 class Repository
   attr_reader :name
   def initialize(name); @name = name; end
-
-  def rev_parse(rev)
-    @deferred = When::Deferred.new
-    @deferred.promise
-  end
-
-  def blame(ref, path)
-    @deferred = When::Deferred.new
-    @deferred.promise
-  end
-
-  def log(ref, path, limit)
-    @deferred = When::Deferred.new
-    @deferred.promise
-  end
+  def rev_parse(rev); stub; end
+  def blame(ref, path); stub; end
+  def log(ref, path, limit); stub; end
+  def refs; stub; end
 
   def resolve_promise(blob)
     @deferred.resolve(blob)
+  end
+
+  private
+  def stub
+    @deferred = When::Deferred.new
+    @deferred.promise
   end
 end
 
@@ -157,6 +153,32 @@ describe Dolt::RepoActions do
         :repository => "gitorious",
         :ref =>  "babd120",
         :path => "app"
+      }
+      assert_equal expected, data
+    end
+  end
+
+  describe "#refs" do
+    before do
+      @refs = ["refs/stash",
+               "refs/tags/v0.2.1",
+               "refs/tags/v0.2.0",
+               "refs/remotes/origin/master",
+               "refs/heads/libgit2",
+               "refs/heads/master"].map { |n| OpenStruct.new(:name => n) }
+    end
+
+    it "yields repositories, tags and heads" do
+      data = nil
+      @actions.refs("gitorious") { |err, d| data = d }
+
+      repo = @resolver.resolved.last
+      repo.resolve_promise(@refs)
+
+      expected = {
+        :repository => "gitorious",
+        :heads => ["libgit2", "master"],
+        :tags => ["v0.2.1", "v0.2.0"]
       }
       assert_equal expected, data
     end

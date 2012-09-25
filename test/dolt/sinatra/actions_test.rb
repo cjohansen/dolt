@@ -99,6 +99,10 @@ class Actions
     respond(:history, repo, ref, path, &block)
   end
 
+  def refs(repo, &block)
+    respond(:refs, repo, nil, nil, &block)
+  end
+
   def respond(type, repo, ref, path, &block)
     @repo = repo
     @ref = ref
@@ -210,7 +214,7 @@ describe Dolt::Sinatra::Actions do
       assert_equal "app/models/repository.rb", actions.path
     end
 
-    it "renders the blame template as text" do
+    it "renders the blame template as html" do
       app = DummySinatraApp.new(Actions.new(BlobStub.new), Renderer.new("Text"))
       app.blame("gitorious", "master", "app/models/repository.rb")
 
@@ -230,12 +234,22 @@ describe Dolt::Sinatra::Actions do
       assert_equal "app/models/repository.rb", actions.path
     end
 
-    it "renders the commits template as text" do
+    it "renders the commits template as html" do
       app = DummySinatraApp.new(Actions.new(BlobStub.new), Renderer.new("Text"))
       app.history("gitorious", "master", "app/models/repository.rb", 10)
 
       assert_equal "text/html", app.response["Content-Type"]
       assert_equal "commits:Text", app.body
+    end
+  end
+
+  describe "#refs" do
+    it "renders the refs template as json" do
+      app = DummySinatraApp.new(Actions.new(BlobStub.new), Renderer.new("JSON"))
+      app.refs("gitorious")
+
+      assert_equal "application/json", app.response["Content-Type"]
+      assert_equal "refs:JSON", app.body
     end
   end
 end

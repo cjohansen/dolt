@@ -82,6 +82,10 @@ module Dolt
         force_ref(params[:splat], "blame", "master")
       end
 
+      aget "/refs" do
+        refs(repo)
+      end
+
       private
       def force_ref(args, action, ref)
         redirect("/#{action}/#{ref}:" + args.join)

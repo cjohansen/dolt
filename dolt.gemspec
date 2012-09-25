@@ -33,6 +33,7 @@ Gem::Specification.new do |s|
   s.add_dependency "tzinfo", "~> 0.3"
   s.add_dependency "github-markup", "~> 0.7"
   s.add_dependency "htmlentities", "~> 4.3"
+  s.add_dependency "json", "~> 1.7"
 
   s.add_development_dependency "minitest", "~> 2.0"
   s.add_development_dependency "em-minitest-spec", "~> 1.1"

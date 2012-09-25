@@ -39,6 +39,20 @@ module Dolt
       repo_action(repo, ref, path, :commits, :log, ref, path, count, &block)
     end
 
+    def refs(repo, &block)
+      repository = repo_resolver.resolve(repo)
+      d = repository.refs
+      d.callback do |refs|
+        names = refs.map(&:name)
+        block.call(nil, {
+                     :repository => repo,
+                     :tags => stripped_ref_names(names, :tags),
+                     :heads => stripped_ref_names(names, :heads)
+                   })
+      end
+      d.errback { |err| block.call(err, nil) }
+    end
+
     def repositories
       repo_resolver.all
     end
@@ -61,6 +75,12 @@ module Dolt
         :path => path,
         :ref => ref
       }.merge(locals)
+    end
+
+    def stripped_ref_names(names, type)
+      names.select { |n| n =~ /#{type}/ }.map do |n|
+        n.sub(/^refs\/#{type}\//, "")
+      end
     end
   end
 end

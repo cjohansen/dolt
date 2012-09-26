@@ -24,7 +24,7 @@ module Dolt
         options = { :lexer => lexer(path, code) }.merge(opt)
         Pygments.highlight(code, highlight_options(options))
       rescue RubyPython::PythonError
-        code
+        respond_to?(:entityfy) ? entityfy(code) : code
       end
 
       def highlight_multiline(path, code, options = {})

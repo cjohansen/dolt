@@ -20,9 +20,13 @@ require "htmlentities"
 module Dolt
   module View
     module Blob
-      def format_blob(path, content)
+      def entityfy(content)
         @coder ||= HTMLEntities.new
-        multiline(@coder.encode(content))
+        @coder.encode(content)
+      end
+
+      def format_blob(path, content)
+        multiline(entityfy(content))
       end
 
       def blob_url(repository, ref, path)

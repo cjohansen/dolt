@@ -52,7 +52,10 @@ module Dolt
         num = 0
         lines = blob.split("\n").inject("") do |html, line|
           num += 1
-          line = format_whitespace(line)
+          # Empty elements causes annoying rendering artefacts
+          # Forcing one space on each line affects copy-paste negatively
+          # TODO: Don't force one space, find CSS fix
+          line = format_whitespace(line).sub(/^$/, " ")
           "#{html}<li class=\"L#{num}\"><span class=\"line\">#{line}</span></li>"
         end
 

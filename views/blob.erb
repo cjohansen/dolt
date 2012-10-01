@@ -19,17 +19,7 @@
 %>
 <% @title = "#{path} in #{repository}:master" %>
 <div class="gts-file">
-  <%#
-  <div class="dropdown gts-branch-selector pull-right">
-    <a href="#" data-toggle="dropdown" class="dropdown-toggle"><span class="caret"></span> <em>branch:</em> master</a>
-    <ul class="dropdown-menu">
-      <li class="dropdown-label"><strong>Branches</strong></li>
-      <li><a href="#">master</a></li>
-      <li class="dropdown-label"><strong>Tags</strong></li>
-      <li><a href="#">v2.0.0</a></li>
-    </ul>
-  </div>
-  %>
+  <div id="gts-ref-selector-ph"></div>
   <ul class="pull-right gts-blob-view">
     <li class="active">Blob content</li>
     <li><a href="<%= blame_url(repository, ref, path) %>">Blame</a></li>

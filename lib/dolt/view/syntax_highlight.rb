@@ -23,7 +23,9 @@ module Dolt
       def highlight(path, code, opt = {})
         options = { :lexer => lexer(path, code) }.merge(opt)
         Pygments.highlight(code, highlight_options(options))
-      rescue RubyPython::PythonError
+      rescue MentosError => e
+        # "MentosError" is what Pyments.rb raises when an unknown lexer is
+        # attempted used
         respond_to?(:entityfy) ? entityfy(code) : code
       end
 

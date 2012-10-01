@@ -53,6 +53,7 @@ view.helper(Dolt::View::Commit)
 view.helper(Dolt::View::Gravatar)
 Dolt::View::TabWidth.tab_width = 4
 view.helper(Dolt::View::TabWidth)
+view.helper(Dolt::View::BinaryBlobEmbedder)
 
 # Configure blob rendering module
 

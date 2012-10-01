@@ -28,9 +28,13 @@ module Dolt
         body ""
       end
 
-      def error(error)
-        response["Content-Type"] = "text/plain"
-        body("Process failed with exit code #{error.exit_code}:\n#{error.message}")
+      def error(error, repo, ref)
+        response["Content-Type"] = "text/html"
+        body(renderer.render(:"500", {
+                               :error => error,
+                               :repository => repo,
+                               :ref => ref
+                             }))
       end
 
       def raw(repo, ref, path)
@@ -43,7 +47,7 @@ module Dolt
 
       def blob(repo, ref, path, options = { :template => :blob, :content_type => "text/html" })
         actions.blob(repo, ref, path) do |err, data|
-          return error(err) if !err.nil?
+          return error(err, repo, ref) if !err.nil?
           blob = data[:blob]
           return redirect(tree_url(repo, ref, path)) if !blob.is_a?(Rugged::Blob)
           response["Content-Type"] = options[:content_type]
@@ -54,7 +58,7 @@ module Dolt
 
       def tree(repo, ref, path)
         actions.tree(repo, ref, path) do |err, data|
-          return error(err) if !err.nil?
+          return error(err, repo, ref) if !err.nil?
           tree = data[:tree]
           return redirect(blob_url(repo, ref, path)) if !tree.is_a?(Rugged::Tree)
           response["Content-Type"] = "text/html"
@@ -64,7 +68,7 @@ module Dolt
 
       def blame(repo, ref, path)
         actions.blame(repo, ref, path) do |err, data|
-          return error(err) if !err.nil?
+          return error(err, repo, ref) if !err.nil?
           response["Content-Type"] = "text/html"
           body(renderer.render(:blame, data))
         end
@@ -72,7 +76,7 @@ module Dolt
 
       def history(repo, ref, path, count)
         actions.history(repo, ref, path, count) do |err, data|
-          return error(err) if !err.nil?
+          return error(err, repo, ref) if !err.nil?
           response["Content-Type"] = "text/html"
           body(renderer.render(:commits, data))
         end
@@ -80,7 +84,7 @@ module Dolt
 
       def refs(repo)
         actions.refs(repo) do |err, data|
-          return error(err) if !err.nil?
+          return error(err, repo, ref) if !err.nil?
           response["Content-Type"] = "application/json"
           body(renderer.render(:refs, data, :layout => nil))
         end

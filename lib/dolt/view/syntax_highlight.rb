@@ -33,7 +33,7 @@ module Dolt
         multiline(highlight(path, code, options), :class_names => [lexer])
       end
 
-      def format_text_blob(path, code, options = {})
+      def format_text_blob(path, code, repo = nil, ref = nil, options = {})
         highlight_multiline(path, code, options)
       end
 

@@ -20,16 +20,30 @@ require "htmlentities"
 module Dolt
   module View
     module Blob
+      def binary?(content)
+        !content[0...(content.length-1)].index("\000").nil?
+      end
+
       def entityfy(content)
         @coder ||= HTMLEntities.new
         @coder.encode(content)
       end
 
-      def format_blob(path, content)
-        format_text_blob(path, content)
+      def format_blob(path, content, repo = nil, ref = nil)
+        return format_binary_blob(path, content, repo, ref) if binary?(content)
+        format_text_blob(path, content, repo, ref)
       end
 
-      def format_text_blob(path, content)
+      def format_binary_blob(path, content, repository = nil, ref = nil)
+        <<-HTML
+<p class="prettyprint">
+The content you're attempting to browse appears to be binary.
+<a href="#{raw_url(repository, ref, path)}">Download #{File.basename(path)}</a>.
+</p>
+        HTML
+      end
+
+      def format_text_blob(path, content, repository = nil, ref = nil)
         multiline(entityfy(content))
       end
 

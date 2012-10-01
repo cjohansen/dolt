@@ -87,4 +87,30 @@ describe Dolt::View::Blob do
       assert_match /&lt;hey&gt;/, html
     end
   end
+
+  describe "#format_binary_blob" do
+    include Dolt::View::SingleRepository
+
+    it "renders link to binary blob" do
+      content = "GIF89aK\000 \000\367\000\000\266\270\274\335\336\337\214"
+      html = format_binary_blob("some/file.gif", content, "gitorious", "master")
+      assert_match /<a href="\/raw\/master:some\/file.gif"/, html
+      assert_match "Download file.gif", html
+    end
+  end
+
+  describe "#format_blob" do
+    include Dolt::View::SingleRepository
+
+    it "renders link to binary blob" do
+      content = "GIF89aK\000 \000\367\000\000\266\270\274\335\336\337\214"
+      html = format_blob("file.gif", content, "gitorious", "master")
+      assert_match "Download file.gif", html
+    end
+
+    it "renders text blob" do
+      html = format_blob("file.txt", "<hey>")
+      assert_match /&lt;hey&gt;/, html
+    end
+  end
 end

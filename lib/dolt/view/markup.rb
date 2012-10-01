@@ -29,7 +29,7 @@ module Dolt
         GitHub::Markup.can_render?(path)
       end
 
-      def format_blob(path, code, options = {})
+      def format_text_blob(path, code, options = {})
         render_markup(path, code)
       end
     end

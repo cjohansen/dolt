@@ -26,6 +26,10 @@ module Dolt
       end
 
       def format_blob(path, content)
+        format_text_blob(path, content)
+      end
+
+      def format_text_blob(path, content)
         multiline(entityfy(content))
       end
 

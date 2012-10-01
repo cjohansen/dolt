@@ -24,7 +24,7 @@ module Dolt
       include Dolt::View::Markup
       include Dolt::View::SyntaxHighlight
 
-      def format_blob(path, content, options = {})
+      def format_text_blob(path, content, options = {})
         return render_markup(path, content) if supported_markup_format?(path)
         highlight_multiline(path, content, options)
       end

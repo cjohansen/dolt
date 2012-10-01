@@ -22,9 +22,9 @@ describe Dolt::View::SmartBlobRenderer do
   include Dolt::View::Blob
   include Dolt::View::SmartBlobRenderer
 
-  describe "#format_blob" do
+  describe "#format_text_blob" do
     it "highlights a Ruby file" do
-      html = format_blob("file.rb", "class File\n  attr_reader :path\nend")
+      html = format_text_blob("file.rb", "class File\n  attr_reader :path\nend")
 
       assert_match "<span class=\"k\">class</span>", html
       assert_match "<span class=\"nc\">File</span>", html

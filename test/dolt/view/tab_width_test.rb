@@ -32,7 +32,7 @@ describe Dolt::View::TabWidth do
 
     it "uses wide tabs in formatted blobs" do
       Dolt::View::TabWidth.tab_width = 12
-      html = format_blob("file.rb", "class File\n\tattr_reader :path\nend")
+      html = format_text_blob("file.rb", "class File\n\tattr_reader :path\nend")
 
       assert_match(/            attr_reader/, html)
     end

@@ -40,6 +40,13 @@ describe Dolt::View::Blob do
       assert_match "<span class=\"p-Indicator\">:", html
     end
 
+    it "highlights an .htm file" do
+      html = highlight("file.htm", "<h1>Hey</h1>")
+
+      assert_match "<span class=\"nt\">&lt;h1&gt;</span>", html
+      assert_match "Hey<span class=\"nt\">&lt;/h1&gt;</span>", html
+    end
+
     it "highlights file with custom suffix" do
       Dolt::View::SyntaxHighlight.add_lexer_alias("derp", "rb")
       html = highlight("file.derp", "class File")

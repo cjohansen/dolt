@@ -19,7 +19,8 @@
 %>
 <% @title = "Blame #{path} in #{repository}:master" %>
 
-<div class="gts-file">
+<div class="gts-file gts-browser">
+  <div id="gts-ref-selector-ph"></div>
   <ul class="pull-right gts-blob-view">
     <li><a href="<%= blob_url(repository, ref, path) %>">Blob content</a></li>
     <li class="active">Blame</li>

@@ -35,6 +35,10 @@ module Dolt
       end
 
       def format_binary_blob(path, content, repository = nil, ref = nil)
+        link_binary_blob(path, content, repository, ref)
+      end
+
+      def link_binary_blob(path, content, repository = nil, ref = nil)
         <<-HTML
 <p class="prettyprint">
 The content you're attempting to browse appears to be binary.

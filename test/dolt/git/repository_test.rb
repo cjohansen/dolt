@@ -17,6 +17,7 @@
 #++
 require "test_helper"
 require "dolt/git/repository"
+require "time"
 
 describe Dolt::Git::Repository do
   include EM::MiniTest::Spec
@@ -54,6 +55,65 @@ describe Dolt::Git::Repository do
         assert Hash === log[0]
         done!
       end
+      wait!
+    end
+  end
+
+  describe "#tree_history" do
+    before { @repository = Dolt::Git::Repository.new(".") }
+
+    it "returns deferrable" do
+      deferrable = @repository.tree_history("master", "")
+      assert deferrable.respond_to?(:callback)
+      assert deferrable.respond_to?(:errback)
+    end
+
+    it "fails if path is not a tree" do
+      deferrable = @repository.tree_history("master", "Gemfile")
+      deferrable.errback do |err|
+        assert_match /not a tree/, err.message
+        done!
+      end
+      wait!
+    end
+
+    it "fails if path does not exist in ref" do
+      deferrable = @repository.tree_history("26139a3", "test")
+      deferrable.errback do |err|
+        assert_match /does not exist/, err.message
+        done!
+      end
+      wait!
+    end
+
+    it "yields tree with history" do
+      promise = @repository.tree_history("48ffbf7", "")
+
+      promise.callback do |log|
+        assert_equal 11, log.length
+        expected = {
+          :type => :blob,
+          :oid => "e90021f89616ddf86855d05337c188408d3b417e",
+          :filemode => 33188,
+          :name => ".gitmodules",
+          :history => [{
+            :oid => "906d67b4f3e5de7364ba9b57d174d8998d53ced6",
+            :author => { :name => "Christian Johansen",
+                         :email => "christian@cjohansen.no" },
+            :summary => "Working Moron server for viewing blobs",
+            :date => Time.parse("Mon Sep 10 15:07:39 +0200 2012"),
+            :message => ""
+          }]
+        }
+
+        assert_equal expected, log[0]
+        done!
+      end
+
+      promise.errback do |err|
+        puts "FAILED! #{err.inspect}"
+      end
+
       wait!
     end
   end

@@ -56,7 +56,7 @@ module Dolt
       def self.extract_commit_summary(lines)
         summary = lines.shift
         lines.shift if lines.first == ""
-        summary
+        summary.sub(/^    /, "")
       end
 
       def self.extract_commit_message(lines)

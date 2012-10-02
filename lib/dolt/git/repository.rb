@@ -20,6 +20,7 @@ require "em_pessimistic/deferrable_child_process"
 require "em/deferrable"
 require "dolt/git/blame"
 require "dolt/git/commit"
+require "dolt/async/when"
 
 module Dolt
   module Git
@@ -31,12 +32,43 @@ module Dolt
       end
 
       def log(ref, path, limit)
-        deferred_method("log -n #{limit} #{ref} #{path}") do |out, s|
+        entry_history(ref, path, limit)
+      end
+
+      def tree_history(ref, path, limit = 1)
+        d = EventMachine::DefaultDeferrable.new
+        rp = rev_parse("#{ref}:#{path}")
+        rp.errback { |err| d.fail(err) }
+        rp.callback do |tree|
+          if tree.class != Rugged::Tree
+            message = "#{ref}:#{path} is not a tree (#{tree.class.to_s})"
+            break d.fail(Exception.new(message))
+          end
+
+          building = build_history(ref, tree, limit)
+          building.callback { |history| d.succeed(history) }
+          building.errback { |err| d.fail(err) }
+        end
+        d
+      end
+
+      private
+      def entry_history(ref, entry, limit)
+        deferred_method("log -n #{limit} #{ref} #{entry}") do |out, s|
           Dolt::Git::Commit.parse_log(out)
         end
       end
 
-      private
+      def build_history(ref, entries, limit)
+        d = EventMachine::DefaultDeferrable.new
+        progress = When.all(entries.map { |e| entry_history(ref, e[:name], limit) })
+        progress.errback { |e| d.fail(e) }
+        progress.callback do |history|
+          d.succeed(entries.map { |e| e.merge({ :history => history.shift }) })
+        end
+        d
+      end
+
       def deferred_method(cmd, &block)
         d = EventMachine::DefaultDeferrable.new
         cmd = git(cmd)
@@ -46,8 +78,8 @@ module Dolt
           d.succeed(block.call(output, status))
         end
 
-        p.errback do |err|
-          d.fail(err)
+        p.errback do |stderr, status|
+          d.fail(stderr)
         end
 
         d

@@ -65,7 +65,7 @@ describe "tree_history template" do
         "author" => { "name" => "Christian Johansen",
                      "email" => "christian@cjohansen.no" },
         "summary" => "Working Moron server for viewing blobs",
-        "date" => "Mon Sep 10 15:07:39 +0200 2012",
+        "date" => "2012-09-10T15:07:39+02:00",
         "message" => ""
       }]
     }, {
@@ -78,7 +78,7 @@ describe "tree_history template" do
         "author" => { "name" => "Christian Johansen",
                      "email" => "christian@cjohansen.no" },
         "summary" => "Initial commit",
-        "date" => "Thu Aug 23 11:40:39 +0200 2012",
+        "date" => "2012-08-23T11:40:39+02:00",
         "message" => ""
       }]
     }]

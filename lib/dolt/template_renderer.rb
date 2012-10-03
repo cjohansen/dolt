@@ -18,6 +18,10 @@
 require "tilt"
 require "json"
 
+# Need consistent Time formatting in JSON
+require "time"
+class Time; def to_json(*args); "\"#{iso8601}\""; end; end
+
 module Dolt
   class TemplateRenderer
     def initialize(template_root, opt = {})

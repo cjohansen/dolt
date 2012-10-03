@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    dolt (0.4.0)
+    dolt (0.4.1)
       async_sinatra (~> 1.0)
       builder (~> 3.1)
       em_pessimistic (~> 0.1)

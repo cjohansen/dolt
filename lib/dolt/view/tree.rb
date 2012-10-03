@@ -28,36 +28,67 @@ module Dolt
           sort(tree.entries.select { |e| e[:type] == :blob })
       end
 
-      def tree_context(repo, ref, path)
-        acc = ""
-        pieces = path.sub(/^\.?\//, "").split("/")
-        total = 5 + pieces.length
+      def tree_context(repo, ref, path, maxdepth = nil)
+        levels = accumulate_path(partition_path(path, maxdepth))
+        return "" if levels.length == 1 && levels[0].length == 1
+        total = 4 + levels.length
         colspan = total
-        pieces.inject("") do |html, dir|
-          padding_td = tree_table_padding_td(acc.sub(/^\.?\//, ""))
-          url = object_url(repo, ref, acc, { :type => :tree, :name => dir })
-          acc << "/#{dir}"
-          colspan -= 1
-          <<-HTML
-            #{html}
+        (levels.map do |level|
+          html = <<-HTML
             <tr>
-              #{padding_td}
+              #{'<td></td>' * (total - colspan)}
               <td colspan="#{colspan}">
-                <a href=\"#{url}\">
-                  <i class="icon icon-folder-open"></i> #{dir}
-                </a>
+                #{tree_context_level_links(repo, ref, level)}
               </td>
             </tr>
           HTML
-        end
+          colspan -= 1
+          html
+        end).join
       end
 
-      def tree_table_padding_td(path)
-        "<td></td>" * tree_table_padding_width(path)
+      def tree_context_level_links(repo, ref, level)
+        extra = "<i class=\"icon icon-folder-open\"></i>"
+
+        (level.map do |path|
+           dir = File.dirname(path)
+           dir = "" if dir == "."
+           file = path == "" ? "/" : File.basename(path)
+           url = object_url(repo, ref, dir, { :type => :tree, :name => file })
+           html = "<a href=\"#{url}\">#{extra} #{file}</a>"
+           extra = ""
+           html
+        end).join(" ")
+      end
+
+      def partition_path(path, maxdepth = nil)
+        path = path.sub(/^\.?\//, "")
+        result = [[""]]
+        return result if path == ""
+        parts = path.split("/")
+        maxdepth ||= parts.length
+        (parts.length - maxdepth + 1).times { result[0] << parts.shift }
+        result << [parts.shift] while parts.length > 0
+        result
+      end
+
+      def accumulate_path(pieces)
+        acc = []
+        pieces.map do |piece|
+          piece.map do |p|
+            next p if p == ""
+            acc << p
+            File.join(acc)
+          end
+        end
       end
 
       def tree_table_padding_width(path)
         path.split("/").length
+      end
+
+      def tree_table_padding_td(path)
+        "<td></td>" * tree_table_padding_width(path)
       end
 
       private

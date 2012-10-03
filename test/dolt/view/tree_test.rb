@@ -72,6 +72,51 @@ describe Dolt::View::Tree do
     end
   end
 
+  describe "#partition_path" do
+    it "partitions root into double array" do
+      parts = partition_path("")
+      assert_equal [[""]], parts
+
+      parts = partition_path("/")
+      assert_equal [[""]], parts
+
+      parts = partition_path("./")
+      assert_equal [[""]], parts
+    end
+
+    it "partitions single directory" do
+      parts = partition_path("lib")
+      assert_equal [["", "lib"]], parts
+    end
+
+    it "partitions two directories" do
+      parts = partition_path("lib/dolt")
+      assert_equal [["", "lib"], ["dolt"]], parts
+    end
+
+    it "partitions multiple directories" do
+      parts = partition_path("lib/dolt/git/help")
+      assert_equal [["", "lib"], ["dolt"], ["git"], ["help"]], parts
+    end
+
+    it "ignore trailing slash" do
+      parts = partition_path("lib/dolt/")
+      assert_equal [["", "lib"], ["dolt"]], parts
+    end
+
+    it "chunks up leading path" do
+      parts = partition_path("lib/dolt/very/deep", 3)
+      assert_equal [["", "lib", "dolt"], ["very"], ["deep"]], parts
+    end
+  end
+
+  describe "#accumulate_path" do
+    it "accumulates partitioned path" do
+      parts = accumulate_path(partition_path("lib/dolt/very/deep", 3))
+      assert_equal [["", "lib", "lib/dolt"], ["lib/dolt/very"], ["lib/dolt/very/deep"]], parts
+    end
+  end
+
   describe "#tree_context" do
     def context(path)
       tree_context("gitorious", "master", path)
@@ -88,13 +133,18 @@ describe Dolt::View::Tree do
       assert_equal 1, select(context("./lib"), "tr").length
     end
 
+    it "includes link to root in single table row" do
+      assert_equal 2, select(context("lib"), "a").length
+    end
+
     it "renders single path item in cell" do
       assert_equal 1, select(context("lib"), "td").length
     end
 
     it "renders single path item as link" do
-      assert_equal 1, select(context("lib"), "a").length
-      assert_match /lib/, select(context("lib"), "a").first
+      # Two, because there's always a link to the root directory
+      assert_equal 2, select(context("lib"), "a").length
+      assert_match /lib/, select(context("lib"), "a")[1]
     end
 
     it "renders single path item with open folder icon" do

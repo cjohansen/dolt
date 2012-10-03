@@ -17,7 +17,7 @@
   #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
   #++
 %>
-<% @title = "#{path} in #{ref}" %>
+<% @title = "#{path == '' ? './' : path} in #{ref}" %>
 <div id="gts-ref-selector-ph"></div>
 <table class="table table-striped gts-tree-explorer" data-gts-tree-history="<%= tree_history_url(repository, ref, path) %>">
   <thead>

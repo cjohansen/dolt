@@ -46,6 +46,7 @@ describe "tree template" do
     tree = Tree.new([])
     markup = render("app/models", tree)
 
-    assert_match /<table class="table table-striped gts-tree-explorer">/, markup
+    assert_match /<table class="table table-striped gts-tree-explorer"/, markup
+    assert_match /data-gts-tree-history="/, markup
   end
 end

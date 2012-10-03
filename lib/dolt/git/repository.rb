@@ -45,7 +45,7 @@ module Dolt
             break d.fail(Exception.new(message))
           end
 
-          building = build_history(ref, tree, limit)
+          building = build_history(path || "./", ref, tree, limit)
           building.callback { |history| d.succeed(history) }
           building.errback { |err| d.fail(err) }
         end
@@ -59,9 +59,12 @@ module Dolt
         end
       end
 
-      def build_history(ref, entries, limit)
+      def build_history(path, ref, entries, limit)
         d = EventMachine::DefaultDeferrable.new
-        progress = When.all(entries.map { |e| entry_history(ref, e[:name], limit) })
+        resolve = lambda { |p| path == "" ? p : File.join(path, p) }
+        progress = When.all(entries.map do |e|
+                              entry_history(ref, resolve.call(e[:name]), limit)
+                            end)
         progress.errback { |e| d.fail(e) }
         progress.callback do |history|
           d.succeed(entries.map { |e| e.merge({ :history => history.shift }) })

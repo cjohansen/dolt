@@ -116,5 +116,35 @@ describe Dolt::Git::Repository do
 
       wait!
     end
+
+    it "yields nested tree with history" do
+      promise = @repository.tree_history("48ffbf7", "lib")
+
+      promise.callback do |log|
+        expected = [{
+          :type => :tree,
+          :oid => "58f84405b588699b24c619aa4cd83669c5623f88",
+          :filemode => 16384,
+          :name => "dolt",
+          :history => [{
+            :oid => "8ab4f8c42511f727244a02aeee04824891610bbd",
+            :author => { :name => "Christian Johansen",
+                         :email => "christian@gitorious.com" },
+            :summary => "New version",
+            :date => Time.parse("Mon Oct 1 16:34:00 +0200 2012"),
+            :message => ""
+          }]
+        }]
+
+        assert_equal expected, log
+        done!
+      end
+
+      promise.errback do |err|
+        puts "FAILED! #{err.inspect}"
+      end
+
+      wait!
+    end
   end
 end

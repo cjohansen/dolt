@@ -27,6 +27,7 @@ class Repository
   def blame(ref, path); stub; end
   def log(ref, path, limit); stub; end
   def refs; stub; end
+  def tree_history(ref, path, count); stub; end
 
   def resolve_promise(blob)
     @deferred.resolve(blob)
@@ -179,6 +180,54 @@ describe Dolt::RepoActions do
         :repository => "gitorious",
         :heads => ["libgit2", "master"],
         :tags => ["v0.2.1", "v0.2.0"]
+      }
+      assert_equal expected, data
+    end
+  end
+
+  describe "#tree_history" do
+    before do
+      @tree = [{
+          :type => :blob,
+          :oid => "e90021f89616ddf86855d05337c188408d3b417e",
+          :filemode => 33188,
+          :name => ".gitmodules",
+          :history => [{
+            :oid => "906d67b4f3e5de7364ba9b57d174d8998d53ced6",
+            :author => { :name => "Christian Johansen",
+                         :email => "christian@cjohansen.no" },
+            :summary => "Working Moron server for viewing blobs",
+            :date => Time.parse("Mon Sep 10 15:07:39 +0200 2012"),
+            :message => ""
+          }]
+        }, {
+          :type => :blob,
+          :oid => "c80ee3697054566d1a4247d80be78ec3ddfde295",
+          :filemode => 33188,
+          :name => "Gemfile",
+          :history => [{
+            :oid => "26139a3aba4aac8cbf658c0d0ea58b8983e4090b",
+            :author => { :name => "Christian Johansen",
+                         :email => "christian@cjohansen.no" },
+            :summary => "Initial commit",
+            :date => Time.parse("Thu Aug 23 11:40:39 +0200 2012"),
+            :message => ""
+          }]
+        }]
+    end
+
+    it "yields repository, path, ref and history" do
+      data = nil
+      @actions.tree_history("gitorious", "master", "", 1) { |err, d| data = d }
+
+      repo = @resolver.resolved.last
+      repo.resolve_promise(@tree)
+
+      expected = {
+        :repository => "gitorious",
+        :ref => "master",
+        :path => "",
+        :tree => @tree
       }
       assert_equal expected, data
     end

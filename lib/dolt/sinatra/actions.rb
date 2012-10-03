@@ -89,6 +89,17 @@ module Dolt
           body(renderer.render(:refs, data, :layout => nil))
         end
       end
+
+      def tree_history(repo, ref, path, count = 1)
+        actions.tree_history(repo, ref, path, count) do |err, data|
+          if !err.nil?
+            error(err, repo, ref)
+          else
+            response["Content-Type"] = "application/json"
+            body(renderer.render(:tree_history, data, :layout => nil))
+          end
+        end
+      end
     end
   end
 end

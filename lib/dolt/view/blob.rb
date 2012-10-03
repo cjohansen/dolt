@@ -67,6 +67,10 @@ The content you're attempting to browse appears to be binary.
         repo_url(repository, "/raw/#{ref}:#{path}")
       end
 
+      def tree_history_url(repository, ref, path)
+        repo_url(repository, "/tree_history/#{ref}:#{path}")
+      end
+
       def format_whitespace(text)
         text
       end

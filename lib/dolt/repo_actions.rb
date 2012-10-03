@@ -1,3 +1,4 @@
+
 # encoding: utf-8
 #--
 #   Copyright (C) 2012 Gitorious AS
@@ -51,6 +52,10 @@ module Dolt
                    })
       end
       d.errback { |err| block.call(err, nil) }
+    end
+
+    def tree_history(repo, ref, path, count, &block)
+      repo_action(repo, ref, path, :tree, :tree_history, ref, path, count, &block)
     end
 
     def repositories

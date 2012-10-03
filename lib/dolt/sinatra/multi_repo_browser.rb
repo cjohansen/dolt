@@ -68,8 +68,22 @@ module Dolt
         force_ref(params[:splat], "blame", "master")
       end
 
+      aget "/*/history/*:*" do
+        repo, ref, path = params[:splat]
+        history(repo, ref, path, (params[:commit_count] || 20).to_i)
+      end
+
+      aget "/*/history/*" do
+        force_ref(params[:splat], "history", "master")
+      end
+
       aget "/*/refs" do
         refs(params[:splat].first)
+      end
+
+      aget "/*/tree_history/*:*" do
+        repo, ref, path = params[:splat]
+        tree_history(repo, ref, path)
       end
 
       private

@@ -86,6 +86,11 @@ module Dolt
         refs(repo)
       end
 
+      aget "/tree_history/*:*" do
+        ref, path = params[:splat]
+        tree_history(repo, ref, path)
+      end
+
       private
       def force_ref(args, action, ref)
         redirect("/#{action}/#{ref}:" + args.join)

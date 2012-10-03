@@ -16,7 +16,4 @@
 #   You should have received a copy of the GNU Affero General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #++
-%>
-<h1><%= @title = "An error occurred" %></h1>
-<h2><%= error.respond_to?(:message) ? error.message : error %></h2>
-<p><a href="<%= tree_url(repository, ref, "") %>">Go back</a></p>
+%><%= JSON.generate(tree) %>

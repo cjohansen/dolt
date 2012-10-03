@@ -103,6 +103,10 @@ class Actions
     respond(:refs, repo, nil, nil, &block)
   end
 
+  def tree_history(repo, ref, path, count, &block)
+    respond(:tree_history, repo, ref, path, &block)
+  end
+
   def respond(type, repo, ref, path, &block)
     @repo = repo
     @ref = ref
@@ -250,6 +254,16 @@ describe Dolt::Sinatra::Actions do
 
       assert_equal "application/json", app.response["Content-Type"]
       assert_equal "refs:JSON", app.body
+    end
+  end
+
+  describe "#tree_history" do
+    it "renders the tree_history template as json" do
+      app = DummySinatraApp.new(Actions.new(BlobStub.new), Renderer.new("JSON"))
+      app.tree_history("gitorious", "master", "", 1)
+
+      assert_equal "application/json", app.response["Content-Type"]
+      assert_equal "tree_history:JSON", app.body
     end
   end
 end

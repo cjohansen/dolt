@@ -19,7 +19,7 @@
 %>
 <% @title = "#{path} in #{ref}" %>
 <div id="gts-ref-selector-ph"></div>
-<table class="table table-striped gts-tree-explorer">
+<table class="table table-striped gts-tree-explorer" data-gts-tree-history="<%= tree_history_url(repository, ref, path) %>">
   <thead>
     <tr>
       <th colspan="<%= tree_table_padding_width("/#{path}") %>">File</th>
@@ -38,8 +38,8 @@
             <%= object[:name] %>
           </a>
         </td>
-        <td></td>
-        <td class="gts-sha"></td>
+        <td class="gts-commit-date"></td>
+        <td class="gts-commit-oid"></td>
         <td></td>
       </tr>
     <% end %>

@@ -54,7 +54,7 @@ module Dolt
 
       private
       def entry_history(ref, entry, limit)
-        deferred_method("log -n #{limit} #{ref} #{entry}") do |out, s|
+        deferred_method("log -n #{limit} #{ref} -- #{entry}") do |out, s|
           Dolt::Git::Commit.parse_log(out)
         end
       end

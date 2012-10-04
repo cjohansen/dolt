@@ -70,6 +70,18 @@ describe Dolt::View::Tree do
       assert_equal "version.rb", entries[7][:name]
       assert_equal "view.rb", entries[8][:name]
     end
+
+    it "lumps submodules in with directories" do
+      async = { :name => "async", :type => :tree }
+      disk_repo_resolver = { :type => :blob, :name => "disk_repo_resolver.rb" }
+      git = { :type => :submodule, :name => "git" }
+      tree = OpenStruct.new({ :entries => [async, disk_repo_resolver, git] })
+      entries = tree_entries(tree)
+
+      assert_equal :tree, entries[0][:type]
+      assert_equal :submodule, entries[1][:type]
+      assert_equal :blob, entries[2][:type]
+    end
   end
 
   describe "#partition_path" do

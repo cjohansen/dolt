@@ -23,6 +23,7 @@ require "ostruct"
 class Repository
   attr_reader :name
   def initialize(name); @name = name; end
+  def tree(ref, path); stub; end
   def rev_parse(rev); stub; end
   def blame(ref, path); stub; end
   def log(ref, path, limit); stub; end

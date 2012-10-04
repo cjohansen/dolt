@@ -21,10 +21,50 @@ require "time"
 
 describe Dolt::Git::Repository do
   include EM::MiniTest::Spec
+  before { @repository = Dolt::Git::Repository.new(".") }
+
+  describe "#submodules" do
+    it "returns deferrable" do
+      deferrable = @repository.submodules("master")
+      assert deferrable.respond_to?(:callback)
+      assert deferrable.respond_to?(:errback)
+    end
+
+    it "yields list of submodules" do
+      @repository.submodules("c1f6cd9").callback do |submodules|
+        url = "git://gitorious.org/gitorious/ui3.git"
+        assert_equal [{ :path => "vendor/ui", :url => url }], submodules
+        done!
+      end
+    wait!
+    end
+
+    it "resolves with empty array if no submodules" do
+      @repository.submodules("26139a3").callback do |submodules|
+        assert_equal [], submodules
+        done!
+      end
+      wait!
+    end
+  end
+
+  describe "#tree" do
+    it "includes submodule data for trees" do
+      @repository.tree("master", "vendor").callback do |tree|
+        assert_equal({
+          :type => :submodule,
+          :filemode => 57344,
+          :name => "ui",
+          :oid => "2b05baa5a2e626cb1a4c4b30299c1db5490979b7",
+          :url => "git://gitorious.org/gitorious/ui3.git"
+        }, tree.entries.first)
+        done!
+      end
+      wait!
+    end
+  end
 
   describe "#blame" do
-    before { @repository = Dolt::Git::Repository.new(".") }
-
     it "returns deferrable" do
       deferrable = @repository.blame("master", "Gemfile")
       assert deferrable.respond_to?(:callback)
@@ -41,8 +81,6 @@ describe Dolt::Git::Repository do
   end
 
   describe "#log" do
-    before { @repository = Dolt::Git::Repository.new(".") }
-
     it "returns deferrable" do
       deferrable = @repository.log("master", "Gemfile", 1)
       assert deferrable.respond_to?(:callback)
@@ -60,8 +98,6 @@ describe Dolt::Git::Repository do
   end
 
   describe "#tree_history" do
-    before { @repository = Dolt::Git::Repository.new(".") }
-
     it "returns deferrable" do
       deferrable = @repository.tree_history("master", "")
       assert deferrable.respond_to?(:callback)
@@ -97,13 +133,13 @@ describe Dolt::Git::Repository do
           :filemode => 33188,
           :name => ".gitmodules",
           :history => [{
-            :oid => "906d67b4f3e5de7364ba9b57d174d8998d53ced6",
-            :author => { :name => "Christian Johansen",
-                         :email => "christian@cjohansen.no" },
-            :summary => "Working Moron server for viewing blobs",
-            :date => Time.parse("Mon Sep 10 15:07:39 +0200 2012"),
-            :message => ""
-          }]
+                         :oid => "906d67b4f3e5de7364ba9b57d174d8998d53ced6",
+                         :author => { :name => "Christian Johansen",
+                           :email => "christian@cjohansen.no" },
+                         :summary => "Working Moron server for viewing blobs",
+                         :date => Time.parse("Mon Sep 10 15:07:39 +0200 2012"),
+                         :message => ""
+                       }]
         }
 
         assert_equal expected, log[0]
@@ -122,19 +158,19 @@ describe Dolt::Git::Repository do
 
       promise.callback do |log|
         expected = [{
-          :type => :tree,
-          :oid => "58f84405b588699b24c619aa4cd83669c5623f88",
-          :filemode => 16384,
-          :name => "dolt",
-          :history => [{
-            :oid => "8ab4f8c42511f727244a02aeee04824891610bbd",
-            :author => { :name => "Christian Johansen",
-                         :email => "christian@gitorious.com" },
-            :summary => "New version",
-            :date => Time.parse("Mon Oct 1 16:34:00 +0200 2012"),
-            :message => ""
-          }]
-        }]
+                      :type => :tree,
+                      :oid => "58f84405b588699b24c619aa4cd83669c5623f88",
+                      :filemode => 16384,
+                      :name => "dolt",
+                      :history => [{
+                                     :oid => "8ab4f8c42511f727244a02aeee04824891610bbd",
+                                     :author => { :name => "Christian Johansen",
+                                       :email => "christian@gitorious.com" },
+                                     :summary => "New version",
+                                     :date => Time.parse("Mon Oct 1 16:34:00 +0200 2012"),
+                                     :message => ""
+                                   }]
+                    }]
 
         assert_equal expected, log
         done!

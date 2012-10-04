@@ -17,27 +17,25 @@
 #++
 
 module Dolt
-  module View
-    module Object
-      def object_url(repository, ref, path, object)
-        return object[:url] if object[:type] == :submodule
-        url = "/#{object[:type]}/#{ref}:#{object_path(path, object)}"
-        repo_url(repository, url)
+  module Git
+    class Tree
+      attr_reader :oid, :entries
+      include Enumerable
+
+      def initialize(oid, entries)
+        @oid = oid
+        @entries = entries
       end
 
-      def object_path(root, object)
-        File.join(root, object[:name]).sub(/^\//, "")
+      def each(&block)
+        entries.each(&block)
       end
 
-      def object_icon_class(entry)
-        case entry[:type]
-        when :blob
-          "icon-file"
-        when :tree
-          "icon-folder-close"
-        when :submodule
-          "icon-hdd"
-        end
+      # From Rugged::Tree
+      def inspect
+        data = "#<Dolt::Git::Tree:#{object_id} {oid: #{oid}}>\n"
+        self.each { |e| data << "  <\"#{e[:name]}\" #{e[:oid]}>\n" }
+        data
       end
     end
   end

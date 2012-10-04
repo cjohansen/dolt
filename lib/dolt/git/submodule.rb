@@ -17,26 +17,17 @@
 #++
 
 module Dolt
-  module View
-    module Object
-      def object_url(repository, ref, path, object)
-        return object[:url] if object[:type] == :submodule
-        url = "/#{object[:type]}/#{ref}:#{object_path(path, object)}"
-        repo_url(repository, url)
-      end
-
-      def object_path(root, object)
-        File.join(root, object[:name]).sub(/^\//, "")
-      end
-
-      def object_icon_class(entry)
-        case entry[:type]
-        when :blob
-          "icon-file"
-        when :tree
-          "icon-folder-close"
-        when :submodule
-          "icon-hdd"
+  module Git
+    class Submodule
+      def self.parse_config(config)
+        config.split("\n").inject([]) do |modules, line|
+          if line =~ /\[submodule ".*"\]/
+            modules << {}
+          else
+            _, key, val = *line.match(/\s([^\s]+) = ([^\s]+)/)
+            modules.last[key.to_sym] = val
+          end
+          modules
         end
       end
     end

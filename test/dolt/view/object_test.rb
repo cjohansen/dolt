@@ -61,11 +61,23 @@ describe Dolt::View::Object do
     end
   end
 
-  it "returns blob icon type" do
-    assert_equal "icon-file", object_icon_class({ :type => :blob })
+  describe "#object_icon_class" do
+    it "returns blob icon type" do
+      assert_equal "icon-file", object_icon_class({ :type => :blob })
+    end
+
+    it "returns tree icon type" do
+      assert_equal "icon-folder-close", object_icon_class({ :type => :tree })
+    end
+
+    it "returns submodule icon type" do
+      assert_equal "icon-hdd", object_icon_class({ :type => :submodule })
+    end
   end
 
-  it "returns tree icon type" do
-    assert_equal "icon-folder-close", object_icon_class({ :type => :tree })
+  it "links submodule object to submodule" do
+    url = "git://gitorious.org/gitorious/ui3.git"
+    object = { :type => :submodule, :url => url }
+    assert_equal url, object_url("gitorious", "master", "vendor", object)
   end
 end

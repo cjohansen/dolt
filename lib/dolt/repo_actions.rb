@@ -29,7 +29,7 @@ module Dolt
     end
 
     def tree(repo, ref, path, &block)
-      repo_action(repo, ref, path, :tree, :rev_parse, "#{ref}:#{path}", &block)
+      repo_action(repo, ref, path, :tree, :tree, ref, path, &block)
     end
 
     def blame(repo, ref, path, &block)

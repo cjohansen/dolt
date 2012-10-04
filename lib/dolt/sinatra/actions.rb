@@ -60,7 +60,7 @@ module Dolt
         actions.tree(repo, ref, path) do |err, data|
           return error(err, repo, ref) if !err.nil?
           tree = data[:tree]
-          return redirect(blob_url(repo, ref, path)) if !tree.is_a?(Rugged::Tree)
+          return redirect(blob_url(repo, ref, path)) if tree.class.to_s !~ /\bTree/
           response["Content-Type"] = "text/html"
           body(renderer.render(:tree, data))
         end

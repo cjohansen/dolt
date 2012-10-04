@@ -24,7 +24,7 @@ module Dolt
       end
 
       def tree_entries(tree)
-        sort(tree.entries.select { |e| e[:type] == :tree }) +
+        sort(tree.entries.select { |e| [:tree, :submodule].index(e[:type]) }) +
           sort(tree.entries.select { |e| e[:type] == :blob })
       end
 

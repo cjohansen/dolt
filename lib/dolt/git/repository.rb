@@ -20,11 +20,36 @@ require "em_pessimistic/deferrable_child_process"
 require "em/deferrable"
 require "dolt/git/blame"
 require "dolt/git/commit"
+require "dolt/git/submodule"
+require "dolt/git/tree"
 require "dolt/async/when"
 
 module Dolt
   module Git
     class Repository < EMRugged::Repository
+      def submodules(ref)
+        d = EventMachine::DefaultDeferrable.new
+        gm = rev_parse("#{ref}:.gitmodules")
+        gm.callback do |config|
+          d.succeed(Dolt::Git::Submodule.parse_config(config.content))
+        end
+        # Fails if .gitmodules cannot be found, which means no submodules
+        gm.errback { |err| d.succeed([]) }
+        d
+      end
+
+      def tree(ref, path)
+        d = EventMachine::DefaultDeferrable.new
+        rp = rev_parse("#{ref}:#{path}")
+        rp.callback do |tree|
+          break d.fail(StandardError.new("Not a tree")) unless tree.is_a?(Rugged::Tree)
+          break d.succeed(tree) if !tree.find { |e| e[:type].nil? }
+          annotate_submodules(ref, path, d, tree)
+        end
+        rp.errback { |err| d.fail(err) }
+        d
+      end
+
       def blame(ref, path)
         deferred_method("blame -l -t -p #{ref} #{path}") do |output, s|
           Dolt::Git::Blame.parse_porcelain(output)
@@ -70,6 +95,24 @@ module Dolt
           d.succeed(entries.map { |e| e.merge({ :history => history.shift }) })
         end
         d
+      end
+
+      def annotate_submodules(ref, path, deferrable, tree)
+        submodules(ref).callback do |submodules|
+          entries = tree.entries.map do |entry|
+            if entry[:type].nil?
+              mod = path == "" ? entry[:name] : File.join(path, entry[:name])
+              meta = submodules.find { |s| s[:path] == mod }
+              if meta
+                entry[:type] = :submodule
+                entry[:url] = meta[:url]
+              end
+            end
+            entry
+          end
+
+          deferrable.succeed(Dolt::Git::Tree.new(tree.oid, entries))
+        end
       end
 
       def deferred_method(cmd, &block)

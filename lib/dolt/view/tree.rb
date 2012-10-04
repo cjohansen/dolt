@@ -28,8 +28,7 @@ module Dolt
           sort(tree.entries.select { |e| e[:type] == :blob })
       end
 
-      def tree_context(repo, ref, path, maxdepth = nil)
-        levels = accumulate_path(partition_path(path, maxdepth))
+      def tree_context(repo, ref, levels)
         return "" if levels.length == 1 && levels[0].length == 1
         total = 4 + levels.length
         colspan = total
@@ -56,7 +55,7 @@ module Dolt
            file = path == "" ? "/" : File.basename(path)
            url = object_url(repo, ref, dir, { :type => :tree, :name => file })
            html = "<a href=\"#{url}\">#{extra} #{file}</a>"
-           extra = ""
+           extra = extra == "" || extra == "/" ? "/" : ""
            html
         end).join(" ")
       end
@@ -67,7 +66,8 @@ module Dolt
         return result if path == ""
         parts = path.split("/")
         maxdepth ||= parts.length
-        (parts.length - maxdepth + 1).times { result[0] << parts.shift }
+        fill_first = [parts.length, [1, parts.length - maxdepth + 1].max].min
+        fill_first.times { result[0] << parts.shift }
         result << [parts.shift] while parts.length > 0
         result
       end
@@ -83,12 +83,12 @@ module Dolt
         end
       end
 
-      def tree_table_padding_width(path)
-        path.split("/").length
+      def tree_table_padding_width(partitioned)
+        partitioned.length == 1 ? partitioned[0].length - 1 : partitioned.length
       end
 
-      def tree_table_padding_td(path)
-        "<td></td>" * tree_table_padding_width(path)
+      def tree_table_padding_td(partitioned)
+        "<td></td>" * tree_table_padding_width(partitioned)
       end
 
       private

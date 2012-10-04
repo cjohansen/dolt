@@ -26,7 +26,7 @@ module Dolt
         url = repo_url(repository, "/tree/#{ref}")
         <<-HTML
           <ul class="breadcrumb">
-            <li><a href="#{url}:"><i class="icon icon-file"></i></a></li>
+            <li><a href="#{url}:"><i class="icon icon-file"></i> /</a></li>
             #{dir_html}<li class="active">#{filename}</li>
           </ul>
         HTML

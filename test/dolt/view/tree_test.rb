@@ -120,6 +120,11 @@ describe Dolt::View::Tree do
       parts = partition_path("lib/dolt/very/deep", 3)
       assert_equal [["", "lib", "dolt"], ["very"], ["deep"]], parts
     end
+
+    it "partitions short path with maxdepth" do
+      parts = partition_path("lib", 3)
+      assert_equal [["", "lib"]], parts
+    end
   end
 
   describe "#accumulate_path" do
@@ -130,8 +135,8 @@ describe Dolt::View::Tree do
   end
 
   describe "#tree_context" do
-    def context(path)
-      tree_context("gitorious", "master", path)
+    def context(path, maxdepth = nil)
+      tree_context("gitorious", "master", accumulate_path(partition_path(path, maxdepth)))
     end
 
     it "renders root as empty string" do
@@ -172,6 +177,23 @@ describe Dolt::View::Tree do
       assert_match /colspan="5"/, select(context("lib/dolt"), "tr")[1]
       tr = select(context("lib/dolt"), "tr")[1]
       assert_equal 2, select(tr, "td").length
+    end
+
+    it "renders condensed first entry with slashes" do
+      links = select(context("src/phorkie/Database/Adapter", 3), "a")
+
+      assert_equal "<a href=\"/tree/master:\"><i class=\"icon icon-folder-open\"></i> /</a>", links.first
+      assert_equal "<a href=\"/tree/master:src\"> src</a>", links[1]
+      assert_equal "<a href=\"/tree/master:src/phorkie\">/ phorkie</a>", links[2]
+    end
+
+    it "renders long condensed first entry with slashes" do
+      links = select(context("src/phorkie/Database/Adapter/Elasticsearch", 3), "a")
+
+      assert_equal "<a href=\"/tree/master:\"><i class=\"icon icon-folder-open\"></i> /</a>", links.first
+      assert_equal "<a href=\"/tree/master:src\"> src</a>", links[1]
+      assert_equal "<a href=\"/tree/master:src/phorkie\">/ phorkie</a>", links[2]
+      assert_equal "<a href=\"/tree/master:src/phorkie/Database\">/ Database</a>", links[3]
     end
   end
 end

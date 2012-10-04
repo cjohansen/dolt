@@ -49,4 +49,17 @@ describe "tree template" do
     assert_match /<table class="table table-striped gts-tree-explorer"/, markup
     assert_match /data-gts-tree-history="/, markup
   end
+
+  it "renders context for non-empty tree" do
+    tree = Tree.new([
+      { :type => :tree, :name => "lib" },
+      { :type => :submodule, :name => "ui", :url => "git://git.git" },
+      { :type => :blob, :name => "file.txt" }
+    ])
+
+    markup = render("app/models", tree)
+
+    assert_match /icon-folder-open/, markup
+    assert_match /tree\/master:app"/, markup
+  end
 end

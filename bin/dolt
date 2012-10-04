@@ -66,6 +66,14 @@ view.helper(Dolt::View::BinaryBlobEmbedder)
 # Render supported formats as markup, syntax highlight the rest
 view.helper(Dolt::View::SmartBlobRenderer)
 
+module MaxDepth
+  def maxdepth
+    3
+  end
+end
+
+view.helper(MaxDepth)
+
 Sinatra::Base.set(:public_folder, File.join(base, "vendor/ui"))
 server = create_app(ARGV[0], view)
 Thin::Server.start("0.0.0.0", 3000, server)

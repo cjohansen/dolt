@@ -17,14 +17,78 @@
 #++
 require "test_helper"
 require "dolt/view/markup"
+require "dolt/view/syntax_highlight"
+
+module StubHighlighter
+  def highlight(path, code, opt = {})
+    return "##[#{opt[:lexer]}]#{code}##"
+  end
+end
 
 describe Dolt::View::Markup do
   include Dolt::View::Markup
 
   describe "#render_markup" do
+    include Dolt::View::SyntaxHighlight
+
     it "wraps markup in .gts-markup" do
       html = render_markup("file.md", "# Hey")
       assert_match "<div class=\"gts-markup\">", html
+    end
+
+    it "renders multi-line code blocks with syntax highlighting" do
+      html = render_markup("file.md", <<-MD)
+```cl
+(s-trim-left "trim ") ;; => "trim "
+(s-trim-left " this") ;; => "this"
+```
+      MD
+
+      assert_match "<pre class=\"common-lisp prettyprint\">", html
+    end
+
+    it "highlights multiple separate multi-line code blocks" do
+      html = render_markup("file.md", <<-MD)
+# # This stuff
+
+```cl
+(s-trim-left "trim ") ;; => "trim "
+(s-trim-left " this") ;; => "this"
+```
+
+# And this stuff
+
+```cl
+(s-trim-left "trim ") ;; => "trim "
+(s-trim-left " this") ;; => "this"
+```
+      MD
+
+      assert_equal 2, html.scan(/common-lisp/).length
+    end
+  end
+
+  describe "#highlight_code_blocks" do
+    include StubHighlighter
+
+    it "does not touch non-markdown files" do
+      content = "```cl\n(yup)\n```"
+      assert_equal content, highlight_code_blocks("file.rst", content)
+    end
+
+    it "highlights one-line code block" do
+      content = "```cl\n(yup)\n```"
+      assert_match "##[cl](yup)##", highlight_code_blocks("file.md", content)
+    end
+
+    it "highlights multi-line code block" do
+      content = "```cl\n(yup)\n(yessir-p t)\n```"
+      assert_match "##[cl](yup)\n(yessir-p t)##", highlight_code_blocks("file.md", content)
+    end
+
+    it "preserves code block white-space" do
+      content = "```cl\n(yup\n  (yessir-p t))\n```"
+      assert_match "##[cl](yup\n  (yessir-p t))##", highlight_code_blocks("file.md", content)
     end
   end
 end

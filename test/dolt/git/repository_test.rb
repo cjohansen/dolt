@@ -50,12 +50,12 @@ describe Dolt::Git::Repository do
 
   describe "#tree" do
     it "includes submodule data for trees" do
-      @repository.tree("master", "vendor").callback do |tree|
+      @repository.tree("3dc532f", "vendor").callback do |tree|
         assert_equal({
           :type => :submodule,
           :filemode => 57344,
           :name => "ui",
-          :oid => "2b05baa5a2e626cb1a4c4b30299c1db5490979b7",
+          :oid => "d167e3e1c17a27e4cf459dd380670801b0659659",
           :url => "git://gitorious.org/gitorious/ui3.git"
         }, tree.entries.first)
         done!

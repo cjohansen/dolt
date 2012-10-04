@@ -86,5 +86,6 @@ Dolt::View::SyntaxHighlight.add_lexer_alias("Gemfile", "rb")
 Dolt::View::SyntaxHighlight.add_lexer_alias("Gemfile.lock", "yaml")
 Dolt::View::SyntaxHighlight.add_lexer_alias("gemspec", "rb")
 Dolt::View::SyntaxHighlight.add_lexer_alias("htm", "html")
+Dolt::View::SyntaxHighlight.add_lexer_alias("feature", "gherkin")
 
 Dolt::View::SyntaxHighlight.add_lexer_shebang(/\bruby\b/, "rb")

@@ -56,7 +56,7 @@ describe Dolt::View::Blob do
     end
 
     it "skips highlighting if lexer is missing" do
-      html = highlight("file.txt", "Yeah yeah yeah")
+      html = highlight("file.trololol", "Yeah yeah yeah")
 
       assert_equal "Yeah yeah yeah", html
     end

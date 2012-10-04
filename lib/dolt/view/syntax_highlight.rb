@@ -45,6 +45,8 @@ module Dolt
 
       def self.lexer(suffix, code = nil)
         return @@lexer_aliases[suffix] if @@lexer_aliases[suffix]
+        lexer = Pygments::Lexer.find_by_extname(".#{suffix}")
+        return lexer.aliases.first || lexer.name if lexer
         shebang_language(shebang(code)) || suffix
       end
 
@@ -79,13 +81,10 @@ module Dolt
   end
 end
 
-Dolt::View::SyntaxHighlight.add_lexer_alias("yml", "yaml")
+Dolt::View::SyntaxHighlight.add_lexer_alias("txt", "text")
 Dolt::View::SyntaxHighlight.add_lexer_alias("ru", "rb")
 Dolt::View::SyntaxHighlight.add_lexer_alias("Rakefile", "rb")
 Dolt::View::SyntaxHighlight.add_lexer_alias("Gemfile", "rb")
 Dolt::View::SyntaxHighlight.add_lexer_alias("Gemfile.lock", "yaml")
-Dolt::View::SyntaxHighlight.add_lexer_alias("gemspec", "rb")
-Dolt::View::SyntaxHighlight.add_lexer_alias("htm", "html")
-Dolt::View::SyntaxHighlight.add_lexer_alias("feature", "gherkin")
 
 Dolt::View::SyntaxHighlight.add_lexer_shebang(/\bruby\b/, "rb")

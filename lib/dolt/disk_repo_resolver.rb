@@ -29,8 +29,8 @@ module Dolt
 
     def all
       (Dir.entries(root).select do |e|
-        File.exists?(File.join(root, e, ".git"))
-      end).sort
+         File.exists?(File.join(root, e, ".git"))
+       end).sort
     end
 
     private

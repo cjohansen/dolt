@@ -6,11 +6,9 @@ your browser of choice and features syntax highlighting with
 [Markdown](http://daringfireball.net/projects/markdown/)/[org-mode](http://orgmode.org/)/[+++](https://github.com/github/markup/)
 rendering, commit log and blame.
 
-Dolt is also a library, designed to render Git trees, blobs, commit log and
-blame. It can render said views with or without a layout, or you can provide
-your own templates (through [Tilt](https://github.com/rtomayko/tilt/)). You can
-also provide your own rendering implementation to render other formats than
-templates outputting HTML.
+The Dolt repository browser is both a stand-alone application and a library.
+`Dolt` (this package) is the stand-alone application, while `libdolt` is the
+generally reusable library.
 
 Dolt is the implementation of the next generation repo browser to be used in the
 [Gitorious](http://gitorious.org) software.

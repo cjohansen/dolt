@@ -1,10 +1,8 @@
 #!/usr/bin/env ruby
-require "thin"
+require "libdolt"
 require "tiltout"
+require "thin"
 require "sinatra/base"
-require "dolt/repo_actions"
-require "dolt/view"
-require "dolt/disk_repo_resolver"
 
 if ARGV.length == 0
   puts("Dolt should be run with a directory as its sole argument")
@@ -38,8 +36,7 @@ end
 
 base = File.join(File.dirname(__FILE__), "..")
 
-template_root = File.join(base, "views")
-view = Tiltout.new(template_root, {
+view = Tiltout.new(Dolt.template_dir, {
   :cache => false,
   :layout => "layout"
 })

@@ -16,9 +16,9 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #++
 require "dolt/sinatra/base"
-require "dolt/view/single_repository"
-require "dolt/view/blob"
-require "dolt/view/tree"
+require "libdolt/view/single_repository"
+require "libdolt/view/blob"
+require "libdolt/view/tree"
 
 module Dolt
   module Sinatra

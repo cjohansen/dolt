@@ -20,6 +20,7 @@ require "minitest/autorun"
 require "em/minitest/spec"
 require "eventmachine"
 require "dolt/view"
+require "tiltout"
 
 Bundler.require(:default, :test)
 
@@ -31,8 +32,9 @@ module Dolt
   end
 
   module ViewTest
-    def prepare_renderer(root, options = {}, helpers = nil)
-      renderer = Dolt::TemplateRenderer.new(root, options)
+    def prepare_renderer(options = {}, helpers = nil)
+      root = File.join(File.dirname(__FILE__), "..", "views")
+      renderer = Tiltout.new(root, options)
       renderer.helper(helpers || [Dolt::View::MultiRepository,
                                   Dolt::View::Object,
                                   Dolt::View::Blob,

@@ -1,8 +1,8 @@
 PATH
   remote: .
   specs:
-    dolt (0.5.1)
-      async_sinatra (~> 1.0)
+    dolt (0.5.2)
+      async_sinatra (~> 1)
       builder (~> 3.1)
       em_pessimistic (~> 0.1)
       em_rugged (~> 0.1.2)
@@ -12,9 +12,9 @@ PATH
       json (~> 1.7)
       mime-types (~> 1.19)
       pygments.rb (~> 0.2)
-      sinatra (~> 1.3)
+      sinatra (~> 1)
       thin (~> 1.4)
-      tilt (~> 1.3)
+      tiltout (~> 1)
       tzinfo (~> 0.3)
 
 GEM
@@ -39,7 +39,7 @@ GEM
     metaclass (0.0.1)
     mime-types (1.19)
     minitest (2.12.1)
-    mocha (0.12.4)
+    mocha (0.12.6)
       metaclass (~> 0.0.1)
     posix-spawn (0.3.6)
     pygments.rb (0.3.1)
@@ -60,6 +60,8 @@ GEM
       eventmachine (>= 0.12.6)
       rack (>= 1.0.0)
     tilt (1.3.3)
+    tiltout (1.0.0)
+      tilt (~> 1.3)
     tzinfo (0.3.33)
     yajl-ruby (1.1.0)
 

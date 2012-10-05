@@ -16,7 +16,6 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #++
 require "test_helper"
-require "dolt/template_renderer"
 require "dolt/view"
 
 class Blob
@@ -29,11 +28,10 @@ describe "blob template" do
 
   before do
     @repo = "the-dolt"
-    @template_root = File.join(File.dirname(__FILE__), "..", "..", "..", "views")
   end
 
   def render(path, blob, options = {}, helpers = nil)
-    renderer = prepare_renderer(@template_root, options, helpers)
+    renderer = prepare_renderer(options, helpers)
     renderer.render(:blob, {
                       :blob => blob,
                       :repository => @repo,

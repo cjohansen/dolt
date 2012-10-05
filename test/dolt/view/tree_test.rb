@@ -34,13 +34,12 @@ describe Dolt::View::Tree do
       git = { :type => :tree, :name => "git" }
       repo_actions = { :type => :blob, :name => "repo_actions.rb" }
       sinatra = { :type => :tree, :name => "sinatra" }
-      template_renderer = { :type => :blob, :name => "template_renderer.rb" }
       version = { :type => :blob, :name => "version.rb" }
       view_rb = { :type => :blob, :name => "view.rb" }
       view = { :type => :tree, :name => "view" }
       @tree = OpenStruct.new({ :entries => [async, disk_repo_resolver, git,
-                                            repo_actions, sinatra, template_renderer,
-                                            version, view_rb, view] })
+                                            repo_actions, sinatra, version,
+                                            view_rb, view] })
     end
 
     it "groups tree by type, dirs first" do
@@ -54,7 +53,6 @@ describe Dolt::View::Tree do
       assert_equal :blob, entries[5][:type]
       assert_equal :blob, entries[6][:type]
       assert_equal :blob, entries[7][:type]
-      assert_equal :blob, entries[8][:type]
     end
 
     it "sorts by name" do
@@ -66,9 +64,8 @@ describe Dolt::View::Tree do
       assert_equal "view", entries[3][:name]
       assert_equal "disk_repo_resolver.rb", entries[4][:name]
       assert_equal "repo_actions.rb", entries[5][:name]
-      assert_equal "template_renderer.rb", entries[6][:name]
-      assert_equal "version.rb", entries[7][:name]
-      assert_equal "view.rb", entries[8][:name]
+      assert_equal "version.rb", entries[6][:name]
+      assert_equal "view.rb", entries[7][:name]
     end
 
     it "lumps submodules in with directories" do

@@ -16,7 +16,6 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #++
 require "test_helper"
-require "dolt/template_renderer"
 require "dolt/view"
 require "json"
 
@@ -25,8 +24,7 @@ describe "refs template" do
 
   before do
     @repo = "the-dolt"
-    @template_root = File.join(File.dirname(__FILE__), "..", "..", "..", "views")
-    @renderer = prepare_renderer(@template_root)
+    @renderer = prepare_renderer
   end
 
   it "renders JSON" do

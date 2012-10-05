@@ -16,7 +16,6 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #++
 require "test_helper"
-require "dolt/template_renderer"
 require "dolt/view"
 
 class Blame
@@ -29,7 +28,6 @@ describe "blame template" do
 
   before do
     @repo = "the-dolt"
-    @template_root = File.join(File.dirname(__FILE__), "..", "..", "..", "views")
     @committer = {
       :name => "Christian Johansen",
       :mail => "christian@cjohansen.no",
@@ -38,7 +36,7 @@ describe "blame template" do
   end
 
   def render(path, blame, options = {})
-    renderer = prepare_renderer(@template_root, options)
+    renderer = prepare_renderer(options)
     renderer.render(:blame, {
                       :blame => blame,
                       :repository => @repo,

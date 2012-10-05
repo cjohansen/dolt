@@ -16,7 +16,6 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #++
 require "test_helper"
-require "dolt/template_renderer"
 require "dolt/view"
 
 class Blob
@@ -29,11 +28,10 @@ describe "raw template" do
 
   before do
     @repo = "the-dolt"
-    @template_root = File.join(File.dirname(__FILE__), "..", "..", "..", "views")
   end
 
   it "renders raw contents" do
-    renderer = prepare_renderer(@template_root)
+    renderer = prepare_renderer
     html = renderer.render(:raw, { :blob => Blob.new("Something something") })
 
     assert_equal "Something something\n", html

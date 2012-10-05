@@ -18,6 +18,10 @@
 #++
 require "eventmachine"
 
+# Need consistent Time formatting in JSON
+require "time"
+class Time; def to_json(*args); "\"#{iso8601}\""; end; end
+
 module Dolt
   class RepoActions
     def initialize(repo_resolver)

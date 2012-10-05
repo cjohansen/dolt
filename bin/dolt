@@ -1,8 +1,8 @@
 #!/usr/bin/env ruby
 require "thin"
+require "tiltout"
 require "sinatra/base"
 require "dolt/repo_actions"
-require "dolt/template_renderer"
 require "dolt/view"
 require "dolt/disk_repo_resolver"
 
@@ -39,7 +39,7 @@ end
 base = File.join(File.dirname(__FILE__), "..")
 
 template_root = File.join(base, "views")
-view = Dolt::TemplateRenderer.new(template_root, {
+view = Tiltout.new(template_root, {
   :cache => false,
   :layout => "layout"
 })

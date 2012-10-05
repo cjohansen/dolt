@@ -16,7 +16,6 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #++
 require "test_helper"
-require "dolt/template_renderer"
 require "dolt/view"
 
 describe "commits template" do
@@ -38,11 +37,10 @@ describe "commits template" do
     @commit1 = commit("1")
     @commit2 = commit("2")
     @commit3 = commit("3")
-    @template_root = File.join(File.dirname(__FILE__), "..", "..", "..", "views")
   end
 
   def render(path, commits, options = {})
-    renderer = prepare_renderer(@template_root, options)
+    renderer = prepare_renderer(options)
     renderer.render(:commits, {
                       :commits => commits,
                       :repository => @repo,

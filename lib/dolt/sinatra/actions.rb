@@ -48,9 +48,9 @@ module Dolt
 
       def blob(repo, ref, path, options = { :template => :blob, :content_type => "text/html" })
         actions.blob(repo, ref, path) do |err, data|
-          return error(err, repo, ref) if !err.nil?
+          next error(err, repo, ref) if !err.nil?
           blob = data[:blob]
-          return redirect(tree_url(repo, ref, path)) if !blob.is_a?(Rugged::Blob)
+          next redirect(tree_url(repo, ref, path)) if !blob.is_a?(Rugged::Blob)
           response["Content-Type"] = options[:content_type]
           tpl_options = options[:template_options] || {}
           body(renderer.render(options[:template], data, tpl_options))
@@ -59,9 +59,9 @@ module Dolt
 
       def tree(repo, ref, path)
         actions.tree(repo, ref, path) do |err, data|
-          return error(err, repo, ref) if !err.nil?
+          next error(err, repo, ref) if !err.nil?
           tree = data[:tree]
-          return redirect(blob_url(repo, ref, path)) if tree.class.to_s !~ /\bTree/
+          next redirect(blob_url(repo, ref, path)) if tree.class.to_s !~ /\bTree/
           response["Content-Type"] = "text/html"
           body(renderer.render(:tree, data))
         end
@@ -69,7 +69,7 @@ module Dolt
 
       def blame(repo, ref, path)
         actions.blame(repo, ref, path) do |err, data|
-          return error(err, repo, ref) if !err.nil?
+          next error(err, repo, ref) if !err.nil?
           response["Content-Type"] = "text/html"
           body(renderer.render(:blame, data))
         end
@@ -77,7 +77,7 @@ module Dolt
 
       def history(repo, ref, path, count)
         actions.history(repo, ref, path, count) do |err, data|
-          return error(err, repo, ref) if !err.nil?
+          next error(err, repo, ref) if !err.nil?
           response["Content-Type"] = "text/html"
           body(renderer.render(:commits, data))
         end
@@ -85,7 +85,7 @@ module Dolt
 
       def refs(repo)
         actions.refs(repo) do |err, data|
-          return error(err, repo, ref) if !err.nil?
+          next error(err, repo, ref) if !err.nil?
           response["Content-Type"] = "application/json"
           body(renderer.render(:refs, data, :layout => nil))
         end

@@ -11,7 +11,7 @@ end
 
 Gem::Specification.new do |s|
   s.name        = "dolt"
-  s.version     = "0.6.1"
+  s.version     = "0.6.2"
   s.authors     = ["Christian Johansen"]
   s.email       = ["christian@gitorious.org"]
   s.homepage    = "http://gitorious.org/gitorious/dolt"

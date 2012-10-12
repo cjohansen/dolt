@@ -42,6 +42,7 @@ view = Tiltout.new(Dolt.template_dir, {
 })
 
 view.helper(Dolt::View::Object)
+view.helper(Dolt::View::Urls)
 view.helper(Dolt::View::Blob)
 view.helper(Dolt::View::Blame)
 view.helper(Dolt::View::Breadcrumb)

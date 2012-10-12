@@ -33,7 +33,7 @@ module Dolt
         response["Content-Type"] = "text/html"
         body(renderer.render(:"500", {
                                :error => error,
-                               :repository => repo,
+                               :repository_slug => repo,
                                :ref => ref
                              }))
       end

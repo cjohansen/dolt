@@ -58,11 +58,15 @@ module Dolt
 
       def tree(repo, ref, path)
         actions.tree(repo, ref, path) do |err, data|
-          next error(err, repo, ref) if !err.nil?
-          tree = data[:tree]
-          next redirect(blob_url(repo, ref, path)) if tree.class.to_s !~ /\bTree/
-          response["Content-Type"] = "text/html"
-          body(renderer.render(:tree, data))
+          begin
+            next error(err, repo, ref) if !err.nil?
+            tree = data[:tree]
+            next redirect(blob_url(repo, ref, path)) if tree.class.to_s !~ /\bTree/
+            response["Content-Type"] = "text/html"
+            body(renderer.render(:tree, data))
+          rescue Exception => err
+            error(err, repo, ref)
+          end
         end
       end
 

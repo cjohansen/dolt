@@ -35,6 +35,21 @@ module Dolt
                                :repository_slug => repo,
                                :ref => ref
                              }))
+      rescue Exception => err
+        err_backtrace = err.backtrace.map { |s| "<li>#{s}</li>" }
+        error_backtrace = error.backtrace.map { |s| "<li>#{s}</li>" }
+
+        body(<<-HTML)
+        <h1>Fatal Dolt Error</h1>
+        <p>
+          Dolt encountered an exception, and additionally
+          triggered another exception trying to render the error.
+        </p>
+        <h2>Error: #{err.class} #{err.message}</h2>
+        <ul>#{err_backtrace.join()}</ul>
+        <h2>Original error: #{error.class} #{error.message}</h2>
+        <ul>#{error_backtrace.join()}</ul>
+        HTML
       end
 
       def raw(repo, ref, path)

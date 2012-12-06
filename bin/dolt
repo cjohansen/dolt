@@ -49,9 +49,9 @@ view.helper(Dolt::View::Breadcrumb)
 view.helper(Dolt::View::Tree)
 view.helper(Dolt::View::Commit)
 view.helper(Dolt::View::Gravatar)
-Dolt::View::TabWidth.tab_width = 4
 view.helper(Dolt::View::TabWidth)
 view.helper(Dolt::View::BinaryBlobEmbedder)
+view.helper(:tab_width => 4, :maxdepth => 3)
 
 # Configure blob rendering module
 
@@ -63,14 +63,6 @@ view.helper(Dolt::View::BinaryBlobEmbedder)
 
 # Render supported formats as markup, syntax highlight the rest
 view.helper(Dolt::View::SmartBlobRenderer)
-
-module MaxDepth
-  def maxdepth
-    3
-  end
-end
-
-view.helper(MaxDepth)
 
 Sinatra::Base.set(:public_folder, File.join(base, "vendor/ui"))
 server = create_app(ARGV[0], view)

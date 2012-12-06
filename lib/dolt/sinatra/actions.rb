@@ -15,7 +15,6 @@
 #   You should have received a copy of the GNU Affero General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #++
-require "em_rugged"
 require "json"
 
 module Dolt
@@ -50,7 +49,7 @@ module Dolt
         actions.blob(repo, ref, path) do |err, data|
           next error(err, repo, ref) if !err.nil?
           blob = data[:blob]
-          next redirect(tree_url(repo, ref, path)) if !blob.is_a?(Rugged::Blob)
+          next redirect(tree_url(repo, ref, path)) if blob.class.to_s !~ /\bBlob/
           response["Content-Type"] = options[:content_type]
           tpl_options = options[:template_options] || {}
           body(renderer.render(options[:template], data, tpl_options))

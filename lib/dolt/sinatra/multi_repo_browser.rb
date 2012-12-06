@@ -16,14 +16,14 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #++
 require "dolt/sinatra/base"
-require "libdolt/view/single_repository"
+require "libdolt/view/multi_repository"
 require "libdolt/view/blob"
 require "libdolt/view/tree"
 
 module Dolt
   module Sinatra
     class MultiRepoBrowser < Dolt::Sinatra::Base
-      include Dolt::View::SingleRepository
+      include Dolt::View::MultiRepository
       include Dolt::View::Blob
       include Dolt::View::Tree
 

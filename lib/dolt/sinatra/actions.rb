@@ -85,6 +85,18 @@ module Dolt
         end
       end
 
+      def tree_entry(repo, ref, path)
+        actions.tree_entry(repo, ref, path) do |err, data|
+          begin
+            next error(err, repo, ref) if !err.nil?
+            response["Content-Type"] = "text/html"
+            body(renderer.render(data.key?(:tree) ? :tree : :blob, data))
+          rescue Exception => err
+            error(err, repo, ref)
+          end
+        end
+      end
+
       def blame(repo, ref, path)
         actions.blame(repo, ref, path) do |err, data|
           next error(err, repo, ref) if !err.nil?

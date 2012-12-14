@@ -87,6 +87,10 @@ class Actions
     respond(:tree, repo, ref, path, &block)
   end
 
+  def tree_entry(repo, ref, path, &block)
+    respond(:tree_entry, repo, ref, path, &block)
+  end
+
   def raw(repo, ref, path, &block)
     respond(:raw, repo, ref, path, &block)
   end
@@ -112,7 +116,7 @@ class Actions
     @ref = ref
     @path = path
     data = { :ref => ref, :repository => repo }
-    data[type] = @response
+    data[type != :tree_entry ? type : (@response.class.to_s =~ /Tree/ ? :tree : :blob)] = @response
     block.call(nil, data)
   end
 end
@@ -174,6 +178,24 @@ describe Dolt::Sinatra::Actions do
       assert_equal 302, app.response.status
       assert_equal "/gitorious/blob/master:app/models/repository.rb", location
       assert_equal "", app.body
+    end
+  end
+
+  describe "#tree_entry" do
+    it "renders trees with the tree template as html" do
+      app = DummySinatraApp.new(Actions.new(TreeStub.new), Renderer.new("Tree"))
+      app.tree_entry("gitorious", "master", "app/models")
+
+      assert_equal "text/html", app.response["Content-Type"]
+      assert_equal "tree:Tree", app.body
+    end
+
+    it "renders trees with the tree template as html" do
+      app = DummySinatraApp.new(Actions.new(BlobStub.new), Renderer.new("Blob"))
+      app.tree_entry("gitorious", "master", "app/models")
+
+      assert_equal "text/html", app.response["Content-Type"]
+      assert_equal "blob:Blob", app.body
     end
   end
 

@@ -137,7 +137,7 @@ describe Dolt::Sinatra::Actions do
       app = DummySinatraApp.new(Actions.new(BlobStub.new), Renderer.new("Blob"))
       app.blob("gitorious", "master", "app/models/repository.rb")
 
-      assert_equal "text/html", app.response["Content-Type"]
+      assert_equal "text/html; charset=utf-8", app.response["Content-Type"]
       assert_equal "blob:Blob", app.body
     end
 
@@ -166,7 +166,7 @@ describe Dolt::Sinatra::Actions do
       app = DummySinatraApp.new(Actions.new(TreeStub.new), Renderer.new("Tree"))
       app.tree("gitorious", "master", "app/models")
 
-      assert_equal "text/html", app.response["Content-Type"]
+      assert_equal "text/html; charset=utf-8", app.response["Content-Type"]
       assert_equal "tree:Tree", app.body
     end
 
@@ -179,6 +179,28 @@ describe Dolt::Sinatra::Actions do
       assert_equal "/gitorious/blob/master:app/models/repository.rb", location
       assert_equal "", app.body
     end
+
+    it "sets X-UA-Compatible header" do
+      app = DummySinatraApp.new(Actions.new(TreeStub.new), Renderer.new("Tree"))
+      app.tree("gitorious", "master", "app/models")
+
+      assert_equal "IE=edge", app.response["X-UA-Compatible"]
+    end
+
+    it "does not set cache-control header for head ref" do
+      app = DummySinatraApp.new(Actions.new(TreeStub.new), Renderer.new("Tree"))
+      app.tree("gitorious", "master", "app/models")
+
+      assert !app.response.key?("Cache-Control")
+    end
+
+    it "sets cache headers for full oid ref" do
+      app = DummySinatraApp.new(Actions.new(TreeStub.new), Renderer.new("Tree"))
+      app.tree("gitorious", "a" * 40, "app/models")
+
+      assert_equal "max-age=315360000, public", app.response["Cache-Control"]
+      refute_nil app.response["Expires"]
+    end
   end
 
   describe "#tree_entry" do
@@ -186,7 +208,7 @@ describe Dolt::Sinatra::Actions do
       app = DummySinatraApp.new(Actions.new(TreeStub.new), Renderer.new("Tree"))
       app.tree_entry("gitorious", "master", "app/models")
 
-      assert_equal "text/html", app.response["Content-Type"]
+      assert_equal "text/html; charset=utf-8", app.response["Content-Type"]
       assert_equal "tree:Tree", app.body
     end
 
@@ -194,7 +216,7 @@ describe Dolt::Sinatra::Actions do
       app = DummySinatraApp.new(Actions.new(BlobStub.new), Renderer.new("Blob"))
       app.tree_entry("gitorious", "master", "app/models")
 
-      assert_equal "text/html", app.response["Content-Type"]
+      assert_equal "text/html; charset=utf-8", app.response["Content-Type"]
       assert_equal "blob:Blob", app.body
     end
   end
@@ -244,7 +266,7 @@ describe Dolt::Sinatra::Actions do
       app = DummySinatraApp.new(Actions.new(BlobStub.new), Renderer.new("Text"))
       app.blame("gitorious", "master", "app/models/repository.rb")
 
-      assert_equal "text/html", app.response["Content-Type"]
+      assert_equal "text/html; charset=utf-8", app.response["Content-Type"]
       assert_equal "blame:Text", app.body
     end
   end
@@ -264,7 +286,7 @@ describe Dolt::Sinatra::Actions do
       app = DummySinatraApp.new(Actions.new(BlobStub.new), Renderer.new("Text"))
       app.history("gitorious", "master", "app/models/repository.rb", 10)
 
-      assert_equal "text/html", app.response["Content-Type"]
+      assert_equal "text/html; charset=utf-8", app.response["Content-Type"]
       assert_equal "commits:Text", app.body
     end
   end

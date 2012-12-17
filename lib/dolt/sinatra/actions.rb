@@ -16,6 +16,7 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #++
 require "json"
+require "time"
 
 module Dolt
   module Sinatra
@@ -29,7 +30,7 @@ module Dolt
       end
 
       def error(error, repo, ref)
-        response["Content-Type"] = "text/html"
+        add_headers(response)
         body(renderer.render(:"500", {
                                :error => error,
                                :repository_slug => repo,
@@ -60,12 +61,12 @@ module Dolt
              })
       end
 
-      def blob(repo, ref, path, options = { :template => :blob, :content_type => "text/html" })
+      def blob(repo, ref, path, options = { :template => :blob })
         actions.blob(repo, ref, path) do |err, data|
           next error(err, repo, ref) if !err.nil?
           blob = data[:blob]
           next redirect(tree_url(repo, ref, path)) if blob.class.to_s !~ /\bBlob/
-          response["Content-Type"] = options[:content_type]
+          add_headers(response, options.merge(:ref => ref))
           tpl_options = options[:template_options] || {}
           body(renderer.render(options[:template], data, tpl_options))
         end
@@ -77,7 +78,7 @@ module Dolt
             next error(err, repo, ref) if !err.nil?
             tree = data[:tree]
             next redirect(blob_url(repo, ref, path)) if tree.class.to_s !~ /\bTree/
-            response["Content-Type"] = "text/html"
+            add_headers(response, :ref => ref)
             body(renderer.render(:tree, data))
           rescue Exception => err
             error(err, repo, ref)
@@ -89,7 +90,7 @@ module Dolt
         actions.tree_entry(repo, ref, path) do |err, data|
           begin
             next error(err, repo, ref) if !err.nil?
-            response["Content-Type"] = "text/html"
+            add_headers(response, :ref => ref)
             body(renderer.render(data.key?(:tree) ? :tree : :blob, data))
           rescue Exception => err
             error(err, repo, ref)
@@ -100,7 +101,7 @@ module Dolt
       def blame(repo, ref, path)
         actions.blame(repo, ref, path) do |err, data|
           next error(err, repo, ref) if !err.nil?
-          response["Content-Type"] = "text/html"
+          add_headers(response, :ref => ref)
           body(renderer.render(:blame, data))
         end
       end
@@ -108,7 +109,7 @@ module Dolt
       def history(repo, ref, path, count)
         actions.history(repo, ref, path, count) do |err, data|
           next error(err, repo, ref) if !err.nil?
-          response["Content-Type"] = "text/html"
+          add_headers(response, :ref => ref)
           body(renderer.render(:commits, data))
         end
       end
@@ -116,7 +117,7 @@ module Dolt
       def refs(repo)
         actions.refs(repo) do |err, data|
           next error(err, repo, ref) if !err.nil?
-          response["Content-Type"] = "application/json"
+          add_headers(response, :content_type => "application/json")
           body(renderer.render(:refs, data, :layout => nil))
         end
       end
@@ -126,9 +127,22 @@ module Dolt
           if !err.nil?
             error(err, repo, ref)
           else
-            response["Content-Type"] = "application/json"
+            add_headers(response, :content_type => "application/json", :ref => ref)
             body(renderer.render(:tree_history, data, :layout => nil))
           end
+        end
+      end
+
+      private
+      def add_headers(response, headers = {})
+        default_ct = "text/html; charset=utf-8"
+        response["Content-Type"] = headers[:content_type] || default_ct
+        response["X-UA-Compatible"] = "IE=edge"
+
+        if headers[:ref] && headers[:ref].length == 40
+          response["Cache-Control"] = "max-age=315360000, public"
+          year = 60*60*24*365
+          response["Expires"] = (Time.now + year).httpdate
         end
       end
     end

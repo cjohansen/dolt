@@ -124,11 +124,15 @@ module Dolt
 
       def tree_history(repo, ref, path, count = 1)
         actions.tree_history(repo, ref, path, count) do |err, data|
-          if !err.nil?
+          begin
+            if !err.nil?
+              error(err, repo, ref)
+            else
+              add_headers(response, :content_type => "application/json", :ref => ref)
+              body(renderer.render(:tree_history, data, :layout => nil))
+            end
+          rescue Exception => err
             error(err, repo, ref)
-          else
-            add_headers(response, :content_type => "application/json", :ref => ref)
-            body(renderer.render(:tree_history, data, :layout => nil))
           end
         end
       end

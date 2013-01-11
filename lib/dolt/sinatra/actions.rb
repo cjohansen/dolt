@@ -54,6 +54,10 @@ module Dolt
       end
 
       def raw(repo, ref, path)
+        if oid = lookup_ref_oid(repo, ref)
+          redirect(raw_url(repo, oid, path)) and return
+        end
+
         blob(repo, ref, path, {
                :template => :raw,
                :content_type => "text/plain",
@@ -62,7 +66,11 @@ module Dolt
       end
 
       def blob(repo, ref, path, options = { :template => :blob })
-        actions.blob(repo, ref, path) do |err, data|
+        if oid = lookup_ref_oid(repo, ref)
+          redirect(blob_url(repo, oid, path)) and return
+        end
+
+        actions.blob(repo, u(ref), path) do |err, data|
           next error(err, repo, ref) if !err.nil?
           blob = data[:blob]
           next redirect(tree_url(repo, ref, path)) if blob.class.to_s !~ /\bBlob/
@@ -73,7 +81,11 @@ module Dolt
       end
 
       def tree(repo, ref, path)
-        actions.tree(repo, ref, path) do |err, data|
+        if oid = lookup_ref_oid(repo, ref)
+          redirect(tree_url(repo, oid, path)) and return
+        end
+
+        actions.tree(repo, u(ref), path) do |err, data|
           begin
             next error(err, repo, ref) if !err.nil?
             tree = data[:tree]
@@ -87,7 +99,11 @@ module Dolt
       end
 
       def tree_entry(repo, ref, path)
-        actions.tree_entry(repo, ref, path) do |err, data|
+        if oid = lookup_ref_oid(repo, ref)
+          redirect(tree_entry_url(repo, oid, path)) and return
+        end
+
+        actions.tree_entry(repo, u(ref), path) do |err, data|
           begin
             next error(err, repo, ref) if !err.nil?
             add_headers(response, :ref => ref)
@@ -99,7 +115,11 @@ module Dolt
       end
 
       def blame(repo, ref, path)
-        actions.blame(repo, ref, path) do |err, data|
+        if oid = lookup_ref_oid(repo, ref)
+          redirect(blame_url(repo, oid, path)) and return
+        end
+
+        actions.blame(repo, u(ref), path) do |err, data|
           next error(err, repo, ref) if !err.nil?
           add_headers(response, :ref => ref)
           body(renderer.render(:blame, data))
@@ -107,7 +127,11 @@ module Dolt
       end
 
       def history(repo, ref, path, count)
-        actions.history(repo, ref, path, count) do |err, data|
+        if oid = lookup_ref_oid(repo, ref)
+          redirect(history_url(repo, oid, path)) and return
+        end
+
+        actions.history(repo, u(ref), path, count) do |err, data|
           next error(err, repo, ref) if !err.nil?
           add_headers(response, :ref => ref)
           body(renderer.render(:commits, data))
@@ -123,7 +147,11 @@ module Dolt
       end
 
       def tree_history(repo, ref, path, count = 1)
-        actions.tree_history(repo, ref, path, count) do |err, data|
+        if oid = lookup_ref_oid(repo, ref)
+          redirect(tree_history_url(repo, oid, path)) and return
+        end
+
+        actions.tree_history(repo, u(ref), path, count) do |err, data|
           begin
             if !err.nil?
               error(err, repo, ref)
@@ -142,6 +170,17 @@ module Dolt
       end
 
       private
+      def lookup_ref_oid(repo, ref)
+        return if !respond_to?(:redirect_refs?) || !redirect_refs? || ref.length == 40
+        actions.rev_parse_oid(repo, ref)
+      end
+
+      def u(str)
+        # Temporarily swap the + out with a magic byte, so
+        # filenames/branches with +'s won't get unescaped to a space
+        CGI.unescape(str.gsub("+", "\001")).gsub("\001", '+')
+      end
+
       def add_headers(response, headers = {})
         default_ct = "text/html; charset=utf-8"
         response["Content-Type"] = headers[:content_type] || default_ct

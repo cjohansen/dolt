@@ -11,7 +11,7 @@ end
 
 Gem::Specification.new do |s|
   s.name        = "dolt"
-  s.version     = "0.10.0"
+  s.version     = "0.11.0"
   s.authors     = ["Christian Johansen"]
   s.email       = ["christian@gitorious.org"]
   s.homepage    = "http://gitorious.org/gitorious/dolt"
@@ -20,7 +20,7 @@ Gem::Specification.new do |s|
 
   s.rubyforge_project = "dolt"
 
-  s.add_dependency "libdolt", "~>0.14"
+  s.add_dependency "libdolt", "~>0.15"
   s.add_dependency "thin", "~>1.4"
   s.add_dependency "sinatra", "~>1.0"
   s.add_dependency "async_sinatra", "~>1.0"

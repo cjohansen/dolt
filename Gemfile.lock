@@ -1,10 +1,10 @@
 PATH
   remote: .
   specs:
-    dolt (0.10.0)
+    dolt (0.11.0)
       async_sinatra (~> 1.0)
       json (~> 1.5)
-      libdolt (~> 0.14)
+      libdolt (~> 0.15)
       sinatra (~> 1.0)
       thin (~> 1.4)
       tiltout (~> 1.4)
@@ -27,7 +27,7 @@ GEM
     github-markup (0.7.5)
     htmlentities (4.3.1)
     json (1.7.6)
-    libdolt (0.14.0)
+    libdolt (0.15.0)
       em_pessimistic (~> 0.1)
       em_rugged (~> 0.3)
       eventmachine (~> 1.0)

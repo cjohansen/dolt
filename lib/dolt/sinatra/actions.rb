@@ -137,6 +137,10 @@ module Dolt
         end
       end
 
+      def resolve_repository(repo)
+        actions.resolve_repository(repo)
+      end
+
       private
       def add_headers(response, headers = {})
         default_ct = "text/html; charset=utf-8"

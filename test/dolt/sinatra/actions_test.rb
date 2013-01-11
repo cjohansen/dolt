@@ -142,12 +142,19 @@ describe Dolt::Sinatra::Actions do
     end
 
     it "redirects tree views to tree action" do
-      app = DummySinatraApp.new(Actions.new(TreeStub.new), Renderer.new("Blob"))
+      app = DummySinatraApp.new(Actions.new(TreeStub.new), Renderer.new("Tree"))
       app.blob("gitorious", "master", "app/models")
 
       assert_equal 302, app.response.status
       assert_equal "/gitorious/tree/master:app/models", app.response["Location"]
       assert_equal "", app.body
+    end
+
+    it "unescapes ref" do
+      app = DummySinatraApp.new(Actions.new(BlobStub.new), Renderer.new("Blob"))
+      app.blob("gitorious", "issue-%23221", "app/my documents")
+
+      assert_equal "issue-#221", actions.ref
     end
   end
 

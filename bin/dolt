@@ -51,7 +51,7 @@ class DoltApp
     view.helper(Dolt::View::Gravatar)
     view.helper(Dolt::View::TabWidth)
     view.helper(Dolt::View::BinaryBlobEmbedder)
-    view.helper(:tab_width => 4, :maxdepth => 3)
+    view.helper(:tab_width => options[:tab_width], :maxdepth => 3)
 
     # Configure blob rendering module
 
@@ -77,7 +77,7 @@ Main {
   argument("root") {
     required
     validate {|dir| File.exists?(dir) }
-    description "The base diretory to serve repositories from"
+    description "The base directory to serve repositories from"
   }
 
   option("socket=[socket]") {
@@ -91,6 +91,12 @@ Main {
     default 3000
   }
 
+  option("tabwidth=[tabwidth]") {
+    cast :int
+    description "The number of spaces to use as a tab"
+    default 4
+  }
+
   def run
     options = {}
     if params[:socket].given?
@@ -98,6 +104,7 @@ Main {
     else
       options[:port] = params[:port].value
     end
+    options[:tab_width] = params[:tabwidth].value
     DoltApp.new(File.join(File.dirname(__FILE__), "..")).run(params[:root].value, options)
   end
 }

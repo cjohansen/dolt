@@ -4,67 +4,100 @@ require "tiltout"
 require "thin"
 require "sinatra/base"
 require "cgi"
-
-if ARGV.length == 0
-  puts("Dolt should be run with a directory as its sole argument")
-  puts("The directory should either be a Git repository or a directory")
-  puts("that holds Git repositories.")
-  exit(1)
-end
+require "main"
 
 ### TODO: Extract this into a testable API
 
-def is_git_repo?(dir)
-  File.exists?(File.join(dir, ".git"))
-end
 
-def create_app(dir, view)
-  if is_git_repo?(dir)
-    dir = File.expand_path(dir)
-    resolver = Dolt::DiskRepoResolver.new(File.dirname(dir))
-    actions = Dolt::RepoActions.new(resolver)
-    view.helper(Dolt::View::SingleRepository)
-    require "dolt/sinatra/single_repo_browser"
-    Dolt::Sinatra::SingleRepoBrowser.new(File.basename(dir), actions, view)
-  else
-    resolver = Dolt::DiskRepoResolver.new(dir)
-    actions = Dolt::RepoActions.new(resolver)
-    view.helper(Dolt::View::MultiRepository)
-    require "dolt/sinatra/multi_repo_browser"
-    Dolt::Sinatra::MultiRepoBrowser.new(actions, view)
+class DoltApp
+  def initialize(base)
+    @base = base
+  end
+
+  def is_git_repo?(dir)
+    File.exists?(File.join(dir, ".git"))
+  end
+
+  def create_app(dir, view)
+    if is_git_repo?(dir)
+      dir = File.expand_path(dir)
+      resolver = Dolt::DiskRepoResolver.new(File.dirname(dir))
+      actions = Dolt::RepoActions.new(resolver)
+      view.helper(Dolt::View::SingleRepository)
+      require "dolt/sinatra/single_repo_browser"
+      Dolt::Sinatra::SingleRepoBrowser.new(File.basename(dir), actions, view)
+    else
+      resolver = Dolt::DiskRepoResolver.new(dir)
+      actions = Dolt::RepoActions.new(resolver)
+      view.helper(Dolt::View::MultiRepository)
+      require "dolt/sinatra/multi_repo_browser"
+      Dolt::Sinatra::MultiRepoBrowser.new(actions, view)
+    end
+  end
+
+  def run(root, options)
+    view = Tiltout.new(Dolt.template_dir, {
+        :cache => false,
+        :layout => "layout"
+      })
+
+    view.helper(Dolt::View::Object)
+    view.helper(Dolt::View::Urls)
+    view.helper(Dolt::View::Blob)
+    view.helper(Dolt::View::Blame)
+    view.helper(Dolt::View::Breadcrumb)
+    view.helper(Dolt::View::Tree)
+    view.helper(Dolt::View::Commit)
+    view.helper(Dolt::View::Gravatar)
+    view.helper(Dolt::View::TabWidth)
+    view.helper(Dolt::View::BinaryBlobEmbedder)
+    view.helper(:tab_width => 4, :maxdepth => 3)
+
+    # Configure blob rendering module
+
+    # Attempt to syntax highlight every blob
+    # view.helper(Dolt::View::SyntaxHighlight)
+
+    # Attempt to render every blob as markup
+    # view.helper(Dolt::View::Markup)
+
+    # Render supported formats as markup, syntax highlight the rest
+    view.helper(Dolt::View::SmartBlobRenderer)
+    Sinatra::Base.set(:public_folder, File.join(@base, "vendor/ui"))
+    server = create_app(root, view)
+    if options[:socket]
+      Thin::Server.start(options[:socket], server)
+    else
+      Thin::Server.start("0.0.0.0", options[:port], server)
+    end
   end
 end
 
-base = File.join(File.dirname(__FILE__), "..")
+Main {
+  argument("root") {
+    required
+    validate {|dir| File.exists?(dir) }
+    description "The base diretory to serve repositories from"
+  }
 
-view = Tiltout.new(Dolt.template_dir, {
-  :cache => false,
-  :layout => "layout"
-})
+  option("socket=[socket]") {
+    cast :string
+    description "A socket to listen to"
+  }
 
-view.helper(Dolt::View::Object)
-view.helper(Dolt::View::Urls)
-view.helper(Dolt::View::Blob)
-view.helper(Dolt::View::Blame)
-view.helper(Dolt::View::Breadcrumb)
-view.helper(Dolt::View::Tree)
-view.helper(Dolt::View::Commit)
-view.helper(Dolt::View::Gravatar)
-view.helper(Dolt::View::TabWidth)
-view.helper(Dolt::View::BinaryBlobEmbedder)
-view.helper(:tab_width => 4, :maxdepth => 3)
+  option("port=[port]") {
+    cast :int
+    description "A port to listen to"
+    default 3000
+  }
 
-# Configure blob rendering module
-
-# Attempt to syntax highlight every blob
-# view.helper(Dolt::View::SyntaxHighlight)
-
-# Attempt to render every blob as markup
-# view.helper(Dolt::View::Markup)
-
-# Render supported formats as markup, syntax highlight the rest
-view.helper(Dolt::View::SmartBlobRenderer)
-
-Sinatra::Base.set(:public_folder, File.join(base, "vendor/ui"))
-server = create_app(ARGV[0], view)
-Thin::Server.start("0.0.0.0", 3000, server)
+  def run
+    options = {}
+    if params[:socket].given?
+      options[:socket] = params[:socket].value
+    else
+      options[:port] = params[:port].value
+    end
+    DoltApp.new(File.join(File.dirname(__FILE__), "..")).run(params[:root].value, options)
+  end
+}

@@ -10,8 +10,8 @@ require "main"
 
 
 class DoltApp
-  def initialize(base)
-    @base = base
+  def initialize(layout_base)
+    @layout_base = layout_base
   end
 
   def is_git_repo?(dir)
@@ -63,7 +63,7 @@ class DoltApp
 
     # Render supported formats as markup, syntax highlight the rest
     view.helper(Dolt::View::SmartBlobRenderer)
-    Sinatra::Base.set(:public_folder, File.join(@base, "vendor/ui"))
+    Sinatra::Base.set(:public_folder, File.join(@layout_base, "vendor/ui"))
     server = create_app(root, view)
     if options[:socket]
       Thin::Server.start(options[:socket], server)

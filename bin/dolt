@@ -3,6 +3,7 @@ require "libdolt"
 require "tiltout"
 require "thin"
 require "sinatra/base"
+require "cgi"
 
 if ARGV.length == 0
   puts("Dolt should be run with a directory as its sole argument")

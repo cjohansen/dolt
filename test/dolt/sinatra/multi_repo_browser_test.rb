@@ -1,6 +1,6 @@
 # encoding: utf-8
 #--
-#   Copyright (C) 2012-2013 Gitorious AS
+#   Copyright (C) 2013 Gitorious AS
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU Affero General Public License as published by
@@ -15,20 +15,27 @@
 #   You should have received a copy of the GNU Affero General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #++
-require "sinatra/base"
-require "dolt/sinatra/actions"
+require "test_helper"
+require "rack/test"
+require "pathname"
+require "tiltout"
+require "libdolt"
+require "dolt/sinatra/multi_repo_browser"
 
-module Dolt
-  module Sinatra
-    class Base < ::Sinatra::Base
-      attr_reader :actions, :renderer
-      include Dolt::Sinatra::Actions
+ENV["RACK_ENV"] = "test"
 
-      def initialize(actions, renderer)
-        @actions = actions
-        @renderer = renderer
-        super()
-      end
-    end
+describe Dolt::Sinatra::MultiRepoBrowser do
+  include Rack::Test::Methods
+
+  def app
+    actions = Test::Actions.new(Stub::Blob.new)
+    def actions.repositories; []; end
+    view = Tiltout.new(Dolt.template_dir)
+    Dolt::Sinatra::MultiRepoBrowser.new(actions, view)
+  end
+
+  it "serves the index" do
+    get "/"
+    assert_equal 200, last_response.status
   end
 end

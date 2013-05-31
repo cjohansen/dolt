@@ -1,6 +1,6 @@
 # encoding: utf-8
 #--
-#   Copyright (C) 2012 Gitorious AS
+#   Copyright (C) 2012-2013 Gitorious AS
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU Affero General Public License as published by
@@ -21,8 +21,6 @@ require "time"
 module Dolt
   module Sinatra
     module Actions
-      # Built-in redirect seems to not work with Sinatra::Async, it throws
-      # an error.
       def redirect(url)
         response.status = 302
         response["Location"] = url
@@ -30,8 +28,9 @@ module Dolt
       end
 
       def error(error, repo, ref)
+        template = error.class.to_s == "Rugged::IndexerError" ? :"404" : :"500"
         add_headers(response)
-        body(renderer.render(:"500", {
+        body(renderer.render(template, {
                                :error => error,
                                :repository_slug => repo,
                                :ref => ref
@@ -70,14 +69,14 @@ module Dolt
           redirect(blob_url(repo, oid, path)) and return
         end
 
-        actions.blob(repo, u(ref), path) do |err, data|
-          next error(err, repo, ref) if !err.nil?
-          blob = data[:blob]
-          next redirect(tree_url(repo, ref, path)) if blob.class.to_s !~ /\bBlob/
-          add_headers(response, options.merge(:ref => ref))
-          tpl_options = options[:template_options] || {}
-          body(renderer.render(options[:template], data, tpl_options))
-        end
+        data = actions.blob(repo, u(ref), path)
+        blob = data[:blob]
+        return redirect(tree_url(repo, ref, path)) if blob.class.to_s !~ /\bBlob/
+        add_headers(response, options.merge(:ref => ref))
+        tpl_options = options[:template_options] || {}
+        body(renderer.render(options[:template], data, tpl_options))
+      rescue Exception => err
+        error(err, repo, ref)
       end
 
       def tree(repo, ref, path)
@@ -85,17 +84,13 @@ module Dolt
           redirect(tree_url(repo, oid, path)) and return
         end
 
-        actions.tree(repo, u(ref), path) do |err, data|
-          begin
-            next error(err, repo, ref) if !err.nil?
-            tree = data[:tree]
-            next redirect(blob_url(repo, ref, path)) if tree.class.to_s !~ /\bTree/
-            add_headers(response, :ref => ref)
-            body(renderer.render(:tree, data))
-          rescue Exception => err
-            error(err, repo, ref)
-          end
-        end
+        data = actions.tree(repo, u(ref), path)
+        tree = data[:tree]
+        return redirect(blob_url(repo, ref, path)) if tree.class.to_s !~ /\bTree/
+        add_headers(response, :ref => ref)
+        body(renderer.render(:tree, data))
+      rescue Exception => err
+        error(err, repo, ref)
       end
 
       def tree_entry(repo, ref, path)
@@ -103,15 +98,11 @@ module Dolt
           redirect(tree_entry_url(repo, oid, path)) and return
         end
 
-        actions.tree_entry(repo, u(ref), path) do |err, data|
-          begin
-            next error(err, repo, ref) if !err.nil?
-            add_headers(response, :ref => ref)
-            body(renderer.render(data.key?(:tree) ? :tree : :blob, data))
-          rescue Exception => err
-            error(err, repo, ref)
-          end
-        end
+        data = actions.tree_entry(repo, u(ref), path)
+        add_headers(response, :ref => ref)
+        body(renderer.render(data.key?(:tree) ? :tree : :blob, data))
+      rescue Exception => err
+        error(err, repo, ref)
       end
 
       def blame(repo, ref, path)
@@ -119,11 +110,11 @@ module Dolt
           redirect(blame_url(repo, oid, path)) and return
         end
 
-        actions.blame(repo, u(ref), path) do |err, data|
-          next error(err, repo, ref) if !err.nil?
-          add_headers(response, :ref => ref)
-          body(renderer.render(:blame, data))
-        end
+        data = actions.blame(repo, u(ref), path)
+        add_headers(response, :ref => ref)
+        body(renderer.render(:blame, data))
+      rescue Exception => err
+        error(err, repo, ref)
       end
 
       def history(repo, ref, path, count)
@@ -131,19 +122,19 @@ module Dolt
           redirect(history_url(repo, oid, path)) and return
         end
 
-        actions.history(repo, u(ref), path, count) do |err, data|
-          next error(err, repo, ref) if !err.nil?
-          add_headers(response, :ref => ref)
-          body(renderer.render(:commits, data))
-        end
+        data = actions.history(repo, u(ref), path, count)
+        add_headers(response, :ref => ref)
+        body(renderer.render(:commits, data))
+      rescue Exception => err
+        error(err, repo, ref)
       end
 
       def refs(repo)
-        actions.refs(repo) do |err, data|
-          next error(err, repo, ref) if !err.nil?
-          add_headers(response, :content_type => "application/json")
-          body(renderer.render(:refs, data, :layout => nil))
-        end
+        data = actions.refs(repo)
+        add_headers(response, :content_type => "application/json")
+        body(renderer.render(:refs, data, :layout => nil))
+      rescue Exception => err
+        error(err, repo, nil)
       end
 
       def tree_history(repo, ref, path, count = 1)
@@ -151,18 +142,11 @@ module Dolt
           redirect(tree_history_url(repo, oid, path)) and return
         end
 
-        actions.tree_history(repo, u(ref), path, count) do |err, data|
-          begin
-            if !err.nil?
-              error(err, repo, ref)
-            else
-              add_headers(response, :content_type => "application/json", :ref => ref)
-              body(renderer.render(:tree_history, data, :layout => nil))
-            end
-          rescue Exception => err
-            error(err, repo, ref)
-          end
-        end
+        data = actions.tree_history(repo, u(ref), path, count)
+        add_headers(response, :content_type => "application/json", :ref => ref)
+        body(renderer.render(:tree_history, data, :layout => nil))
+      rescue Exception => err
+        error(err, repo, ref)
       end
 
       def resolve_repository(repo)

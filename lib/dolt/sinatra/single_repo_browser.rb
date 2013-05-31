@@ -33,60 +33,60 @@ module Dolt
         super(actions, renderer)
       end
 
-      aget "/" do
+      get "/" do
         redirect("/tree/master:")
       end
 
-      aget "/tree/*:*" do
+      get "/tree/*:*" do
         ref, path = params[:splat]
         tree(repo, ref, path)
       end
 
-      aget "/tree/*" do
+      get "/tree/*" do
         force_ref(params[:splat], "tree", "master")
       end
 
-      aget "/blob/*:*" do
+      get "/blob/*:*" do
         ref, path = params[:splat]
         blob(repo, ref, path)
       end
 
-      aget "/blob/*" do
+      get "/blob/*" do
         force_ref(params[:splat], "blob", "master")
       end
 
-      aget "/raw/*:*" do
+      get "/raw/*:*" do
         ref, path = params[:splat]
         raw(repo, ref, path)
       end
 
-      aget "/raw/*" do
+      get "/raw/*" do
         force_ref(params[:splat], "raw", "master")
       end
 
-      aget "/blame/*:*" do
+      get "/blame/*:*" do
         ref, path = params[:splat]
         blame(repo, ref, path)
       end
 
-      aget "/blame/*" do
+      get "/blame/*" do
         force_ref(params[:splat], "blame", "master")
       end
 
-      aget "/history/*:*" do
+      get "/history/*:*" do
         ref, path = params[:splat]
         history(repo, ref, path, (params[:commit_count] || 20).to_i)
       end
 
-      aget "/history/*" do
+      get "/history/*" do
         force_ref(params[:splat], "blame", "master")
       end
 
-      aget "/refs" do
+      get "/refs" do
         refs(repo)
       end
 
-      aget "/tree_history/*:*" do
+      get "/tree_history/*:*" do
         ref, path = params[:splat]
         tree_history(repo, ref, path)
       end

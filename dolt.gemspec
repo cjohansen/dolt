@@ -11,7 +11,7 @@ end
 
 Gem::Specification.new do |s|
   s.name        = "dolt"
-  s.version     = "0.11.0"
+  s.version     = "0.12.0"
   s.authors     = ["Christian Johansen"]
   s.email       = ["christian@gitorious.org"]
   s.homepage    = "http://gitorious.org/gitorious/dolt"
@@ -20,16 +20,15 @@ Gem::Specification.new do |s|
 
   s.rubyforge_project = "dolt"
 
-  s.add_dependency "libdolt", "~>0.15"
+  s.add_dependency "libdolt", "~>0.17"
   s.add_dependency "thin", "~>1.4"
   s.add_dependency "sinatra", "~>1.0"
-  s.add_dependency "async_sinatra", "~>1.0"
   s.add_dependency "tiltout", "~>1.4"
   s.add_dependency "json", "~>1.5"
 
   s.add_development_dependency "minitest", "~> 2.0"
-  s.add_development_dependency "em-minitest-spec", "~> 1.1"
   s.add_development_dependency "rake", "~> 0.9"
+  s.add_development_dependency "rack-test", "~> 0.6"
 
   s.files         = GemSpecHelper.files(".") + GemSpecHelper.files("vendor/ui")
   s.test_files    = `git ls-files -- {test}/*`.split("\n")

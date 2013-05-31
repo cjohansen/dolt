@@ -27,61 +27,61 @@ module Dolt
       include Dolt::View::Blob
       include Dolt::View::Tree
 
-      aget "/" do
+      get "/" do
         response["Content-Type"] = "text/html"
         body(renderer.render(:index, { :repositories => actions.repositories }))
       end
 
-      aget "/*/tree/*:*" do
+      get "/*/tree/*:*" do
         repo, ref, path = params[:splat]
         tree(repo, ref, path)
       end
 
-      aget "/*/tree/*" do
+      get "/*/tree/*" do
         force_ref(params[:splat], "tree", "master")
       end
 
-      aget "/*/blob/*:*" do
+      get "/*/blob/*:*" do
         repo, ref, path = params[:splat]
         blob(repo, ref, path)
       end
 
-      aget "/*/blob/*" do
+      get "/*/blob/*" do
         force_ref(params[:splat], "blob", "master")
       end
 
-      aget "/*/raw/*:*" do
+      get "/*/raw/*:*" do
         repo, ref, path = params[:splat]
         raw(repo, ref, path)
       end
 
-      aget "/*/raw/*" do
+      get "/*/raw/*" do
         force_ref(params[:splat], "raw", "master")
       end
 
-      aget "/*/blame/*:*" do
+      get "/*/blame/*:*" do
         repo, ref, path = params[:splat]
         blame(repo, ref, path)
       end
 
-      aget "/*/blame/*" do
+      get "/*/blame/*" do
         force_ref(params[:splat], "blame", "master")
       end
 
-      aget "/*/history/*:*" do
+      get "/*/history/*:*" do
         repo, ref, path = params[:splat]
         history(repo, ref, path, (params[:commit_count] || 20).to_i)
       end
 
-      aget "/*/history/*" do
+      get "/*/history/*" do
         force_ref(params[:splat], "history", "master")
       end
 
-      aget "/*/refs" do
+      get "/*/refs" do
         refs(params[:splat].first)
       end
 
-      aget "/*/tree_history/*:*" do
+      get "/*/tree_history/*:*" do
         repo, ref, path = params[:splat]
         tree_history(repo, ref, path)
       end

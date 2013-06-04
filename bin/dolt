@@ -67,11 +67,17 @@ class DoltApp
     view.helper(Dolt::View::SmartBlobRenderer)
     Sinatra::Base.set(:public_folder, File.join(@layout_base, "vendor/ui"))
     server = create_app(root, view)
-    if options[:socket]
-      Thin::Server.start(options[:socket], server)
-    else
-      Thin::Server.start("0.0.0.0", options[:port], server)
+    thin_server = if options[:socket]
+                    Thin::Server.new(options[:socket], server)
+                  else
+                    Thin::Server.new("0.0.0.0", options[:port], server)
+                  end
+    if options[:pidfile]
+      thin_server.pid_file = options[:pidfile]
+      thin_server.log_file = options[:logfile]
+      thin_server.daemonize
     end
+    thin_server.start
   end
 end
 
@@ -99,12 +105,24 @@ Main {
     default 4
   }
 
+  option("pidfile=[pidfile]") {
+    description "Run as daemon with pidfile stored here."
+  }
+
+  option("logfile=[logfile]") {
+    description "Use as log file. Assumes --pidfile option"
+  }
+
   def run
     options = {}
     if params[:socket].given?
       options[:socket] = params[:socket].value
     else
       options[:port] = params[:port].value
+    end
+    if params[:pidfile].given?
+      options[:pidfile] = params[:pidfile].value
+      options[:logfile] = params[:logfile].value || "/tmp/dolt.log"
     end
     options[:tab_width] = params[:tabwidth].value
     DoltApp.new(File.join(File.dirname(__FILE__), "..")).run(params[:root].value, options)

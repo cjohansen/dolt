@@ -59,6 +59,11 @@ dolt .
      this option will daemonize the dolt process.
    - =--logfile= lets you specify the path to a log file when running daemonized.
 
+   Please note that some of the options allowed can also be specified
+   using environment variables. If no option is given to the CLI, the
+   environment variable will be used if available, otherwise a
+   default will be used.
+
    To stop a running Dolt server, you'll need to do a little manual
    work:
 

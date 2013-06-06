@@ -6,7 +6,7 @@
   supports rendering the commit log and blame.
 
 ** Installation
-   To install `dolt` you need Ruby, [[http://www.rubygems.org/][RubyGems]] Python development files. The
+   To install =dolt= you need Ruby, [[http://www.rubygems.org/][RubyGems]] Python development files. The
    Python development files are required to support Pygments syntax
    highlighting. Once that's installed, simply enter:
 
@@ -29,9 +29,83 @@ dolt .
    This will start a dolt instance serving your current repository on
    port 3000.
 
+   Dolt will serve either a single repository, like above, or a
+   directory of git repositories. Let's say you have a directory
+   =/home/dolt/repositories= containing a collection of bare Git
+   repositories you push your work to over SSH. To serve all of these
+   over the web, simply:
+
+#+BEGIN_SRC shell-script
+cd /home/dolt/repositories
+dolt .
+#+END_SRC
+
+   And you'll be presented with a list of the repositories you can
+   browse.
+
+   The =dolt= binary supports a number of options, which can be
+   listed using the =--help= switch. The following options are
+   currently supported:
+
+   - =--socket= lets you specify a UNIX socket to listen to instead
+     of a port. Enter the path to a socket.
+   - =--port= lets you specify a different port than 3000.
+   - =--tabwidth= lets you specify how many spaces to use when
+     rendering a tab in a source file
+   - =--pidfile= lets you specify the path to a pid file. Entering
+     this option will daemonize the dolt process.
+   - =--logfile= lets you specify the path to a log file when running daemonized.
+
+   To stop a running Dolt server, you'll need to do a little manual
+   work:
+
+#+BEGIN_SRC shell-script
+kill `cat /path/to/dolt.pid`
+#+END_SRC
+
+   A future version of Gitorious will support stopping a running dolt server.
+
 ** Deploying under "a real" web server
-*** Command line options
-*** Nginx configuration
+   To make your repositories publicly available you could specify
+   =port= as 80. However, to do this you need to be root on the
+   machine, and it won't work if you're already running a web server
+   on your computer.
+
+   A more practical solution is to have dolt listening on a socket
+   (or port for that matter), daemonize it, and use your web server
+   as a proxy in front of dolt.
+
+   A minimal nginx configuration which lets you do this could look
+   like this (replace =server_name= with the host name you'll be using):
+
+#+BEGIN_SRC conf
+  upstream dolt {
+    server unix://tmp/dolt.sock fail_timeout=30s;
+  }
+  server {
+    server_name git.zmalltalker.com;
+    location / {
+      proxy_pass http://dolt;
+      proxy_redirect off;
+    }
+  }
+#+END_SRC
+
+   On Debian/Ubuntu, add this to =/etc/nginx/sites-available/dolt=,
+   symlink this to =/etc/nginx/sites-enabled/dolt= and reload nginx:
+
+#+BEGIN_SRC shell-script
+service nginx reload
+#+END_SRC
+
+   On CentOS, add the same contents to =/etc/nginx/conf.d/dolt.conf=
+   and reload nginx:
+
+#+BEGIN_SRC shell-script
+service nginx reload
+#+END_SRC
+
+
 ** Rendering markup
    Dolt uses [[https://github.com/github/markup][GitHub Markup]] to render different markup formats. In
    order to have Dolt render these, you need to install some
@@ -43,7 +117,7 @@ dolt .
    install the =redcarpet= gem.
 
 #+BEGIN_SRC shell-script
-gem install redcarpet
+  gem install redcarpet
 #+END_SRC
 
 ** Org-mode
@@ -65,3 +139,20 @@ gem install RedCloth
 ** Other formats
    To render other markup formats, have a look at the [[https://github.com/github/markup][GitHub Markup]]
    page.
+
+** Why dolt?
+   Dolt is an extraction of the new code browser in
+   [[https://gitorious.org/gitorious/mainline][Gitorious]]. Setting up a full-blown Git repository hosting site
+   just to make it possible to show your source code to the world
+   feels like way too much work with the current situation. You could
+   use =git instaweb=, but that's ridiculously ugly and only allows
+   serving up a single repository.
+
+   Dolt uses [[http://libgit2.github.com][libgit2]] for all git operations, and should perform a lot
+   better than implementations using the git command line tools to
+   integrate with Git.
+
+** License
+   Dolt is free software licensed under the [[http://www.gnu.org/licenses/agpl-3.0.html][GNU Affero General Public
+   License (AGPL)]].  Dolt is developed as part of the Gitorious
+   project.

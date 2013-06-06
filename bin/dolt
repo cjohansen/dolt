@@ -70,7 +70,7 @@ class DoltApp
     thin_server = if options[:socket]
                     Thin::Server.new(options[:socket], server)
                   else
-                    Thin::Server.new("0.0.0.0", options[:port], server)
+                    Thin::Server.new(options[:ip], options[:port], server)
                   end
     if options[:pidfile]
       thin_server.pid_file = options[:pidfile]
@@ -96,7 +96,11 @@ Main {
   option("port=[port]") {
     cast :int
     description "A port to listen to"
-    default 3000
+  }
+
+  option("bind=[bind]") {
+    description "An IP address to bind to"
+    default "0.0.0.0"
   }
 
   option("tabwidth=[tabwidth]") {
@@ -113,12 +117,28 @@ Main {
     description "Use as log file. Assumes --pidfile option"
   }
 
+  environment("IP") {
+    description "An IP address to bind to"
+  }
+
+  environment("PORT") {
+    description "A port to listen on"
+    cast :int
+  }
+
+  # Use option if given, otherwise ENV var if given, otherwise default value
+  def option(param, env, default)
+    return params[param].value if params[param].given?
+    return params[env].value || default
+  end
+
   def run
     options = {}
     if params[:socket].given?
       options[:socket] = params[:socket].value
     else
-      options[:port] = params[:port].value
+      options[:port] = option(:port, :PORT, 3000)
+      options[:ip] = option(:bind, :IP, "0.0.0.0")
     end
     if params[:pidfile].given?
       options[:pidfile] = params[:pidfile].value

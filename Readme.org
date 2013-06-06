@@ -1,0 +1,67 @@
+* Dolt
+  Dolt is a stand-along Git repository browser. It can be used to
+  explore repositories in your browser of choice, and features syntax
+  highlighting with [[http://pygments.org/][Pygments]] and various markdown formats (see
+  below). In addition to offering tree and blob browsing, Dolt also
+  supports rendering the commit log and blame.
+
+** Installation
+   To install `dolt` you need Ruby, [[http://www.rubygems.org/][RubyGems]] Python development files. The
+   Python development files are required to support Pygments syntax
+   highlighting. Once that's installed, simply enter:
+
+#+BEGIN_SRC shell-script
+gem install dolt
+#+END_SRC
+
+   and you'll be ready to serve your repositories on the web.
+
+** The =dolt= Command Line Interface
+   Dolt installs a binary, aptly named =dolt= on your system. This
+   binary has only one required argument, the directory to serve
+   repositories from. To try it out, simply enter a git repository
+   from your terminal and enter
+
+#+BEGIN_SRC shell-script
+dolt .
+#+END_SRC
+
+   This will start a dolt instance serving your current repository on
+   port 3000.
+
+** Deploying under "a real" web server
+*** Command line options
+*** Nginx configuration
+** Rendering markup
+   Dolt uses [[https://github.com/github/markup][GitHub Markup]] to render different markup formats. In
+   order to have Dolt render these, you need to install some
+   different Ruby gems. These gems are not required to install Dolt,
+   so you'll have to install the ones you need separately.
+
+** Markdown
+   To render files with suffixes =.markdown=, =.mdown= and =md=,
+   install the =redcarpet= gem.
+
+#+BEGIN_SRC shell-script
+gem install redcarpet
+#+END_SRC
+
+** Org-mode
+   To render [[http://org-mode.org/][org-mode]] files (like this one) with a =.org= suffix,
+   you'll need the =org-ruby= gem installed on your system.
+
+#+BEGIN_SRC shell-script
+gem install org-ruby
+#+END_SRC
+
+** Textile
+   Rendering =.textile= files requires the =RedCloth= gem installed
+   on your system.
+
+#+BEGIN_SRC shell-script
+gem install RedCloth
+#+END_SRC
+
+** Other formats
+   To render other markup formats, have a look at the [[https://github.com/github/markup][GitHub Markup]]
+   page.

@@ -1,5 +1,5 @@
 * Dolt
-  Dolt is a stand-along Git repository browser. It can be used to
+  Dolt is a stand-alone Git repository browser. It can be used to
   explore repositories in your browser of choice, and features syntax
   highlighting with [[http://pygments.org/][Pygments]] and various markdown formats (see
   below). In addition to offering tree and blob browsing, Dolt also

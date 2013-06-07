@@ -50,7 +50,7 @@ dolt .
    - =--socket= lets you specify a UNIX socket to listen to instead
      of a port. Enter the path to a socket.
    - =--port= lets you specify a different port than 3000. Also
-     supported throught the environment variable =PORT=.
+     supported through the environment variable =PORT=.
    - =--bind= lets you bind to a different IP address than
      =0.0.0.0=. Also supported through the environment variable =IP=.
    - =--tabwidth= lets you specify how many spaces to use when

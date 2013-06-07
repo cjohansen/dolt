@@ -32,6 +32,10 @@ module Dolt
         body(renderer.render(:index, { :repositories => actions.repositories }))
       end
 
+      get "/:repo" do
+        redirect "/#{params[:repo]}/tree/master:"
+      end
+
       get "/*/tree/*:*" do
         repo, ref, path = params[:splat]
         tree(repo, ref, path)

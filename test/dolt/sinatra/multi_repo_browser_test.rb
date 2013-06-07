@@ -38,4 +38,10 @@ describe Dolt::Sinatra::MultiRepoBrowser do
     get "/"
     assert_equal 200, last_response.status
   end
+
+  it "redirects repo requests to main tree" do
+    get "/gitorious.git"
+    assert_equal 302, last_response.status
+    assert_equal "/gitorious.git/tree/master:", last_response.headers["Location"]
+  end
 end

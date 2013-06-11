@@ -17,7 +17,7 @@ class DoltApp
   end
 
   def is_git_repo?(dir)
-    File.exists?(File.join(dir, ".git"))
+    Dolt::Git.git_repo?(dir)
   end
 
   def create_app(dir, view)

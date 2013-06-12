@@ -77,7 +77,12 @@ class DoltApp
       thin_server.log_file = options[:logfile]
       thin_server.daemonize
     end
-    thin_server.start
+    puts ">> Starting Dolt #{Dolt::VERSION} from #{root}"
+    begin
+      thin_server.start
+    rescue RuntimeError => e
+      abort "\nUnable to start Dolt. Message:\n- #{e}\n\n"
+    end
   end
 end
 
@@ -145,6 +150,7 @@ Main {
       options[:logfile] = params[:logfile].value || "/tmp/dolt.log"
     end
     options[:tab_width] = params[:tabwidth].value
-    DoltApp.new(File.join(File.dirname(__FILE__), "..")).run(params[:root].value, options)
+    root = File.expand_path(params[:root].value)
+    DoltApp.new(File.join(File.dirname(__FILE__), "..")).run(root, options)
   end
 }

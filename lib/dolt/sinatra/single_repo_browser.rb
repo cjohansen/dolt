@@ -33,6 +33,8 @@ module Dolt
         super(actions, renderer)
       end
 
+      not_found { renderer.render("404") }
+
       get "/" do
         redirect("/tree/master:")
       end

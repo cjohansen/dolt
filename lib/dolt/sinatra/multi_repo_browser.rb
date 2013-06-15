@@ -27,6 +27,8 @@ module Dolt
       include Dolt::View::Blob
       include Dolt::View::Tree
 
+      not_found { renderer.render("404") }
+
       get "/" do
         response["Content-Type"] = "text/html"
         body(renderer.render(:index, { :repositories => actions.repositories }))

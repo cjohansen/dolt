@@ -5,11 +5,8 @@ require "thin"
 require "sinatra/base"
 require "cgi"
 require "main"
-if RUBY_VERSION < "1.9"
-  require "dolt/ruby19"
-end
-### TODO: Extract this into a testable API
 
+### TODO: Extract this into a testable API
 
 class DoltApp
   def initialize(layout_base)

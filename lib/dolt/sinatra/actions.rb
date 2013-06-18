@@ -17,6 +17,7 @@
 #++
 require "json"
 require "time"
+require "cgi"
 
 module Dolt
   module Sinatra

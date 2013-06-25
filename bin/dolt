@@ -93,16 +93,15 @@ given_root = ARGV.pop
 parser = Trollop::Parser.new do
   version "Dolt #{Dolt::VERSION}"
   banner <<-END_HELP
-Dolt serves your Git repositories
+Dolt is a Git repository browser.
 
 Usage:
-   #{$0} [options] root
+   #{$0} [options] ROOT
 
-   where root is either the path to a repository or a directory containing
-   repositories
+   where ROOT is either the path to a repository or a directory containing
+   repositories.
 
-
-   and  [options] are:
+   Valid options are:
 END_HELP
 
   opt :socket, "A socket to listen to", :type => :string

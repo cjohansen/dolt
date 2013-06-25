@@ -4,7 +4,7 @@ require "tiltout"
 require "thin"
 require "sinatra/base"
 require "cgi"
-require "main"
+require "trollop"
 
 ### TODO: Extract this into a testable API
 
@@ -83,71 +83,56 @@ class DoltApp
   end
 end
 
-Main {
-  argument("root") {
-    required
-    validate {|dir| File.exists?(dir) }
-    description "The base directory to serve repositories from"
-  }
+# Use option if given, otherwise ENV var if given, otherwise default value
+def option_from_options_or_env(option_name, env_name, default, options)
+  return options[option_name] if options[option_name]
+  return ENV[env_name] || default
+end
 
-  option("socket=[socket]") {
-    cast :string
-    description "A socket to listen to"
-  }
+given_root = ARGV.pop
+parser = Trollop::Parser.new do
+  version "Dolt #{Dolt::VERSION}"
+  banner <<-END_HELP
+Dolt serves your Git repositories
 
-  option("port=[port]") {
-    cast :int
-    description "A port to listen to"
-  }
+Usage:
+   #{$0} [options] root
 
-  option("bind=[bind]") {
-    description "An IP address to bind to"
-    default "0.0.0.0"
-  }
+   where root is either the path to a repository or a directory containing
+   repositories
 
-  option("tabwidth=[tabwidth]") {
-    cast :int
-    description "The number of spaces to use as a tab"
-    default 4
-  }
 
-  option("pidfile=[pidfile]") {
-    description "Run as daemon with pidfile stored here."
-  }
+   and  [options] are:
+END_HELP
 
-  option("logfile=[logfile]") {
-    description "Use as log file. Assumes --pidfile option"
-  }
+  opt :socket, "A socket to listen to", :type => :string
+  opt :port, "A port to listen to", :type => :integer
+  opt :bind, "An IP address to bind to", :type => :string
+  opt :tabwidth, "The number of spaces to use as a tab", :type => :integer, :default => 4
+  opt :pidfile, "Run as daemon with pidfile stored here", :type => :string
+  opt :logfile, "Use as log file. Assumes --pidfile option", :type => :string
+end
 
-  environment("IP") {
-    description "An IP address to bind to"
-  }
+params = Trollop::with_standard_exception_handling(parser) do
+  raise Trollop::HelpNeeded if given_root.nil?
+  raise Trollop::HelpNeeded unless File.exist?(given_root)
+  parser.parse(ARGV)
+end
 
-  environment("PORT") {
-    description "A port to listen on"
-    cast :int
-  }
+options = {}
+options[:root] = File.expand_path(given_root)
+if params[:socket]
+  options[:socket] = params[:socket]
+else
+  options[:port] = option_from_options_or_env(:port, "PORT", 3000, params).to_i
+  options[:ip] = option_from_options_or_env(:ip, "IP", "0.0.0.0", params)
+end
 
-  # Use option if given, otherwise ENV var if given, otherwise default value
-  def option(param, env, default)
-    return params[param].value if params[param].given?
-    return params[env].value || default
-  end
+if params[:pidfile]
+  options[:pidfile] = params[:pidfile]
+  options[:logfile] = params[:logfile] || "/tmp/dolt.log"
+end
 
-  def run
-    options = {}
-    if params[:socket].given?
-      options[:socket] = params[:socket].value
-    else
-      options[:port] = option(:port, :PORT, 3000)
-      options[:ip] = option(:bind, :IP, "0.0.0.0")
-    end
-    if params[:pidfile].given?
-      options[:pidfile] = params[:pidfile].value
-      options[:logfile] = params[:logfile].value || "/tmp/dolt.log"
-    end
-    options[:tab_width] = params[:tabwidth].value
-    root = File.expand_path(params[:root].value)
-    DoltApp.new(File.join(File.dirname(__FILE__), "..")).run(root, options)
-  end
-}
+options[:tab_width] = params[:tabwidth]
+
+DoltApp.new(File.join(File.dirname(__FILE__), "..")).run(options.delete(:root), options)

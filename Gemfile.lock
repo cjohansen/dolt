@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    dolt (0.18.0)
+    dolt (0.20.0)
       json (~> 1.5)
       libdolt (~> 0.21)
       sinatra (~> 1.0)
@@ -16,7 +16,7 @@ GEM
     eventmachine (1.0.3)
     github-markup (0.7.5)
     htmlentities (4.3.1)
-    json (1.8.0)
+    json (1.7.7)
     libdolt (0.22.0)
       htmlentities (~> 4.3)
       json (~> 1.7)
@@ -31,7 +31,7 @@ GEM
     mime-types (1.23)
     minitest (2.12.1)
     posix-spawn (0.3.6)
-    pygments.rb (0.5.0)
+    pygments.rb (0.5.1)
       posix-spawn (~> 0.3.6)
       yajl-ruby (~> 1.1.0)
     rack (1.5.2)

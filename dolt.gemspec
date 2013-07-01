@@ -11,7 +11,7 @@ end
 
 Gem::Specification.new do |s|
   s.name        = "dolt"
-  s.version     = "0.18.0"
+  s.version     = "0.19.0"
   s.authors     = ["Christian Johansen"]
   s.email       = ["christian@gitorious.org"]
   s.homepage    = "http://gitorious.org/gitorious/dolt"
@@ -25,7 +25,7 @@ Gem::Specification.new do |s|
   s.add_dependency "sinatra", "~>1.0"
   s.add_dependency "tiltout", "~>1.4"
   s.add_dependency "json", "~>1.5"
-  s.add_dependency "main", "~>5.2"
+  s.add_dependency "trollop", "~>2.0"
 
   s.add_development_dependency "minitest", "~> 2.0"
   s.add_development_dependency "rake", "~> 0.9"

@@ -53,24 +53,24 @@ module Dolt
         HTML
       end
 
-      def raw(repo, ref, path)
+      def raw(repo, ref, path, custom_data = {})
         if oid = lookup_ref_oid(repo, ref)
           redirect(raw_url(repo, oid, path)) and return
         end
 
-        blob(repo, ref, path, {
+        blob(repo, ref, path, custom_data, {
                :template => :raw,
                :content_type => "text/plain",
                :template_options => { :layout => nil }
              })
       end
 
-      def blob(repo, ref, path, options = { :template => :blob })
+      def blob(repo, ref, path, custom_data = {}, options = { :template => :blob })
         if oid = lookup_ref_oid(repo, ref)
           redirect(blob_url(repo, oid, path)) and return
         end
 
-        data = actions.blob(repo, u(ref), path)
+        data = (custom_data || {}).merge(actions.blob(repo, u(ref), path))
         blob = data[:blob]
         return redirect(tree_url(repo, ref, path)) if blob.class.to_s !~ /\bBlob/
         add_headers(response, options.merge(:ref => ref))
@@ -80,12 +80,12 @@ module Dolt
         error(err, repo, ref)
       end
 
-      def tree(repo, ref, path)
+      def tree(repo, ref, path, custom_data = {})
         if oid = lookup_ref_oid(repo, ref)
           redirect(tree_url(repo, oid, path)) and return
         end
 
-        data = actions.tree(repo, u(ref), path)
+        data = (custom_data || {}).merge(actions.tree(repo, u(ref), path))
         tree = data[:tree]
         return redirect(blob_url(repo, ref, path)) if tree.class.to_s !~ /\bTree/
         add_headers(response, :ref => ref)
@@ -94,56 +94,56 @@ module Dolt
         error(err, repo, ref)
       end
 
-      def tree_entry(repo, ref, path)
+      def tree_entry(repo, ref, path, custom_data = {})
         if oid = lookup_ref_oid(repo, ref)
           redirect(tree_entry_url(repo, oid, path)) and return
         end
 
-        data = actions.tree_entry(repo, u(ref), path)
+        data = (custom_data || {}).merge(actions.tree_entry(repo, u(ref), path))
         add_headers(response, :ref => ref)
         body(renderer.render(data.key?(:tree) ? :tree : :blob, data))
       rescue Exception => err
         error(err, repo, ref)
       end
 
-      def blame(repo, ref, path)
+      def blame(repo, ref, path, custom_data = {})
         if oid = lookup_ref_oid(repo, ref)
           redirect(blame_url(repo, oid, path)) and return
         end
 
-        data = actions.blame(repo, u(ref), path)
+        data = (custom_data || {}).merge(actions.blame(repo, u(ref), path))
         add_headers(response, :ref => ref)
         body(renderer.render(:blame, data))
       rescue Exception => err
         error(err, repo, ref)
       end
 
-      def history(repo, ref, path, count)
+      def history(repo, ref, path, count, custom_data = {})
         if oid = lookup_ref_oid(repo, ref)
           redirect(history_url(repo, oid, path)) and return
         end
 
-        data = actions.history(repo, u(ref), path, count)
+        data = (custom_data || {}).merge(actions.history(repo, u(ref), path, count))
         add_headers(response, :ref => ref)
         body(renderer.render(:commits, data))
       rescue Exception => err
         error(err, repo, ref)
       end
 
-      def refs(repo)
-        data = actions.refs(repo)
+      def refs(repo, custom_data = {})
+        data = (custom_data || {}).merge(actions.refs(repo))
         add_headers(response, :content_type => "application/json")
         body(renderer.render(:refs, data, :layout => nil))
       rescue Exception => err
         error(err, repo, nil)
       end
 
-      def tree_history(repo, ref, path, count = 1)
+      def tree_history(repo, ref, path, count = 1, custom_data = {})
         if oid = lookup_ref_oid(repo, ref)
           redirect(tree_history_url(repo, oid, path)) and return
         end
 
-        data = actions.tree_history(repo, u(ref), path, count)
+        data = (custom_data || {}).merge(actions.tree_history(repo, u(ref), path, count))
         add_headers(response, :content_type => "application/json", :ref => ref)
         body(renderer.render(:tree_history, data, :layout => nil))
       rescue Exception => err

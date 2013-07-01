@@ -120,6 +120,7 @@ module Test
   end
 
   class Renderer
+    attr_reader :data
     def initialize(body = ""); @body = body; end
 
     def render(action, data, options = {})

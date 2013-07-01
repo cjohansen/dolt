@@ -38,6 +38,14 @@ describe Dolt::Sinatra::Actions do
       assert_equal "blob:Blob", app.body
     end
 
+    it "renders the blob template with custom data" do
+      renderer = Test::Renderer.new("Blob")
+      app = Test::SinatraApp.new(Test::Actions.new(Stub::Blob.new), renderer)
+      app.blob("gitorious", "master", "app/models/repository.rb", { :who => 42 })
+
+      assert_equal 42, renderer.data[:who]
+    end
+
     it "redirects tree views to tree action" do
       app = Test::SinatraApp.new(Test::Actions.new(Stub::Tree.new), Test::Renderer.new("Tree"))
       app.blob("gitorious", "master", "app/models")
@@ -91,6 +99,14 @@ describe Dolt::Sinatra::Actions do
 
       assert_equal "text/html; charset=utf-8", app.response["Content-Type"]
       assert_equal "tree:Tree", app.body
+    end
+
+    it "renders template with custom data" do
+      renderer = Test::Renderer.new("Tree")
+      app = Test::SinatraApp.new(Test::Actions.new(Stub::Tree.new), renderer)
+      app.tree("gitorious", "master", "app/models", { :who => 42 })
+
+      assert_equal 42, renderer.data[:who]
     end
 
     it "redirects blob views to blob action" do
@@ -150,6 +166,14 @@ describe Dolt::Sinatra::Actions do
       assert_equal "tree:Tree", app.body
     end
 
+    it "renders template with custom data" do
+      renderer = Test::Renderer.new("Tree")
+      app = Test::SinatraApp.new(Test::Actions.new(Stub::Tree.new), renderer)
+      app.tree_entry("gitorious", "master", "app/models", { :who => 42 })
+
+      assert_equal 42, renderer.data[:who]
+    end
+
     it "renders trees with the tree template as html" do
       app = Test::SinatraApp.new(Test::Actions.new(Stub::Blob.new), Test::Renderer.new("Blob"))
       app.tree_entry("gitorious", "master", "app/models")
@@ -191,6 +215,14 @@ describe Dolt::Sinatra::Actions do
 
       assert_equal "text/plain", app.response["Content-Type"]
       assert_equal "raw:Text", app.body
+    end
+
+    it "renders template with custom data" do
+      renderer = Test::Renderer.new("Text")
+      app = Test::SinatraApp.new(Test::Actions.new(Stub::Blob.new), renderer)
+      app.raw("gitorious", "master", "app/models/repository.rb", { :who => 42 })
+
+      assert_equal 42, renderer.data[:who]
     end
 
     it "redirects tree views to tree action" do
@@ -238,6 +270,14 @@ describe Dolt::Sinatra::Actions do
       assert_equal "blame:Text", app.body
     end
 
+    it "renders template with custom data" do
+      renderer = Test::Renderer.new("Text")
+      app = Test::SinatraApp.new(Test::Actions.new(Stub::Blob.new), renderer)
+      app.blame("gitorious", "master", "app/models/repository.rb", { :who => 42 })
+
+      assert_equal 42, renderer.data[:who]
+    end
+
     it "unescapes ref" do
       actions = Test::Actions.new(Stub::Blob.new)
       app = Test::SinatraApp.new(actions, Test::Renderer.new("Blob"))
@@ -273,6 +313,14 @@ describe Dolt::Sinatra::Actions do
       assert_equal "commits:Text", app.body
     end
 
+    it "renders template with custom data" do
+      renderer = Test::Renderer.new("Text")
+      app = Test::SinatraApp.new(Test::Actions.new(Stub::Blob.new), renderer)
+      app.history("gitorious", "master", "app/models/repository.rb", 10, { :who => 42 })
+
+      assert_equal 42, renderer.data[:who]
+    end
+
     it "unescapes ref" do
       actions = Test::Actions.new(Stub::Blob.new)
       app = Test::SinatraApp.new(actions, Test::Renderer.new("Blob"))
@@ -297,6 +345,14 @@ describe Dolt::Sinatra::Actions do
       assert_equal "application/json", app.response["Content-Type"]
       assert_equal "refs:JSON", app.body
     end
+
+    it "renders template with custom data" do
+      renderer = Test::Renderer.new("Text")
+      app = Test::SinatraApp.new(Test::Actions.new(Stub::Blob.new), renderer)
+      app.refs("gitorious", { :who => 42 })
+
+      assert_equal 42, renderer.data[:who]
+    end
   end
 
   describe "#tree_history" do
@@ -306,6 +362,14 @@ describe Dolt::Sinatra::Actions do
 
       assert_equal "application/json", app.response["Content-Type"]
       assert_equal "tree_history:JSON", app.body
+    end
+
+    it "renders template with custom data" do
+      renderer = Test::Renderer.new("Text")
+      app = Test::SinatraApp.new(Test::Actions.new(Stub::Tree.new), renderer)
+      app.tree_history("gitorious", "master", "app/models", 1, { :who => 42 })
+
+      assert_equal 42, renderer.data[:who]
     end
 
     it "unescapes ref" do

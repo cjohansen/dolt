@@ -151,7 +151,8 @@ module Dolt
       end
 
       def resolve_repository(repo)
-        actions.resolve_repository(repo)
+        @cache ||= {}
+        @cache[repo] ||= actions.resolve_repository(repo)
       end
 
       private

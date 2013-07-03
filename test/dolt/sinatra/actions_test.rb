@@ -69,6 +69,7 @@ describe Dolt::Sinatra::Actions do
 
       location = app.response["Location"]
       refute_equal 302, app.response.status
+      refute_equal 307, app.response.status
     end
 
     it "redirects ref to oid if configured so" do
@@ -76,7 +77,7 @@ describe Dolt::Sinatra::Actions do
       app.blob("gitorious", "master", "lib/gitorious.rb")
 
       location = app.response["Location"]
-      assert_equal 302, app.response.status
+      assert_equal 307, app.response.status
       assert_equal "/gitorious/blob/#{'a' * 40}:lib/gitorious.rb", location
       assert_equal "", app.body
     end
@@ -153,6 +154,7 @@ describe Dolt::Sinatra::Actions do
       app = Test::RedirectingSinatraApp.new(Test::Actions.new(Stub::Tree.new), Test::Renderer.new("Tree"))
       app.tree("gitorious", "master", "lib")
 
+      assert_equal 307, app.response.status
       assert_equal "/gitorious/tree/#{'a' * 40}:lib", app.response["Location"]
     end
   end
@@ -194,6 +196,7 @@ describe Dolt::Sinatra::Actions do
       app = Test::RedirectingSinatraApp.new(Test::Actions.new(Stub::Tree.new), Test::Renderer.new("Tree"))
       app.tree_entry("gitorious", "master", "lib")
 
+      assert_equal 307, app.response.status
       assert_equal "/gitorious/source/#{'a' * 40}:lib", app.response["Location"]
     end
   end
@@ -247,6 +250,7 @@ describe Dolt::Sinatra::Actions do
       app = Test::RedirectingSinatraApp.new(Test::Actions.new(Stub::Blob.new), Test::Renderer.new("Blob"))
       app.raw("gitorious", "master", "lib/gitorious.rb")
 
+      assert_equal 307, app.response.status
       assert_equal "/gitorious/raw/#{'a' * 40}:lib/gitorious.rb", app.response["Location"]
     end
   end
@@ -290,6 +294,7 @@ describe Dolt::Sinatra::Actions do
       app = Test::RedirectingSinatraApp.new(Test::Actions.new(Stub::Blob.new), Test::Renderer.new("Blob"))
       app.blame("gitorious", "master", "lib/gitorious.rb")
 
+      assert_equal 307, app.response.status
       assert_equal "/gitorious/blame/#{'a' * 40}:lib/gitorious.rb", app.response["Location"]
     end
   end
@@ -333,6 +338,7 @@ describe Dolt::Sinatra::Actions do
       app = Test::RedirectingSinatraApp.new(Test::Actions.new(Stub::Blob.new), Test::Renderer.new("Blob"))
       app.history("gitorious", "master", "lib/gitorious.rb", 10)
 
+      assert_equal 307, app.response.status
       assert_equal "/gitorious/history/#{'a' * 40}:lib/gitorious.rb", app.response["Location"]
     end
   end
@@ -384,6 +390,7 @@ describe Dolt::Sinatra::Actions do
       app = Test::RedirectingSinatraApp.new(Test::Actions.new(Stub::Tree.new), Test::Renderer.new("Tree"))
       app.tree_history("gitorious", "master", "lib", 10)
 
+      assert_equal 307, app.response.status
       assert_equal "/gitorious/tree_history/#{'a' * 40}:lib", app.response["Location"]
     end
   end

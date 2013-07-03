@@ -22,8 +22,8 @@ require "cgi"
 module Dolt
   module Sinatra
     module Actions
-      def redirect(url)
-        response.status = 302
+      def redirect(url, status = 302)
+        response.status = status
         response["Location"] = url
         body ""
       end
@@ -55,7 +55,7 @@ module Dolt
 
       def raw(repo, ref, path, custom_data = {})
         if oid = lookup_ref_oid(repo, ref)
-          redirect(raw_url(repo, oid, path)) and return
+          redirect(raw_url(repo, oid, path), 307) and return
         end
 
         blob(repo, ref, path, custom_data, {
@@ -67,7 +67,7 @@ module Dolt
 
       def blob(repo, ref, path, custom_data = {}, options = { :template => :blob })
         if oid = lookup_ref_oid(repo, ref)
-          redirect(blob_url(repo, oid, path)) and return
+          redirect(blob_url(repo, oid, path), 307) and return
         end
 
         data = (custom_data || {}).merge(actions.blob(repo, u(ref), path))
@@ -82,7 +82,7 @@ module Dolt
 
       def tree(repo, ref, path, custom_data = {})
         if oid = lookup_ref_oid(repo, ref)
-          redirect(tree_url(repo, oid, path)) and return
+          redirect(tree_url(repo, oid, path), 307) and return
         end
 
         data = (custom_data || {}).merge(actions.tree(repo, u(ref), path))
@@ -96,7 +96,7 @@ module Dolt
 
       def tree_entry(repo, ref, path, custom_data = {})
         if oid = lookup_ref_oid(repo, ref)
-          redirect(tree_entry_url(repo, oid, path)) and return
+          redirect(tree_entry_url(repo, oid, path), 307) and return
         end
 
         data = (custom_data || {}).merge(actions.tree_entry(repo, u(ref), path))
@@ -108,7 +108,7 @@ module Dolt
 
       def blame(repo, ref, path, custom_data = {})
         if oid = lookup_ref_oid(repo, ref)
-          redirect(blame_url(repo, oid, path)) and return
+          redirect(blame_url(repo, oid, path), 307) and return
         end
 
         data = (custom_data || {}).merge(actions.blame(repo, u(ref), path))
@@ -120,7 +120,7 @@ module Dolt
 
       def history(repo, ref, path, count, custom_data = {})
         if oid = lookup_ref_oid(repo, ref)
-          redirect(history_url(repo, oid, path)) and return
+          redirect(history_url(repo, oid, path), 307) and return
         end
 
         data = (custom_data || {}).merge(actions.history(repo, u(ref), path, count))
@@ -140,7 +140,7 @@ module Dolt
 
       def tree_history(repo, ref, path, count = 1, custom_data = {})
         if oid = lookup_ref_oid(repo, ref)
-          redirect(tree_history_url(repo, oid, path)) and return
+          redirect(tree_history_url(repo, oid, path), 307) and return
         end
 
         data = (custom_data || {}).merge(actions.tree_history(repo, u(ref), path, count))
@@ -155,12 +155,12 @@ module Dolt
         @cache[repo] ||= actions.resolve_repository(repo)
       end
 
-      private
       def lookup_ref_oid(repo, ref)
         return if !respond_to?(:redirect_refs?) || !redirect_refs? || ref.length == 40
         actions.rev_parse_oid(repo, ref)
       end
 
+      private
       def u(str)
         # Temporarily swap the + out with a magic byte, so
         # filenames/branches with +'s won't get unescaped to a space

@@ -76,8 +76,6 @@ module Dolt
         add_headers(response, options.merge(:ref => ref))
         tpl_options = options[:template_options] || {}
         body(renderer.render(options[:template], data, tpl_options))
-      rescue Exception => err
-        error(err, repo, ref)
       end
 
       def tree(repo, ref, path, custom_data = {})
@@ -90,8 +88,6 @@ module Dolt
         return redirect(blob_url(repo, ref, path)) if tree.class.to_s !~ /\bTree/
         add_headers(response, :ref => ref)
         body(renderer.render(:tree, data))
-      rescue Exception => err
-        error(err, repo, ref)
       end
 
       def tree_entry(repo, ref, path, custom_data = {})
@@ -102,8 +98,6 @@ module Dolt
         data = (custom_data || {}).merge(actions.tree_entry(repo, u(ref), path))
         add_headers(response, :ref => ref)
         body(renderer.render(data.key?(:tree) ? :tree : :blob, data))
-      rescue Exception => err
-        error(err, repo, ref)
       end
 
       def blame(repo, ref, path, custom_data = {})
@@ -114,8 +108,6 @@ module Dolt
         data = (custom_data || {}).merge(actions.blame(repo, u(ref), path))
         add_headers(response, :ref => ref)
         body(renderer.render(:blame, data))
-      rescue Exception => err
-        error(err, repo, ref)
       end
 
       def history(repo, ref, path, count, custom_data = {})
@@ -126,16 +118,12 @@ module Dolt
         data = (custom_data || {}).merge(actions.history(repo, u(ref), path, count))
         add_headers(response, :ref => ref)
         body(renderer.render(:commits, data))
-      rescue Exception => err
-        error(err, repo, ref)
       end
 
       def refs(repo, custom_data = {})
         data = (custom_data || {}).merge(actions.refs(repo))
         add_headers(response, :content_type => "application/json")
         body(renderer.render(:refs, data, :layout => nil))
-      rescue Exception => err
-        error(err, repo, nil)
       end
 
       def tree_history(repo, ref, path, count = 1, custom_data = {})
@@ -146,8 +134,6 @@ module Dolt
         data = (custom_data || {}).merge(actions.tree_history(repo, u(ref), path, count))
         add_headers(response, :content_type => "application/json", :ref => ref)
         body(renderer.render(:tree_history, data, :layout => nil))
-      rescue Exception => err
-        error(err, repo, ref)
       end
 
       def resolve_repository(repo)

@@ -39,8 +39,12 @@ module Dolt
       end
 
       get "/*/tree/*:*" do
-        repo, ref, path = params[:splat]
-        tree(repo, ref, path)
+        begin
+          repo, ref, path = params[:splat]
+          tree(repo, ref, path)
+        rescue Exception => err
+          error(err, repo, ref)
+        end
       end
 
       get "/*/tree/*" do
@@ -48,8 +52,12 @@ module Dolt
       end
 
       get "/*/blob/*:*" do
-        repo, ref, path = params[:splat]
-        blob(repo, ref, path)
+        begin
+          repo, ref, path = params[:splat]
+          blob(repo, ref, path)
+        rescue Exception => err
+          error(err, repo, ref)
+        end
       end
 
       get "/*/blob/*" do
@@ -57,8 +65,12 @@ module Dolt
       end
 
       get "/*/raw/*:*" do
-        repo, ref, path = params[:splat]
-        raw(repo, ref, path)
+        begin
+          repo, ref, path = params[:splat]
+          raw(repo, ref, path)
+        rescue Exception => err
+          error(err, repo, ref)
+        end
       end
 
       get "/*/raw/*" do
@@ -66,8 +78,12 @@ module Dolt
       end
 
       get "/*/blame/*:*" do
-        repo, ref, path = params[:splat]
-        blame(repo, ref, path)
+        begin
+          repo, ref, path = params[:splat]
+          blame(repo, ref, path)
+        rescue Exception => err
+          error(err, repo, ref)
+        end
       end
 
       get "/*/blame/*" do
@@ -75,8 +91,12 @@ module Dolt
       end
 
       get "/*/history/*:*" do
-        repo, ref, path = params[:splat]
-        history(repo, ref, path, (params[:commit_count] || 20).to_i)
+        begin
+          repo, ref, path = params[:splat]
+          history(repo, ref, path, (params[:commit_count] || 20).to_i)
+        rescue Exception => err
+          error(err, repo, ref)
+        end
       end
 
       get "/*/history/*" do
@@ -84,12 +104,20 @@ module Dolt
       end
 
       get "/*/refs" do
-        refs(params[:splat].first)
+        begin
+          refs(params[:splat].first)
+        rescue Exception => err
+          error(err, repo, nil)
+        end
       end
 
       get "/*/tree_history/*:*" do
-        repo, ref, path = params[:splat]
-        tree_history(repo, ref, path)
+        begin
+          repo, ref, path = params[:splat]
+          tree_history(repo, ref, path)
+        rescue Exception => err
+          error(err, repo, ref)
+        end
       end
 
       private

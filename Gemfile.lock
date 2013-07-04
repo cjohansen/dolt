@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    dolt (0.21.0)
+    dolt (0.22.0)
       json (~> 1.5)
       libdolt (~> 0.21)
       sinatra (~> 1.0)

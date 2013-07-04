@@ -36,7 +36,7 @@ module Dolt
       not_found { renderer.render("404") }
 
       get "/" do
-        redirect("/tree/master:")
+        redirect("/tree/HEAD:")
       end
 
       get "/tree/*:*" do
@@ -49,7 +49,7 @@ module Dolt
       end
 
       get "/tree/*" do
-        force_ref(params[:splat], "tree", "master")
+        force_ref(params[:splat], "tree", "HEAD")
       end
 
       get "/blob/*:*" do
@@ -62,7 +62,7 @@ module Dolt
       end
 
       get "/blob/*" do
-        force_ref(params[:splat], "blob", "master")
+        force_ref(params[:splat], "blob", "HEAD")
       end
 
       get "/raw/*:*" do
@@ -75,7 +75,7 @@ module Dolt
       end
 
       get "/raw/*" do
-        force_ref(params[:splat], "raw", "master")
+        force_ref(params[:splat], "raw", "HEAD")
       end
 
       get "/blame/*:*" do
@@ -88,7 +88,7 @@ module Dolt
       end
 
       get "/blame/*" do
-        force_ref(params[:splat], "blame", "master")
+        force_ref(params[:splat], "blame", "HEAD")
       end
 
       get "/history/*:*" do
@@ -101,7 +101,7 @@ module Dolt
       end
 
       get "/history/*" do
-        force_ref(params[:splat], "blame", "master")
+        force_ref(params[:splat], "blame", "HEAD")
       end
 
       get "/refs" do

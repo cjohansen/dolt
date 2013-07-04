@@ -29,6 +29,9 @@ module Dolt
       end
 
       def render_error(error, repo, ref)
+        if error.class.to_s == "Rugged::ReferenceError" && ref == "HEAD"
+          return body(renderer.render("empty", { :repository => repo, :ref => ref }))
+        end
         template = error.class.to_s == "Rugged::IndexerError" ? :"404" : :"500"
         add_headers(response)
         body(renderer.render(template, {

@@ -20,7 +20,7 @@ Gem::Specification.new do |s|
 
   s.rubyforge_project = "dolt"
 
-  s.add_dependency "libdolt", "~>0.21"
+  s.add_dependency "libdolt", "~>0.23"
   s.add_dependency "thin", "~>1.4"
   s.add_dependency "sinatra", "~>1.0"
   s.add_dependency "tiltout", "~>1.4"

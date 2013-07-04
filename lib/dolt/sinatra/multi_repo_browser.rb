@@ -43,7 +43,7 @@ module Dolt
           repo, ref, path = params[:splat]
           tree(repo, ref, path)
         rescue Exception => err
-          error(err, repo, ref)
+          render_error(err, repo, ref)
         end
       end
 
@@ -56,7 +56,7 @@ module Dolt
           repo, ref, path = params[:splat]
           blob(repo, ref, path)
         rescue Exception => err
-          error(err, repo, ref)
+          render_error(err, repo, ref)
         end
       end
 
@@ -69,7 +69,7 @@ module Dolt
           repo, ref, path = params[:splat]
           raw(repo, ref, path)
         rescue Exception => err
-          error(err, repo, ref)
+          render_error(err, repo, ref)
         end
       end
 
@@ -82,7 +82,7 @@ module Dolt
           repo, ref, path = params[:splat]
           blame(repo, ref, path)
         rescue Exception => err
-          error(err, repo, ref)
+          render_error(err, repo, ref)
         end
       end
 
@@ -95,7 +95,7 @@ module Dolt
           repo, ref, path = params[:splat]
           history(repo, ref, path, (params[:commit_count] || 20).to_i)
         rescue Exception => err
-          error(err, repo, ref)
+          render_error(err, repo, ref)
         end
       end
 
@@ -107,7 +107,7 @@ module Dolt
         begin
           refs(params[:splat].first)
         rescue Exception => err
-          error(err, repo, nil)
+          render_error(err, repo, nil)
         end
       end
 
@@ -116,7 +116,7 @@ module Dolt
           repo, ref, path = params[:splat]
           tree_history(repo, ref, path)
         rescue Exception => err
-          error(err, repo, ref)
+          render_error(err, repo, ref)
         end
       end
 

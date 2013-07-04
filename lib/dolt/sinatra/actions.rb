@@ -28,7 +28,7 @@ module Dolt
         body ""
       end
 
-      def error(error, repo, ref)
+      def render_error(error, repo, ref)
         template = error.class.to_s == "Rugged::IndexerError" ? :"404" : :"500"
         add_headers(response)
         body(renderer.render(template, {

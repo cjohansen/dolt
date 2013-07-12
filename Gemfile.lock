@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    dolt (0.24.0)
+    dolt (0.25.0)
       json (~> 1.5)
       libdolt (~> 0.23)
       sinatra (~> 1.0)
@@ -20,7 +20,7 @@ GEM
     github-markup (0.7.5)
     htmlentities (4.3.1)
     json (1.8.0)
-    libdolt (0.23.0)
+    libdolt (0.24.0)
       htmlentities (~> 4.3)
       json (~> 1.7)
       makeup (~> 0.2)

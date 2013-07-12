@@ -28,9 +28,12 @@ module Dolt
         body ""
       end
 
-      def render_error(error, repo, ref)
+      def render_error(error, repo, ref, data = {})
         if error.class.to_s == "Rugged::ReferenceError" && ref == "HEAD"
-          return body(renderer.render("empty", { :repository => repo, :ref => ref }))
+          return body(renderer.render("empty", {
+                :repository => repo,
+                :ref => ref
+              }.merge(data)))
         end
         template = error.class.to_s == "Rugged::IndexerError" ? :"404" : :"500"
         add_headers(response)
@@ -38,7 +41,7 @@ module Dolt
                                :error => error,
                                :repository_slug => repo,
                                :ref => ref
-                             }))
+                             }.merge(data)))
       rescue Exception => err
         err_backtrace = err.backtrace.map { |s| "<li>#{s}</li>" }
         error_backtrace = error.backtrace.map { |s| "<li>#{s}</li>" }
@@ -49,6 +52,13 @@ module Dolt
           Dolt encountered an exception, and additionally
           triggered another exception trying to render the error.
         </p>
+        <p>Tried to render the #{template} template with the following data:</p>
+        <dl>
+          <dt>Repository</dt>
+          <dd>#{repo}</dd>
+          <dt>Ref</dt>
+          <dd>#{ref}</dd>
+        </dl>
         <h2>Error: #{err.class} #{err.message}</h2>
         <ul>#{err_backtrace.join()}</ul>
         <h2>Original error: #{error.class} #{error.message}</h2>

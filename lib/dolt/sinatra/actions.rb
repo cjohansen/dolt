@@ -21,32 +21,38 @@ require "cgi"
 
 module Dolt
   module Sinatra
-    module ControllerActions
+    class Actions
+      def initialize(app, lookup, renderer)
+        @app = app
+        @lookup = lookup
+        @renderer = renderer
+      end
+
       def redirect(url, status = 302)
-        response.status = status
-        response["Location"] = url
-        body ""
+        app.response.status = status
+        app.response["Location"] = url
+        app.body("")
       end
 
       def render_error(error, repo, ref, data = {})
         if error.class.to_s == "Rugged::ReferenceError" && ref == "HEAD"
-          return body(renderer.render("empty", {
+          return app.body(renderer.render("empty", {
                 :repository => repo,
                 :ref => ref
               }.merge(data)))
         end
         template = error.class.to_s == "Rugged::IndexerError" ? :"404" : :"500"
-        add_headers(response)
-        body(renderer.render(template, {
-                               :error => error,
-                               :repository_slug => repo,
-                               :ref => ref
-                             }.merge(data)))
+        add_headers(app.response)
+        app.body(renderer.render(template, {
+              :error => error,
+              :repository_slug => repo,
+              :ref => ref
+            }.merge(data)))
       rescue Exception => err
         err_backtrace = err.backtrace.map { |s| "<li>#{s}</li>" }
         error_backtrace = error.backtrace.map { |s| "<li>#{s}</li>" }
 
-        body(<<-HTML)
+        app.body(<<-HTML)
         <h1>Fatal Dolt Error</h1>
         <p>
           Dolt encountered an exception, and additionally
@@ -68,85 +74,85 @@ module Dolt
 
       def raw(repo, ref, path, custom_data = {})
         if oid = lookup_ref_oid(repo, ref)
-          redirect(raw_url(repo, oid, path), 307) and return
+          redirect(app.raw_url(repo, oid, path), 307) and return
         end
 
         blob(repo, ref, path, custom_data, {
-               :template => :raw,
-               :content_type => "text/plain",
-               :template_options => { :layout => nil }
-             })
+            :template => :raw,
+            :content_type => "text/plain",
+            :template_options => { :layout => nil }
+          })
       end
 
       def blob(repo, ref, path, custom_data = {}, options = { :template => :blob })
         if oid = lookup_ref_oid(repo, ref)
-          redirect(blob_url(repo, oid, path), 307) and return
+          redirect(app.blob_url(repo, oid, path), 307) and return
         end
 
         data = (custom_data || {}).merge(lookup.blob(repo, u(ref), path))
         blob = data[:blob]
-        return redirect(tree_url(repo, ref, path)) if blob.class.to_s !~ /\bBlob/
-        add_headers(response, options.merge(:ref => ref))
+        return redirect(app.tree_url(repo, ref, path)) if blob.class.to_s !~ /\bBlob/
+        add_headers(app.response, options.merge(:ref => ref))
         tpl_options = options[:template_options] || {}
-        body(renderer.render(options[:template], data, tpl_options))
+        app.body(renderer.render(options[:template], data, tpl_options))
       end
 
       def tree(repo, ref, path, custom_data = {})
         if oid = lookup_ref_oid(repo, ref)
-          redirect(tree_url(repo, oid, path), 307) and return
+          redirect(app.tree_url(repo, oid, path), 307) and return
         end
 
         data = (custom_data || {}).merge(lookup.tree(repo, u(ref), path))
         tree = data[:tree]
-        return redirect(blob_url(repo, ref, path)) if tree.class.to_s !~ /\bTree/
-        add_headers(response, :ref => ref)
-        body(renderer.render(:tree, data))
+        return redirect(app.blob_url(repo, ref, path)) if tree.class.to_s !~ /\bTree/
+        add_headers(app.response, :ref => ref)
+        app.body(renderer.render(:tree, data))
       end
 
       def tree_entry(repo, ref, path, custom_data = {})
         if oid = lookup_ref_oid(repo, ref)
-          redirect(tree_entry_url(repo, oid, path), 307) and return
+          redirect(app.tree_entry_url(repo, oid, path), 307) and return
         end
 
         data = (custom_data || {}).merge(lookup.tree_entry(repo, u(ref), path))
-        add_headers(response, :ref => ref)
-        body(renderer.render(data.key?(:tree) ? :tree : :blob, data))
+        add_headers(app.response, :ref => ref)
+        app.body(renderer.render(data.key?(:tree) ? :tree : :blob, data))
       end
 
       def blame(repo, ref, path, custom_data = {})
         if oid = lookup_ref_oid(repo, ref)
-          redirect(blame_url(repo, oid, path), 307) and return
+          redirect(app.blame_url(repo, oid, path), 307) and return
         end
 
         data = (custom_data || {}).merge(lookup.blame(repo, u(ref), path))
-        add_headers(response, :ref => ref)
-        body(renderer.render(:blame, data))
+        add_headers(app.response, :ref => ref)
+        app.body(renderer.render(:blame, data))
       end
 
       def history(repo, ref, path, count, custom_data = {})
         if oid = lookup_ref_oid(repo, ref)
-          redirect(history_url(repo, oid, path), 307) and return
+          redirect(app.history_url(repo, oid, path), 307) and return
         end
 
         data = (custom_data || {}).merge(lookup.history(repo, u(ref), path, count))
-        add_headers(response, :ref => ref)
-        body(renderer.render(:commits, data))
+        add_headers(app.response, :ref => ref)
+        app.body(renderer.render(:commits, data))
       end
 
       def refs(repo, custom_data = {})
         data = (custom_data || {}).merge(lookup.refs(repo))
-        add_headers(response, :content_type => "application/json")
-        body(renderer.render(:refs, data, :layout => nil))
+        add_headers(app.response, :content_type => "application/json")
+        app.body(renderer.render(:refs, data, :layout => nil))
       end
 
       def tree_history(repo, ref, path, count = 1, custom_data = {})
         if oid = lookup_ref_oid(repo, ref)
-          redirect(tree_history_url(repo, oid, path), 307) and return
+          redirect(app.tree_history_url(repo, oid, path), 307) and return
         end
 
         data = (custom_data || {}).merge(lookup.tree_history(repo, u(ref), path, count))
-        add_headers(response, :content_type => "application/json", :ref => ref)
-        body(renderer.render(:tree_history, data, :layout => nil))
+        add_headers(app.response, :content_type => "application/json", :ref => ref)
+        app.body(renderer.render(:tree_history, data, :layout => nil))
       end
 
       def resolve_repository(repo)
@@ -155,11 +161,13 @@ module Dolt
       end
 
       def lookup_ref_oid(repo, ref)
-        return if !respond_to?(:redirect_refs?) || !redirect_refs? || ref.length == 40
+        return if !app.respond_to?(:redirect_refs?) || !app.redirect_refs? || ref.length == 40
         lookup.rev_parse_oid(repo, ref)
       end
 
       private
+      attr_reader :app, :lookup, :renderer
+
       def u(str)
         # Temporarily swap the + out with a magic byte, so
         # filenames/branches with +'s won't get unescaped to a space

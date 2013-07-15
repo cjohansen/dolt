@@ -23,7 +23,7 @@ end
 require "bundler/setup"
 require "minitest/autorun"
 require "libdolt/view"
-require "dolt/sinatra/controller_actions"
+require "dolt/sinatra/actions"
 require "tiltout"
 
 Bundler.require(:default, :test)
@@ -68,15 +68,7 @@ module Stub
 end
 
 module Test
-  class SinatraApp
-    include Dolt::Sinatra::ControllerActions
-    attr_reader :lookup, :renderer
-
-    def initialize(lookup, renderer)
-      @lookup = lookup
-      @renderer = renderer
-    end
-
+  class App
     def body(str = nil)
       @body = str if !str.nil?
       @body
@@ -118,9 +110,13 @@ module Test
     def raw_url(repo, ref, path)
       "/#{repo}/raw/#{ref}:#{path}"
     end
+
+    def method_missing(name, *args, &block)
+      @actions.send(name, *args, &block)
+    end
   end
 
-  class RedirectingSinatraApp < SinatraApp
+  class RedirectingApp < App
     def redirect_refs?; true; end
   end
 

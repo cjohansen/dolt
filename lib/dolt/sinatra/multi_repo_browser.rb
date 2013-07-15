@@ -15,17 +15,25 @@
 #   You should have received a copy of the GNU Affero General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #++
-require "dolt/sinatra/base"
+require "sinatra/base"
+require "dolt/sinatra/actions"
 require "libdolt/view/multi_repository"
 require "libdolt/view/blob"
 require "libdolt/view/tree"
 
 module Dolt
   module Sinatra
-    class MultiRepoBrowser < Dolt::Sinatra::Base
+    class MultiRepoBrowser < ::Sinatra::Base
       include Dolt::View::MultiRepository
       include Dolt::View::Blob
       include Dolt::View::Tree
+
+      def initialize(lookup, renderer)
+        @lookup = lookup
+        @renderer = renderer
+        @dolt = Dolt::Sinatra::Actions.new(self, lookup, renderer)
+        super()
+      end
 
       not_found { renderer.render("404") }
 
@@ -41,86 +49,88 @@ module Dolt
       get "/*/tree/*:*" do
         begin
           repo, ref, path = params[:splat]
-          tree(repo, ref, path)
+          dolt.tree(repo, ref, path)
         rescue Exception => err
-          render_error(err, repo, ref)
+          dolt.render_error(err, repo, ref)
         end
       end
 
       get "/*/tree/*" do
-        force_ref(params[:splat], "tree", "HEAD")
+        dolt.force_ref(params[:splat], "tree", "HEAD")
       end
 
       get "/*/blob/*:*" do
         begin
           repo, ref, path = params[:splat]
-          blob(repo, ref, path)
+          dolt.blob(repo, ref, path)
         rescue Exception => err
-          render_error(err, repo, ref)
+          dolt.render_error(err, repo, ref)
         end
       end
 
       get "/*/blob/*" do
-        force_ref(params[:splat], "blob", "HEAD")
+        dolt.force_ref(params[:splat], "blob", "HEAD")
       end
 
       get "/*/raw/*:*" do
         begin
           repo, ref, path = params[:splat]
-          raw(repo, ref, path)
+          dolt.raw(repo, ref, path)
         rescue Exception => err
-          render_error(err, repo, ref)
+          dolt.render_error(err, repo, ref)
         end
       end
 
       get "/*/raw/*" do
-        force_ref(params[:splat], "raw", "HEAD")
+        dolt.force_ref(params[:splat], "raw", "HEAD")
       end
 
       get "/*/blame/*:*" do
         begin
           repo, ref, path = params[:splat]
-          blame(repo, ref, path)
+          dolt.blame(repo, ref, path)
         rescue Exception => err
-          render_error(err, repo, ref)
+          dolt.render_error(err, repo, ref)
         end
       end
 
       get "/*/blame/*" do
-        force_ref(params[:splat], "blame", "HEAD")
+        dolt.force_ref(params[:splat], "blame", "HEAD")
       end
 
       get "/*/history/*:*" do
         begin
           repo, ref, path = params[:splat]
-          history(repo, ref, path, (params[:commit_count] || 20).to_i)
+          dolt.history(repo, ref, path, (params[:commit_count] || 20).to_i)
         rescue Exception => err
-          render_error(err, repo, ref)
+          dolt.render_error(err, repo, ref)
         end
       end
 
       get "/*/history/*" do
-        force_ref(params[:splat], "history", "HEAD")
+        dolt.force_ref(params[:splat], "history", "HEAD")
       end
 
       get "/*/refs" do
         begin
-          refs(params[:splat].first)
+          dolt.refs(params[:splat].first)
         rescue Exception => err
-          render_error(err, repo, nil)
+          dolt.render_error(err, repo, nil)
         end
       end
 
       get "/*/tree_history/*:*" do
         begin
           repo, ref, path = params[:splat]
-          tree_history(repo, ref, path)
+          dolt.tree_history(repo, ref, path)
         rescue Exception => err
-          render_error(err, repo, ref)
+          dolt.render_error(err, repo, ref)
         end
       end
 
       private
+      attr_reader :repo, :lookup, :renderer, :dolt
+
       def force_ref(args, action, ref)
         redirect(args.shift + "/#{action}/#{ref}:" + args.join)
       end

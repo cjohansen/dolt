@@ -21,16 +21,16 @@ class DoltApp
     if is_git_repo?(dir)
       dir = File.expand_path(dir)
       resolver = Dolt::DiskRepoResolver.new(File.dirname(dir))
-      actions = Dolt::RepoActions.new(resolver)
+      lookup = Dolt::RepositoryLookup.new(resolver)
       view.helper(Dolt::View::SingleRepository)
       require "dolt/sinatra/single_repo_browser"
-      Dolt::Sinatra::SingleRepoBrowser.new(File.basename(dir), actions, view)
+      Dolt::Sinatra::SingleRepoBrowser.new(File.basename(dir), lookup, view)
     else
       resolver = Dolt::DiskRepoResolver.new(dir)
-      actions = Dolt::RepoActions.new(resolver)
+      lookup = Dolt::RepositoryLookup.new(resolver)
       view.helper(Dolt::View::MultiRepository)
       require "dolt/sinatra/multi_repo_browser"
-      Dolt::Sinatra::MultiRepoBrowser.new(actions, view)
+      Dolt::Sinatra::MultiRepoBrowser.new(lookup, view)
     end
   end
 

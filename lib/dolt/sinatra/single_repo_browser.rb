@@ -28,9 +28,9 @@ module Dolt
       include Dolt::View::Tree
       attr_reader :repo
 
-      def initialize(repo, actions, renderer)
+      def initialize(repo, lookup, renderer)
         @repo = repo
-        super(actions, renderer)
+        super(lookup, renderer)
       end
 
       not_found { renderer.render("404") }

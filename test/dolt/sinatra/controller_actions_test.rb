@@ -16,22 +16,22 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #++
 require "test_helper"
-require "dolt/sinatra/actions"
+require "dolt/sinatra/controller_actions"
 
-describe Dolt::Sinatra::Actions do
+describe Dolt::Sinatra::ControllerActions do
   describe "#blob" do
-    it "delegates to actions" do
-      actions = Test::Actions.new(Stub::Blob.new)
-      app = Test::SinatraApp.new(actions, Test::Renderer.new)
+    it "delegates to lookup" do
+      lookup = Test::Lookup.new(Stub::Blob.new)
+      app = Test::SinatraApp.new(lookup, Test::Renderer.new)
       app.blob("gitorious", "master", "app/models/repository.rb")
 
-      assert_equal "gitorious", actions.repo
-      assert_equal "master", actions.ref
-      assert_equal "app/models/repository.rb", actions.path
+      assert_equal "gitorious", lookup.repo
+      assert_equal "master", lookup.ref
+      assert_equal "app/models/repository.rb", lookup.path
     end
 
     it "renders the blob template as html" do
-      app = Test::SinatraApp.new(Test::Actions.new(Stub::Blob.new), Test::Renderer.new("Blob"))
+      app = Test::SinatraApp.new(Test::Lookup.new(Stub::Blob.new), Test::Renderer.new("Blob"))
       app.blob("gitorious", "master", "app/models/repository.rb")
 
       assert_equal "text/html; charset=utf-8", app.response["Content-Type"]
@@ -40,14 +40,14 @@ describe Dolt::Sinatra::Actions do
 
     it "renders the blob template with custom data" do
       renderer = Test::Renderer.new("Blob")
-      app = Test::SinatraApp.new(Test::Actions.new(Stub::Blob.new), renderer)
+      app = Test::SinatraApp.new(Test::Lookup.new(Stub::Blob.new), renderer)
       app.blob("gitorious", "master", "app/models/repository.rb", { :who => 42 })
 
       assert_equal 42, renderer.data[:who]
     end
 
     it "redirects tree views to tree action" do
-      app = Test::SinatraApp.new(Test::Actions.new(Stub::Tree.new), Test::Renderer.new("Tree"))
+      app = Test::SinatraApp.new(Test::Lookup.new(Stub::Tree.new), Test::Renderer.new("Tree"))
       app.blob("gitorious", "master", "app/models")
 
       assert_equal 302, app.response.status
@@ -56,15 +56,15 @@ describe Dolt::Sinatra::Actions do
     end
 
     it "unescapes ref" do
-      actions = Test::Actions.new(Stub::Blob.new)
-      app = Test::SinatraApp.new(actions, Test::Renderer.new("Blob"))
+      lookup = Test::Lookup.new(Stub::Blob.new)
+      app = Test::SinatraApp.new(lookup, Test::Renderer.new("Blob"))
       app.blob("gitorious", "issue-%23221", "app/my documents")
 
-      assert_equal "issue-#221", actions.ref
+      assert_equal "issue-#221", lookup.ref
     end
 
     it "does not redirect ref to oid by default" do
-      app = Test::SinatraApp.new(Test::Actions.new(Stub::Blob.new), Test::Renderer.new("Blob"))
+      app = Test::SinatraApp.new(Test::Lookup.new(Stub::Blob.new), Test::Renderer.new("Blob"))
       app.blob("gitorious", "master", "lib/gitorious.rb")
 
       location = app.response["Location"]
@@ -73,7 +73,7 @@ describe Dolt::Sinatra::Actions do
     end
 
     it "redirects ref to oid if configured so" do
-      app = Test::RedirectingSinatraApp.new(Test::Actions.new(Stub::Blob.new), Test::Renderer.new("Blob"))
+      app = Test::RedirectingSinatraApp.new(Test::Lookup.new(Stub::Blob.new), Test::Renderer.new("Blob"))
       app.blob("gitorious", "master", "lib/gitorious.rb")
 
       location = app.response["Location"]
@@ -85,17 +85,17 @@ describe Dolt::Sinatra::Actions do
 
   describe "#tree" do
     it "delegates to actions" do
-      actions = Test::Actions.new(Stub::Tree.new)
-      app = Test::SinatraApp.new(actions, Test::Renderer.new)
+      lookup = Test::Lookup.new(Stub::Tree.new)
+      app = Test::SinatraApp.new(lookup, Test::Renderer.new)
       app.tree("gitorious", "master", "app/models")
 
-      assert_equal "gitorious", actions.repo
-      assert_equal "master", actions.ref
-      assert_equal "app/models", actions.path
+      assert_equal "gitorious", lookup.repo
+      assert_equal "master", lookup.ref
+      assert_equal "app/models", lookup.path
     end
 
     it "renders the tree template as html" do
-      app = Test::SinatraApp.new(Test::Actions.new(Stub::Tree.new), Test::Renderer.new("Tree"))
+      app = Test::SinatraApp.new(Test::Lookup.new(Stub::Tree.new), Test::Renderer.new("Tree"))
       app.tree("gitorious", "master", "app/models")
 
       assert_equal "text/html; charset=utf-8", app.response["Content-Type"]
@@ -104,14 +104,14 @@ describe Dolt::Sinatra::Actions do
 
     it "renders template with custom data" do
       renderer = Test::Renderer.new("Tree")
-      app = Test::SinatraApp.new(Test::Actions.new(Stub::Tree.new), renderer)
+      app = Test::SinatraApp.new(Test::Lookup.new(Stub::Tree.new), renderer)
       app.tree("gitorious", "master", "app/models", { :who => 42 })
 
       assert_equal 42, renderer.data[:who]
     end
 
     it "redirects blob views to blob action" do
-      app = Test::SinatraApp.new(Test::Actions.new(Stub::Blob.new), Test::Renderer.new("Tree"))
+      app = Test::SinatraApp.new(Test::Lookup.new(Stub::Blob.new), Test::Renderer.new("Tree"))
       app.tree("gitorious", "master", "app/models/repository.rb")
 
       location = app.response["Location"]
@@ -121,21 +121,21 @@ describe Dolt::Sinatra::Actions do
     end
 
     it "sets X-UA-Compatible header" do
-      app = Test::SinatraApp.new(Test::Actions.new(Stub::Tree.new), Test::Renderer.new("Tree"))
+      app = Test::SinatraApp.new(Test::Lookup.new(Stub::Tree.new), Test::Renderer.new("Tree"))
       app.tree("gitorious", "master", "app/models")
 
       assert_equal "IE=edge", app.response["X-UA-Compatible"]
     end
 
     it "does not set cache-control header for head ref" do
-      app = Test::SinatraApp.new(Test::Actions.new(Stub::Tree.new), Test::Renderer.new("Tree"))
+      app = Test::SinatraApp.new(Test::Lookup.new(Stub::Tree.new), Test::Renderer.new("Tree"))
       app.tree("gitorious", "master", "app/models")
 
       assert !app.response.key?("Cache-Control")
     end
 
     it "sets cache headers for full oid ref" do
-      app = Test::SinatraApp.new(Test::Actions.new(Stub::Tree.new), Test::Renderer.new("Tree"))
+      app = Test::SinatraApp.new(Test::Lookup.new(Stub::Tree.new), Test::Renderer.new("Tree"))
       app.tree("gitorious", "a" * 40, "app/models")
 
       assert_equal "max-age=315360000, public", app.response["Cache-Control"]
@@ -143,15 +143,15 @@ describe Dolt::Sinatra::Actions do
     end
 
     it "unescapes ref" do
-      actions = Test::Actions.new(Stub::Tree.new)
-      app = Test::SinatraApp.new(actions, Test::Renderer.new("Tree"))
+      lookup = Test::Lookup.new(Stub::Tree.new)
+      app = Test::SinatraApp.new(lookup, Test::Renderer.new("Tree"))
       app.tree("gitorious", "issue-%23221", "app")
 
-      assert_equal "issue-#221", actions.ref
+      assert_equal "issue-#221", lookup.ref
     end
 
     it "redirects ref to oid if configured so" do
-      app = Test::RedirectingSinatraApp.new(Test::Actions.new(Stub::Tree.new), Test::Renderer.new("Tree"))
+      app = Test::RedirectingSinatraApp.new(Test::Lookup.new(Stub::Tree.new), Test::Renderer.new("Tree"))
       app.tree("gitorious", "master", "lib")
 
       assert_equal 307, app.response.status
@@ -161,7 +161,7 @@ describe Dolt::Sinatra::Actions do
 
   describe "#tree_entry" do
     it "renders trees with the tree template as html" do
-      app = Test::SinatraApp.new(Test::Actions.new(Stub::Tree.new), Test::Renderer.new("Tree"))
+      app = Test::SinatraApp.new(Test::Lookup.new(Stub::Tree.new), Test::Renderer.new("Tree"))
       app.tree_entry("gitorious", "master", "app/models")
 
       assert_equal "text/html; charset=utf-8", app.response["Content-Type"]
@@ -170,14 +170,14 @@ describe Dolt::Sinatra::Actions do
 
     it "renders template with custom data" do
       renderer = Test::Renderer.new("Tree")
-      app = Test::SinatraApp.new(Test::Actions.new(Stub::Tree.new), renderer)
+      app = Test::SinatraApp.new(Test::Lookup.new(Stub::Tree.new), renderer)
       app.tree_entry("gitorious", "master", "app/models", { :who => 42 })
 
       assert_equal 42, renderer.data[:who]
     end
 
     it "renders trees with the tree template as html" do
-      app = Test::SinatraApp.new(Test::Actions.new(Stub::Blob.new), Test::Renderer.new("Blob"))
+      app = Test::SinatraApp.new(Test::Lookup.new(Stub::Blob.new), Test::Renderer.new("Blob"))
       app.tree_entry("gitorious", "master", "app/models")
 
       assert_equal "text/html; charset=utf-8", app.response["Content-Type"]
@@ -185,15 +185,15 @@ describe Dolt::Sinatra::Actions do
     end
 
     it "unescapes ref" do
-      actions = Test::Actions.new(Stub::Tree.new)
-      app = Test::SinatraApp.new(actions, Test::Renderer.new("Tree"))
+      lookup = Test::Lookup.new(Stub::Tree.new)
+      app = Test::SinatraApp.new(lookup, Test::Renderer.new("Tree"))
       app.tree_entry("gitorious", "issue-%23221", "app")
 
-      assert_equal "issue-#221", actions.ref
+      assert_equal "issue-#221", lookup.ref
     end
 
     it "redirects ref to oid if configured so" do
-      app = Test::RedirectingSinatraApp.new(Test::Actions.new(Stub::Tree.new), Test::Renderer.new("Tree"))
+      app = Test::RedirectingSinatraApp.new(Test::Lookup.new(Stub::Tree.new), Test::Renderer.new("Tree"))
       app.tree_entry("gitorious", "master", "lib")
 
       assert_equal 307, app.response.status
@@ -202,18 +202,18 @@ describe Dolt::Sinatra::Actions do
   end
 
   describe "#raw" do
-    it "delegates to actions" do
-      actions = Test::Actions.new(Stub::Blob.new)
-      app = Test::SinatraApp.new(actions, Test::Renderer.new)
+    it "delegates to lookup" do
+      lookup = Test::Lookup.new(Stub::Blob.new)
+      app = Test::SinatraApp.new(lookup, Test::Renderer.new)
       app.raw("gitorious", "master", "app/models/repository.rb")
 
-      assert_equal "gitorious", actions.repo
-      assert_equal "master", actions.ref
-      assert_equal "app/models/repository.rb", actions.path
+      assert_equal "gitorious", lookup.repo
+      assert_equal "master", lookup.ref
+      assert_equal "app/models/repository.rb", lookup.path
     end
 
     it "renders the raw template as text" do
-      app = Test::SinatraApp.new(Test::Actions.new(Stub::Blob.new), Test::Renderer.new("Text"))
+      app = Test::SinatraApp.new(Test::Lookup.new(Stub::Blob.new), Test::Renderer.new("Text"))
       app.raw("gitorious", "master", "app/models/repository.rb")
 
       assert_equal "text/plain", app.response["Content-Type"]
@@ -222,14 +222,14 @@ describe Dolt::Sinatra::Actions do
 
     it "renders template with custom data" do
       renderer = Test::Renderer.new("Text")
-      app = Test::SinatraApp.new(Test::Actions.new(Stub::Blob.new), renderer)
+      app = Test::SinatraApp.new(Test::Lookup.new(Stub::Blob.new), renderer)
       app.raw("gitorious", "master", "app/models/repository.rb", { :who => 42 })
 
       assert_equal 42, renderer.data[:who]
     end
 
     it "redirects tree views to tree action" do
-      app = Test::SinatraApp.new(Test::Actions.new(Stub::Tree.new), Test::Renderer.new("Tree"))
+      app = Test::SinatraApp.new(Test::Lookup.new(Stub::Tree.new), Test::Renderer.new("Tree"))
       app.raw("gitorious", "master", "app/models")
 
       location = app.response["Location"]
@@ -239,15 +239,15 @@ describe Dolt::Sinatra::Actions do
     end
 
     it "unescapes ref" do
-      actions = Test::Actions.new(Stub::Blob.new)
-      app = Test::SinatraApp.new(actions, Test::Renderer.new("Blob"))
+      lookup = Test::Lookup.new(Stub::Blob.new)
+      app = Test::SinatraApp.new(lookup, Test::Renderer.new("Blob"))
       app.raw("gitorious", "issue-%23221", "app/models/repository.rb")
 
-      assert_equal "issue-#221", actions.ref
+      assert_equal "issue-#221", lookup.ref
     end
 
     it "redirects ref to oid if configured so" do
-      app = Test::RedirectingSinatraApp.new(Test::Actions.new(Stub::Blob.new), Test::Renderer.new("Blob"))
+      app = Test::RedirectingSinatraApp.new(Test::Lookup.new(Stub::Blob.new), Test::Renderer.new("Blob"))
       app.raw("gitorious", "master", "lib/gitorious.rb")
 
       assert_equal 307, app.response.status
@@ -256,18 +256,18 @@ describe Dolt::Sinatra::Actions do
   end
 
   describe "#blame" do
-    it "delegates to actions" do
-      actions = Test::Actions.new(Stub::Blob.new)
-      app = Test::SinatraApp.new(actions, Test::Renderer.new)
+    it "delegates to lookup" do
+      lookup = Test::Lookup.new(Stub::Blob.new)
+      app = Test::SinatraApp.new(lookup, Test::Renderer.new)
       app.blame("gitorious", "master", "app/models/repository.rb")
 
-      assert_equal "gitorious", actions.repo
-      assert_equal "master", actions.ref
-      assert_equal "app/models/repository.rb", actions.path
+      assert_equal "gitorious", lookup.repo
+      assert_equal "master", lookup.ref
+      assert_equal "app/models/repository.rb", lookup.path
     end
 
     it "renders the blame template as html" do
-      app = Test::SinatraApp.new(Test::Actions.new(Stub::Blob.new), Test::Renderer.new("Text"))
+      app = Test::SinatraApp.new(Test::Lookup.new(Stub::Blob.new), Test::Renderer.new("Text"))
       app.blame("gitorious", "master", "app/models/repository.rb")
 
       assert_equal "text/html; charset=utf-8", app.response["Content-Type"]
@@ -276,22 +276,22 @@ describe Dolt::Sinatra::Actions do
 
     it "renders template with custom data" do
       renderer = Test::Renderer.new("Text")
-      app = Test::SinatraApp.new(Test::Actions.new(Stub::Blob.new), renderer)
+      app = Test::SinatraApp.new(Test::Lookup.new(Stub::Blob.new), renderer)
       app.blame("gitorious", "master", "app/models/repository.rb", { :who => 42 })
 
       assert_equal 42, renderer.data[:who]
     end
 
     it "unescapes ref" do
-      actions = Test::Actions.new(Stub::Blob.new)
-      app = Test::SinatraApp.new(actions, Test::Renderer.new("Blob"))
+      lookup = Test::Lookup.new(Stub::Blob.new)
+      app = Test::SinatraApp.new(lookup, Test::Renderer.new("Blob"))
       app.blame("gitorious", "issue-%23221", "app/models/repository.rb")
 
-      assert_equal "issue-#221", actions.ref
+      assert_equal "issue-#221", lookup.ref
     end
 
     it "redirects ref to oid if configured so" do
-      app = Test::RedirectingSinatraApp.new(Test::Actions.new(Stub::Blob.new), Test::Renderer.new("Blob"))
+      app = Test::RedirectingSinatraApp.new(Test::Lookup.new(Stub::Blob.new), Test::Renderer.new("Blob"))
       app.blame("gitorious", "master", "lib/gitorious.rb")
 
       assert_equal 307, app.response.status
@@ -300,18 +300,18 @@ describe Dolt::Sinatra::Actions do
   end
 
   describe "#history" do
-    it "delegates to actions" do
-      actions = Test::Actions.new(Stub::Blob.new)
-      app = Test::SinatraApp.new(actions, Test::Renderer.new)
+    it "delegates to lookup" do
+      lookup = Test::Lookup.new(Stub::Blob.new)
+      app = Test::SinatraApp.new(lookup, Test::Renderer.new)
       app.history("gitorious", "master", "app/models/repository.rb", 10)
 
-      assert_equal "gitorious", actions.repo
-      assert_equal "master", actions.ref
-      assert_equal "app/models/repository.rb", actions.path
+      assert_equal "gitorious", lookup.repo
+      assert_equal "master", lookup.ref
+      assert_equal "app/models/repository.rb", lookup.path
     end
 
     it "renders the commits template as html" do
-      app = Test::SinatraApp.new(Test::Actions.new(Stub::Blob.new), Test::Renderer.new("Text"))
+      app = Test::SinatraApp.new(Test::Lookup.new(Stub::Blob.new), Test::Renderer.new("Text"))
       app.history("gitorious", "master", "app/models/repository.rb", 10)
 
       assert_equal "text/html; charset=utf-8", app.response["Content-Type"]
@@ -320,22 +320,22 @@ describe Dolt::Sinatra::Actions do
 
     it "renders template with custom data" do
       renderer = Test::Renderer.new("Text")
-      app = Test::SinatraApp.new(Test::Actions.new(Stub::Blob.new), renderer)
+      app = Test::SinatraApp.new(Test::Lookup.new(Stub::Blob.new), renderer)
       app.history("gitorious", "master", "app/models/repository.rb", 10, { :who => 42 })
 
       assert_equal 42, renderer.data[:who]
     end
 
     it "unescapes ref" do
-      actions = Test::Actions.new(Stub::Blob.new)
-      app = Test::SinatraApp.new(actions, Test::Renderer.new("Blob"))
+      lookup = Test::Lookup.new(Stub::Blob.new)
+      app = Test::SinatraApp.new(lookup, Test::Renderer.new("Blob"))
       app.history("gitorious", "issue-%23221", "lib/gitorious.rb", 10)
 
-      assert_equal "issue-#221", actions.ref
+      assert_equal "issue-#221", lookup.ref
     end
 
     it "redirects ref to oid if configured so" do
-      app = Test::RedirectingSinatraApp.new(Test::Actions.new(Stub::Blob.new), Test::Renderer.new("Blob"))
+      app = Test::RedirectingSinatraApp.new(Test::Lookup.new(Stub::Blob.new), Test::Renderer.new("Blob"))
       app.history("gitorious", "master", "lib/gitorious.rb", 10)
 
       assert_equal 307, app.response.status
@@ -345,7 +345,7 @@ describe Dolt::Sinatra::Actions do
 
   describe "#refs" do
     it "renders the refs template as json" do
-      app = Test::SinatraApp.new(Test::Actions.new(Stub::Blob.new), Test::Renderer.new("JSON"))
+      app = Test::SinatraApp.new(Test::Lookup.new(Stub::Blob.new), Test::Renderer.new("JSON"))
       app.refs("gitorious")
 
       assert_equal "application/json", app.response["Content-Type"]
@@ -354,7 +354,7 @@ describe Dolt::Sinatra::Actions do
 
     it "renders template with custom data" do
       renderer = Test::Renderer.new("Text")
-      app = Test::SinatraApp.new(Test::Actions.new(Stub::Blob.new), renderer)
+      app = Test::SinatraApp.new(Test::Lookup.new(Stub::Blob.new), renderer)
       app.refs("gitorious", { :who => 42 })
 
       assert_equal 42, renderer.data[:who]
@@ -363,7 +363,7 @@ describe Dolt::Sinatra::Actions do
 
   describe "#tree_history" do
     it "renders the tree_history template as json" do
-      app = Test::SinatraApp.new(Test::Actions.new(Stub::Tree.new), Test::Renderer.new("JSON"))
+      app = Test::SinatraApp.new(Test::Lookup.new(Stub::Tree.new), Test::Renderer.new("JSON"))
       app.tree_history("gitorious", "master", "", 1)
 
       assert_equal "application/json", app.response["Content-Type"]
@@ -372,22 +372,22 @@ describe Dolt::Sinatra::Actions do
 
     it "renders template with custom data" do
       renderer = Test::Renderer.new("Text")
-      app = Test::SinatraApp.new(Test::Actions.new(Stub::Tree.new), renderer)
+      app = Test::SinatraApp.new(Test::Lookup.new(Stub::Tree.new), renderer)
       app.tree_history("gitorious", "master", "app/models", 1, { :who => 42 })
 
       assert_equal 42, renderer.data[:who]
     end
 
     it "unescapes ref" do
-      actions = Test::Actions.new(Stub::Tree.new)
-      app = Test::SinatraApp.new(actions, Test::Renderer.new("Tree"))
+      lookup = Test::Lookup.new(Stub::Tree.new)
+      app = Test::SinatraApp.new(lookup, Test::Renderer.new("Tree"))
       app.tree_history("gitorious", "issue-%23221", "app/models")
 
-      assert_equal "issue-#221", actions.ref
+      assert_equal "issue-#221", lookup.ref
     end
 
     it "redirects ref to oid if configured so" do
-      app = Test::RedirectingSinatraApp.new(Test::Actions.new(Stub::Tree.new), Test::Renderer.new("Tree"))
+      app = Test::RedirectingSinatraApp.new(Test::Lookup.new(Stub::Tree.new), Test::Renderer.new("Tree"))
       app.tree_history("gitorious", "master", "lib", 10)
 
       assert_equal 307, app.response.status

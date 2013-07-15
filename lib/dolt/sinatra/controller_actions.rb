@@ -21,7 +21,7 @@ require "cgi"
 
 module Dolt
   module Sinatra
-    module Actions
+    module ControllerActions
       def redirect(url, status = 302)
         response.status = status
         response["Location"] = url
@@ -83,7 +83,7 @@ module Dolt
           redirect(blob_url(repo, oid, path), 307) and return
         end
 
-        data = (custom_data || {}).merge(actions.blob(repo, u(ref), path))
+        data = (custom_data || {}).merge(lookup.blob(repo, u(ref), path))
         blob = data[:blob]
         return redirect(tree_url(repo, ref, path)) if blob.class.to_s !~ /\bBlob/
         add_headers(response, options.merge(:ref => ref))
@@ -96,7 +96,7 @@ module Dolt
           redirect(tree_url(repo, oid, path), 307) and return
         end
 
-        data = (custom_data || {}).merge(actions.tree(repo, u(ref), path))
+        data = (custom_data || {}).merge(lookup.tree(repo, u(ref), path))
         tree = data[:tree]
         return redirect(blob_url(repo, ref, path)) if tree.class.to_s !~ /\bTree/
         add_headers(response, :ref => ref)
@@ -108,7 +108,7 @@ module Dolt
           redirect(tree_entry_url(repo, oid, path), 307) and return
         end
 
-        data = (custom_data || {}).merge(actions.tree_entry(repo, u(ref), path))
+        data = (custom_data || {}).merge(lookup.tree_entry(repo, u(ref), path))
         add_headers(response, :ref => ref)
         body(renderer.render(data.key?(:tree) ? :tree : :blob, data))
       end
@@ -118,7 +118,7 @@ module Dolt
           redirect(blame_url(repo, oid, path), 307) and return
         end
 
-        data = (custom_data || {}).merge(actions.blame(repo, u(ref), path))
+        data = (custom_data || {}).merge(lookup.blame(repo, u(ref), path))
         add_headers(response, :ref => ref)
         body(renderer.render(:blame, data))
       end
@@ -128,13 +128,13 @@ module Dolt
           redirect(history_url(repo, oid, path), 307) and return
         end
 
-        data = (custom_data || {}).merge(actions.history(repo, u(ref), path, count))
+        data = (custom_data || {}).merge(lookup.history(repo, u(ref), path, count))
         add_headers(response, :ref => ref)
         body(renderer.render(:commits, data))
       end
 
       def refs(repo, custom_data = {})
-        data = (custom_data || {}).merge(actions.refs(repo))
+        data = (custom_data || {}).merge(lookup.refs(repo))
         add_headers(response, :content_type => "application/json")
         body(renderer.render(:refs, data, :layout => nil))
       end
@@ -144,19 +144,19 @@ module Dolt
           redirect(tree_history_url(repo, oid, path), 307) and return
         end
 
-        data = (custom_data || {}).merge(actions.tree_history(repo, u(ref), path, count))
+        data = (custom_data || {}).merge(lookup.tree_history(repo, u(ref), path, count))
         add_headers(response, :content_type => "application/json", :ref => ref)
         body(renderer.render(:tree_history, data, :layout => nil))
       end
 
       def resolve_repository(repo)
         @cache ||= {}
-        @cache[repo] ||= actions.resolve_repository(repo)
+        @cache[repo] ||= lookup.resolve_repository(repo)
       end
 
       def lookup_ref_oid(repo, ref)
         return if !respond_to?(:redirect_refs?) || !redirect_refs? || ref.length == 40
-        actions.rev_parse_oid(repo, ref)
+        lookup.rev_parse_oid(repo, ref)
       end
 
       private

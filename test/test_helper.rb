@@ -23,7 +23,7 @@ end
 require "bundler/setup"
 require "minitest/autorun"
 require "libdolt/view"
-require "dolt/sinatra/actions"
+require "dolt/sinatra/controller_actions"
 require "tiltout"
 
 Bundler.require(:default, :test)
@@ -69,11 +69,11 @@ end
 
 module Test
   class SinatraApp
-    include Dolt::Sinatra::Actions
-    attr_reader :actions, :renderer
+    include Dolt::Sinatra::ControllerActions
+    attr_reader :lookup, :renderer
 
-    def initialize(actions, renderer)
-      @actions = actions
+    def initialize(lookup, renderer)
+      @lookup = lookup
       @renderer = renderer
     end
 
@@ -135,7 +135,7 @@ module Test
     end
   end
 
-  class Actions
+  class Lookup
     attr_reader :repo, :ref, :path
 
     def initialize(response)

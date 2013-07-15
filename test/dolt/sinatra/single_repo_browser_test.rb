@@ -29,9 +29,9 @@ describe Dolt::Sinatra::SingleRepoBrowser do
 
   def app
     dir = Pathname("../../../").realpath.to_s
-    actions = Test::Actions.new(Stub::Blob.new)
+    lookup = Test::Lookup.new(Stub::Blob.new)
     view = Tiltout.new(Dolt.template_dir)
-    Dolt::Sinatra::SingleRepoBrowser.new(dir, actions, view)
+    Dolt::Sinatra::SingleRepoBrowser.new(dir, lookup, view)
   end
 
   it "serves the index" do

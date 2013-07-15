@@ -16,16 +16,16 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #++
 require "sinatra/base"
-require "dolt/sinatra/actions"
+require "dolt/sinatra/controller_actions"
 
 module Dolt
   module Sinatra
     class Base < ::Sinatra::Base
-      attr_reader :actions, :renderer
-      include Dolt::Sinatra::Actions
+      attr_reader :lookup, :renderer
+      include Dolt::Sinatra::ControllerActions
 
-      def initialize(actions, renderer)
-        @actions = actions
+      def initialize(lookup, renderer)
+        @lookup = lookup
         @renderer = renderer
         super()
       end

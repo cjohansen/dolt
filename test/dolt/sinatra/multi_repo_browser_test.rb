@@ -28,10 +28,10 @@ describe Dolt::Sinatra::MultiRepoBrowser do
   include Rack::Test::Methods
 
   def app
-    actions = Test::Actions.new(Stub::Blob.new)
-    def actions.repositories; []; end
+    lookup = Test::Lookup.new(Stub::Blob.new)
+    def lookup.repositories; []; end
     view = Tiltout.new(Dolt.template_dir)
-    Dolt::Sinatra::MultiRepoBrowser.new(actions, view)
+    Dolt::Sinatra::MultiRepoBrowser.new(lookup, view)
   end
 
   it "serves the index" do

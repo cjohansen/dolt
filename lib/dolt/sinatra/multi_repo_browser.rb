@@ -31,7 +31,7 @@ module Dolt
 
       get "/" do
         response["Content-Type"] = "text/html"
-        body(renderer.render(:index, { :repositories => actions.repositories }))
+        body(renderer.render(:index, { :repositories => lookup.repositories }))
       end
 
       get "/:repo" do

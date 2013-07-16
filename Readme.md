@@ -6,13 +6,13 @@
 
 Dolt is a stand-alone Git repository browser. It can be used to explore
 repositories in your browser of choice, and features syntax highlighting with
-[[http://pygments.org/][Pygments]] and various markdown formats (see below). In
+[http://pygments.org/](Pygments) and various markdown formats (see below). In
 addition to offering tree and blob browsing, Dolt also supports rendering the
 commit log and blame.
 
 ## Installation
 
-To install `dolt` you need Ruby, [[http://www.rubygems.org/][RubyGems]] and
+To install `dolt` you need Ruby, [http://www.rubygems.org/](RubyGems) and
 Python development files. The Python development files are required to support
 Pygments syntax highlighting.
 

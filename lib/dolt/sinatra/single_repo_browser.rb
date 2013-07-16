@@ -32,7 +32,6 @@ module Dolt
         @repo = repo
         @lookup = lookup
         @renderer = renderer
-        @dolt = Dolt::Sinatra::Actions.new(self, lookup, renderer)
         super()
       end
 
@@ -125,7 +124,11 @@ module Dolt
       end
 
       private
-      attr_reader :repo, :lookup, :renderer, :dolt
+      attr_reader :repo, :lookup, :renderer
+
+      def dolt
+        @dolt ||= Dolt::Sinatra::Actions.new(self, lookup, renderer)
+      end
 
       def force_ref(args, action, ref)
         redirect("/#{action}/#{ref}:" + args.join)

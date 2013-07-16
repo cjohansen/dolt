@@ -35,6 +35,9 @@ module Dolt
       end
 
       def render_error(error, repo, ref, data = {})
+        $stderr.puts(error.message)
+        $stderr.puts(error.backtrace)
+
         if error.class.to_s == "Rugged::ReferenceError" && ref == "HEAD"
           return app.body(renderer.render("empty", {
                 :repository => repo,
@@ -176,13 +179,13 @@ module Dolt
 
       def add_headers(response, headers = {})
         default_ct = "text/html; charset=utf-8"
-        response["Content-Type"] = headers[:content_type] || default_ct
-        response["X-UA-Compatible"] = "IE=edge"
+        app.response["Content-Type"] = headers[:content_type] || default_ct
+        app.response["X-UA-Compatible"] = "IE=edge"
 
         if headers[:ref] && headers[:ref].length == 40
-          response["Cache-Control"] = "max-age=315360000, public"
+          app.response["Cache-Control"] = "max-age=315360000, public"
           year = 60*60*24*365
-          response["Expires"] = (Time.now + year).httpdate
+          app.response["Expires"] = (Time.now + year).httpdate
         end
       end
     end

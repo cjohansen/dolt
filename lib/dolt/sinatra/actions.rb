@@ -28,6 +28,14 @@ module Dolt
         @dolt = Dolt::ControllerActions.new(app, lookup, renderer)
       end
 
+      def resolve_repository(repo)
+        dolt.resolve_repository(repo)
+      end
+
+      def lookup_ref_oid(repo, ref)
+        dolt.lookup_ref_oid(repo, ref)
+      end
+
       def respond_to?(method)
         dolt.respond_to?(method)
       end
